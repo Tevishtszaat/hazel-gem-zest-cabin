@@ -1,0 +1,6 @@
+{ Faction Id: 0, Name: Neutral }
+{ Faction Id: 1, Name: Talon }
+{ Faction Id: 2, Name: Polaris }
+{ Faction Id: 3, Name: Zirax }
+{ Faction Id: 4, Name: Predator }
+{ Faction Id: 5, Name: Player }

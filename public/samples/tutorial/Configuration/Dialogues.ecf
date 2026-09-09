@@ -1,0 +1,6 @@
+{ +Dialogue Name: Trader_DialogueSwitch_Start
+  NPCName: Trader
+}
+{ +Dialogue Name: TC_Start
+  NPCName: "Talon Chief"
+}

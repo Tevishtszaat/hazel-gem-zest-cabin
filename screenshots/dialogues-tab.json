@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/dialogues",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "PulsePDA",
+      "hasCanvas": false,
+      "bodyTextLen": 334,
+      "bodyTextHash": "3ba6e7c5007dd885648ae6428ad9545cd6115835663535b6994f9c6961dec6b9",
+      "bodyTextPrefix": "P PulsePDA Creator PulsePDA PDA Language English Export YAML Exp",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/dialogues-tab.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "PulsePDA",
+      "hasCanvas": false,
+      "bodyTextLen": 334,
+      "bodyTextHash": "3ba6e7c5007dd885648ae6428ad9545cd6115835663535b6994f9c6961dec6b9",
+      "bodyTextPrefix": "P PulsePDA Creator PulsePDA PDA Language English Export YAML Exp",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/dialogues-tab-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/dialogues-tab.json"
+}

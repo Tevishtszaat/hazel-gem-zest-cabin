@@ -1,0 +1,16 @@
+{ Item Id: 100, Name: GoldCoins
+  StackSize: 10000
+  Category: Components
+}
+{ +Item Id: 63, Name: BioFuel
+  Category: Ingredients
+}
+{ +Item Id: 3, Name: Pistol
+  Category: Weapons/Items
+}
+{ Item Id: 200, Name: SurvivalTool
+  Category: Weapons/Items
+}
+{ Item Id: 201, Name: DrillT1
+  Category: Weapons/Items
+}

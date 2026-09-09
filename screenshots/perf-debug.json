@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/debug",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Axis 2026 Creator Particlewave",
+      "hasCanvas": false,
+      "bodyTextLen": 474,
+      "bodyTextHash": "1b3fc669a67f1a6a3bdc1fdc1bf3c2d0ab60dc7e50b89c9f431cb71750e55760",
+      "bodyTextPrefix": "AX Axis 2026 Creator Particlewave PDA Language English Export YA",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/perf-debug.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Axis 2026 Creator Particlewave",
+      "hasCanvas": false,
+      "bodyTextLen": 474,
+      "bodyTextHash": "1b3fc669a67f1a6a3bdc1fdc1bf3c2d0ab60dc7e50b89c9f431cb71750e55760",
+      "bodyTextPrefix": "AX Axis 2026 Creator Particlewave PDA Language English Export YA",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/perf-debug-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/perf-debug.json"
+}

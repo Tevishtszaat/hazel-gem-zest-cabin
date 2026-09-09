@@ -1,0 +1,45 @@
+import type { ImportKind } from "./import-kinds.ts";
+import { indexScenario, type ScenarioCatalog, type ScenarioSource } from "./scenario-index.ts";
+import { problemStats, validateProject, type Problem } from "./validate.ts";
+import { importPda, type ImportFiles } from "./yaml-import.ts";
+import type { PdaProject } from "./types.ts";
+
+export type HeavyOp = "index" | "importPda" | "validate";
+
+export type HeavyPayload = {
+  files?: ScenarioSource[];
+  kind?: ImportKind;
+  importFiles?: ImportFiles;
+  project?: PdaProject;
+  catalog?: ScenarioCatalog;
+};
+
+export type ValidateResult = {
+  issues: Problem[];
+  stats: ReturnType<typeof problemStats>;
+};
+
+export function slimCatalog(catalog: ScenarioCatalog): ScenarioCatalog {
+  return {
+    folderName: catalog.folderName,
+    files: catalog.files,
+    entries: catalog.entries,
+    texts: [],
+    indexedAt: catalog.indexedAt,
+  };
+}
+
+export function runHeavy(op: HeavyOp, payload: HeavyPayload) {
+  if (op === "index") {
+    return indexScenario(payload.files || [], payload.kind);
+  }
+  if (op === "importPda") {
+    if (!payload.importFiles?.yamlText) throw new Error("No PDA.yaml to parse.");
+    return importPda(payload.importFiles);
+  }
+  if (op === "validate") {
+    const issues = validateProject(payload.project!, payload.catalog);
+    return { issues, stats: problemStats(issues) } satisfies ValidateResult;
+  }
+  throw new Error(`Unknown heavy op ${op}`);
+}

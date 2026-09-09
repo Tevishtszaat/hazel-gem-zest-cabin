@@ -1,0 +1,6 @@
+{ Block Id: 400, Name: GeneratorMS }
+{ Block Id: 401, Name: GeneratorBA }
+{ Block Id: 402, Name: GeneratorMST2 }
+{ Block Id: 403, Name: SolarGenerator }
+{ Block Id: 404, Name: FuelTankMSLarge }
+{ Block Id: 405, Name: ConstructorSurvival }

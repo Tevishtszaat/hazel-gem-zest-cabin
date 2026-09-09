@@ -1,0 +1,6 @@
+Sectors:
+  - Coordinates: [0, 0, 0]
+    Playfields:
+      - ['0, 0, 0', Sathium Freighter Mission, Space]
+      - ['10, 0, 0', Akua, Planet]
+      - ['20, 0, 0', Omicron, Planet]

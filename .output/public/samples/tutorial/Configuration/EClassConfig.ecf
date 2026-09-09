@@ -1,0 +1,21 @@
+{ +Entity Name: AlienBug01, Ref: AlienTemplate
+  Faction: Predator
+}
+{ +Entity Name: AlienBug02 }
+{ +Entity Name: AlienBug03 }
+{ +Entity Name: AlienBug04 }
+{ +Entity Name: CaveWormGreen }
+{ +Entity Name: CaveWormGrey }
+{ +Entity Name: CaveWormWhite }
+{ +Entity Name: Otyugh }
+{ +Entity Name: Oviraptor }
+{ +Entity Name: Raptor }
+{ +Entity Name: RaptorNight }
+{ +Entity Name: Spider01 }
+{ +Entity Name: Spider02 }
+{ +Entity Name: Spider03 }
+{ +Entity Name: Spinosaurus }
+{ +Entity Name: Telluropod }
+{ +Entity Name: PlantMonster }
+{ +Entity Name: CaveWormGreyOld }
+{ +Entity Name: Creepy }

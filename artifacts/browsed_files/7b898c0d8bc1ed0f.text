@@ -1,0 +1,1658 @@
+# -------
+# Created with eWCCT v1.7.0
+# Website: https://empyrion-homeworld.net/tools/ewcct
+# -------
+{ +Dialogue Name: Trader_DialogueSwitch_Start
+  NPCName: Trader
+  Output: dialogue_traderSplit1
+  Option_1: dialogue_traderSplit1a
+  OptionNext_1: Trader_DialogueSwitch_Talk
+  Option_2: dialogue_traderSplit1b
+  OptionNext_2: Trader_DialogueSwitch_Trade
+}
+{ +Dialogue Name: Trader_DialogueSwitch_Talk
+  NPCName: Trader
+  Output: dialogue_traderSplit2
+  Option_1: dialogue_traderSplit2a
+  OptionNext_1: Trader_DialogueSwitch_Start
+  Option_2: dialogue_traderSplit2b
+  OptionNext_2: End
+}
+{ +Dialogue Name: Trader_DialogueSwitch_Trade
+  NPCName: Trader
+  Execute_1: "OpenTraderWindow()"
+}
+{ +Dialogue Name: TC_Start
+  NPCName: "Talon Chief"
+  Variable_1: "FoodCounter", param1: int
+  Variable_2: "TalkCount", param1: dbstate_int
+  Variable_3: "PlayerTalkExp", param1: dbplayer_int
+  Variable_4: "GlobalVar", param1: dbglobal_int
+  Execute_1: "TalkCount = TalkCount + 1"
+  Execute_2: "PlayerTalkExp = PlayerTalkExp + 1"
+  Execute_3: "GlobalVar += AddToGlobalVar('GlobalVar', 3)"
+  Next_1: TC_RepuBad
+  NextIf_1: "GetReputation(Faction.Talon) < Reputation.NeutralMin"
+  Next_2: TC_HasHolyStatus
+  NextIf_2: "HasItem('KeyCardBlack',3)"
+  Next_3: TC_TalkingOk
+  NextIf_3: "TalkCount > 3 && Random(1, 4) == 1"
+  Next_4: TC_CameBack
+  NextIf_4: "TalkCount > 1"
+  Next_5: TC_DefaultEntry
+}
+{ +Dialogue Name: TC_CameBack
+  Output: dialogue_TCCameBack
+}
+{ +Dialogue Name: TC_TalkingOk
+  Output: dialogue_TCTalkinOk
+  Execute_1: "TalkCount = 1"
+  Next_1: TC_DefaultEntry
+}
+{ +Dialogue Name: TC_RepuBad
+  Output: dlgTCBadRepu
+}
+{ +Dialogue Name: TC_HasHolyStatus
+  Output: dlgTCHolyStatue
+  Option_1: dialogue_TCHasHolyStatus1
+  OptionNext_1: TC_GiveHolyStatue
+  Option_2: dialogue_TCHasHolyStatus2
+  OptionNext_2: TC_DefaultEntryCont
+  Option_3: dialogue_TCHasHolyStatus3
+  OptionNext_3: End
+}
+{ +Dialogue Name: TC_DefaultEntry
+  Output: dlgTCGreetings
+  Next_1: TC_DefaultEntryCont
+}
+{ +Dialogue Name: TC_DefaultEntryCont
+  Option_1: dlgTCTellMeStory
+  OptionNext_1: TC_AskStoryAboutPeople
+  Option_2: dialogue_TCDefaultEntryCont1
+  OptionNext_2: TC_CheckFood
+  Option_3: dialogue_TCDefaultEntryCont2
+  OptionNext_3: End
+}
+{ +Dialogue Name: TC_GiveHolyStatue
+  Output: dialogue_TCGiveHolyStatue
+}
+{ +Dialogue Name: TC_CheckFood
+  Next_1: TC_TooMuchFood
+  NextIf_1: "FoodCounter == 1"
+  Next_2: TC_TooMuchFood2
+  NextIf_2: "FoodCounter > 1"
+  Next_3: TC_GiveFood
+}
+{ +Dialogue Name: TC_GiveFood
+  Execute_1: "FoodCounter = FoodCounter + 1"
+  Output: dialogue_TCGiveFood
+  Next_1: TC_DefaultEntryCont
+}
+{ +Dialogue Name: TC_TooMuchFood
+  Execute_1: "FoodCounter = FoodCounter + 1"
+  Output: dialogue_TCTooMuchFood
+  Next_1: TC_DefaultEntryCont
+}
+{ +Dialogue Name: TC_TooMuchFood2
+  Output: dialogue_TCTooMuchFood2
+}
+{ +Dialogue Name: TC_AskStoryAboutPeople
+  Output: dialogue_AskStoryAboutPeople
+}
+{ +Dialogue Name: BJ_Start
+  NPCName: txt_UGmuO
+  Variable_1: "PlayerCards", param1: int
+  Variable_2: "TalkCount", param1: dbstate_int
+  Variable_3: "TotalGamesWon", param1: dbstate_int
+  Variable_4: "TotalGamesLost", param1: dbstate_int
+  Variable_5: "TableGamesWon", param1: dbstate_int
+  Variable_6: "TableGamesLost", param1: dbstate_int
+  Variable_7: "TableCoinsWon", param1: dbstate_int
+  Variable_8: "TableCoinsLost", param1: dbstate_int
+  Variable_9: "GamesPlayed", param1: dbstate_int
+  Output: txt_mWeCe
+  Next_1: BJ_NoMoney
+  NextIf_1: "!HasItem('GoldCoins',1)"
+  Next_2: BJ_AskBet
+  NextIf_2: "HasItem('GoldCoins',1) && TotalGamesLost < 20 && TotalGamesWon < 10"
+  Next_3: BJ_Cooldown_Lost
+  NextIf_3: "TotalGamesLost >= 20"
+  Next_4: BJ_Cooldown_Won
+  NextIf_4: "TotalGamesWon >= 10"
+}
+{ +Dialogue Name: BJ_Cooldown_Won
+  Output: txt_KaO0m
+  Execute_1: "TalkCount = TalkCount + 1"
+  Next_1: BJ_Cooldown_Won_Clear
+  NextIf_1: "TalkCount >= 10"
+}
+{ +Dialogue Name: BJ_Cooldown_Won_Clear
+  Execute_1: "TotalGamesWon = 0"
+}
+{ +Dialogue Name: BJ_Cooldown_Lost
+  Output: txt_O4ame
+  Execute_1: "TalkCount = TalkCount + 1"
+  Next_1: BJ_Cooldown_Lost_Clear
+  NextIf_1: "TalkCount >= 20"
+}
+{ +Dialogue Name: BJ_Cooldown_Lost_Clear
+  Execute_1: "TotalGamesLost = 0"
+}
+{ +Dialogue Name: BJ_AskBet
+  Variable_1: "GoldCoinsPlayerBet", param1: int
+  Output: txt_mq8OK
+  Option_1: txt_4WUCq
+  OptionNext_1: BJ_RemoveCoins
+  OptionExecute_1: "GoldCoinsPlayerBet = 1"
+  Option_2: txt_Zi4Gm
+  OptionIf_2: "HasItem('GoldCoins', 10)"
+  OptionNext_2: BJ_RemoveCoins
+  OptionExecute_2: "GoldCoinsPlayerBet = 10"
+  Option_3: txt_BxmOu
+  OptionIf_3: "HasItem('GoldCoins', 100)"
+  OptionNext_3: BJ_RemoveCoins
+  OptionExecute_3: "GoldCoinsPlayerBet = 100"
+  Option_4: txt_80qd8
+  OptionNext_4: BJ_Rules
+  Option_5: txt_eeUSG
+  OptionNext_5: BJ_Statistics
+  Execute_1: "TalkCount = 0"
+}
+{ +Dialogue Name: BJ_Statistics
+  Output: txt_WKaie
+  Option_1: txt_aCMq8
+  OptionNext_1: BJ_AskBet
+}
+{ +Dialogue Name: BJ_Rules
+  Output: txt_oiqaF
+  Option_1: txt_emqJ4
+  OptionNext_1: BJ_AskBet
+}
+{ +Dialogue Name: BJ_RemoveCoins
+  Execute_1: "RemoveItem('GoldCoins', GoldCoinsPlayerBet)"
+  Next_1: BJ_StartGame
+}
+{ +Dialogue Name: BJ_NoMoney
+  Output: txt_8cmWW
+}
+{ +Dialogue Name: BJ_StartGame
+  Execute_1: "PlayerCards = Random(1,11)"
+  Output: txt_S0uKE
+  Next_1: BJ_AskCard
+}
+{ +Dialogue Name: BJ_AskCard
+  Output: txt_aqCI0
+  Option_1: txt_GiiaK
+  OptionNext_1: BJ_NewCard
+  Option_2: txt_8OGas
+  OptionNext_2: BJ_DealerTakesFirstCard
+}
+{ +Dialogue Name: BJ_NewCard
+  Variable_1: "NextCard", param1: int
+  Execute_1: "NextCard = Random(1,11)"
+  Execute_2: "PlayerCards = PlayerCards + NextCard"
+  Output: txt_GaeK3
+  Next_1: BJ_CheckPlayerLost
+  NextIf_1: "PlayerCards > 21"
+  Next_2: BJ_AskCard
+}
+{ +Dialogue Name: BJ_CheckPlayerLost
+  Execute_1: "TotalGamesLost = TotalGamesLost + 1"
+  Execute_2: "TableGamesLost = TableGamesLost + 1"
+  Execute_3: "TableCoinsLost = TableCoinsLost  + GoldCoinsPlayerBet"
+  Output: txt_G0Fqm
+  Next_1: BJ_AskForNewGame
+}
+{ +Dialogue Name: BJ_DealerTakesFirstCard
+  Variable_1: "DealerCards", param1: int
+  Execute_1: "DealerCards = Random(1,11)"
+  Output: txt_O4W4q
+  Next_1: BJ_DealerTakesAnotherCard
+}
+{ +Dialogue Name: BJ_DealerTakesAnotherCard
+  Variable_1: "DealerNewCard", param1: int
+  Execute_1: "DealerNewCard = Random(1,11)"
+  Execute_2: "DealerCards = DealerCards + DealerNewCard"
+  Output: txt_0CqKm
+  Next_1: BJ_DealerTakesAnotherCard
+  NextIf_1: "DealerCards < 21 && DealerCards < PlayerCards"
+  Next_2: BJ_PlayerWins
+  NextIf_2: "PlayerCards > DealerCards || DealerCards > 21"
+  Next_3: BJ_DealerWins
+}
+{ +Dialogue Name: BJ_PlayerWins
+  Output: txt_40jMG
+  Execute_1: "AddItem('GoldCoins', 2*GoldCoinsPlayerBet)"
+  Execute_2: "TotalGamesWon = TotalGamesWon + 1"
+  Execute_3: "TableGamesWon = TableGamesWon + 1"
+  Execute_4: "TableCoinsWon = TableCoinsWon  + GoldCoinsPlayerBet"
+  Next_1: BJ_AskForNewGame
+}
+{ +Dialogue Name: BJ_DealerWins
+  Output: txt_8mhiq
+  Execute_1: "TotalGamesLost = TotalGamesLost + 1"
+  Execute_2: "TableGamesLost = TableGamesLost + 1"
+  Execute_3: "TableCoinsLost = TableCoinsLost  + GoldCoinsPlayerBet"
+  Next_1: BJ_AskForNewGame
+}
+{ +Dialogue Name: BJ_AskForNewGame
+  Output: txt_8Ujii
+  Option_1: txt_vmOu4
+  OptionNext_1: BJ_Start
+  Option_2: txt_8Oiie
+  OptionNext_2: BJ_Bye
+  Execute_1: "GamesPlayed = GamesPlayed + 1"
+}
+{ +Dialogue Name: BJ_Bye
+  Output: txt_O8CaF
+}
+{ +Dialogue Name: DS_SurveyStation
+  NPCName: dialogue_G8GSe
+  Output: dialogue_02Giu
+}
+{ +Dialogue Name: DS_SurveyStation2
+  NPCName: "Station Service Console"
+  Output: dialogue_W4qS4
+}
+{ +Dialogue Name: DR_HeidelbergAI
+  NPCName: dialogue_8WuSa
+  Output: dialogue_40mWq
+}
+{ +Dialogue Name: RP_Tut_1_Intro
+  NPCName: dialogue_484O8
+  Output: dialogue_ea4m7
+  Option_1: dialogue_KKSS0
+  OptionNext_1: RP_Tut_1_EmergencyPod
+  Option_2: dialogue_Y0GSQ
+  OptionNext_2: End
+}
+{ +Dialogue Name: RP_Tut_1_EmergencyPod
+  NPCName: dialogue_uSuiW
+  Output: dialogue_sKeGu
+  Option_1: dialogue_0KioS
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_StartingTheJourney_Start
+  NPCName: dialogue_e0uS4
+  Output: dialogue_GGKSW
+  Option_1: dialogue_G80Sm
+  OptionNext_1: SM_StartingTheJourney_1
+  Option_2: dialogue_iiSSK
+  OptionNext_2: SM_StartingTheJourney_Start_decline
+}
+{ +Dialogue Name: SM_StartingTheJourney_Start_decline
+  NPCName: dialogue_Wimmu
+  Output: dialogue_OSqYe
+  Option_1: dialogue_8S4ia
+  OptionNext_1: SM_StartingTheJourney_Start_End
+}
+{ +Dialogue Name: SM_StartingTheJourney_Start_End
+  NPCName: "Integrated Data Assistan (IDA)"
+  Output: dialogue_qui48
+  Option_1: dialogue_KeiGK
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_StartingTheJourney_1
+  NPCName: dialogue_8uuC8
+  Output: dialogue_YWWi0
+  Option_1: dialogue_amSmC
+  OptionNext_1: SM_StartingTheJourney_2
+  Option_2: dialogue_aCg1a
+  OptionNext_2: SM_StartingTheJourney_Start_decline
+}
+{ +Dialogue Name: SM_StartingTheJourney_2
+  NPCName: "Data Analyzation and Visualization Entity (D.A.V.E.)"
+  Output: dialogue_KuG6K
+  Option_1: dialogue_diOq4
+  OptionNext_1: SM_StartingTheJourney_3
+  Option_2: dialogue_sbKOp
+  OptionNext_2: SM_StartingTheJourney_Start_decline
+}
+{ +Dialogue Name: SM_StartingTheJourney_3
+  NPCName: "Data Analyzation and Visualization Entity (D.A.V.E.)"
+  Output: dialogue_KuRY0
+  Option_1: dialogue_ufCq8
+  OptionNext_1: SM_StartingTheJourney_4
+  Option_2: dialogue_0q4uW
+  OptionNext_2: SM_StartingTheJourney_Start_decline
+}
+{ +Dialogue Name: SM_StartingTheJourney_4
+  NPCName: "Data Analyzation and Visualization Entity (D.A.V.E.)"
+  Output: dialogue_Uuiae
+  Option_1: dialogue_W8IGG
+  OptionNext_1: SM_StartingTheJourney_5
+  Option_2: dialogue_OiquC
+  OptionNext_2: SM_StartingTheJourney_Start_decline
+}
+{ +Dialogue Name: SM_StartingTheJourney_5
+  NPCName: "Data Analyzation and Visualization Entity (D.A.V.E.)"
+  Output: dialogue_4m4qS
+  Option_1: dialogue_eS2IO
+  OptionNext_1: SM_StartingTheJourney_6
+  Option_2: dialogue_ueEKe
+  OptionNext_2: SM_StartingTheJourney_Start_decline
+}
+{ +Dialogue Name: SM_StartingTheJourney_6
+  NPCName: "Data Analyzation and Visualization Entity (D.A.V.E.)"
+  Output: dialogue_OuW0G
+  Option_1: dialogue_GSWu4
+  OptionNext_1: SM_StartingTheJourney_7
+  Option_2: dialogue_8QqwW
+  OptionNext_2: SM_StartingTheJourney_Start_decline
+}
+{ +Dialogue Name: SM_StartingTheJourney_7
+  NPCName: "Data Analyzation and Visualization Entity (D.A.V.E.)"
+  Output: dialogue_G8Wqa
+  Option_1: dialogue_bGGKK
+  OptionNext_1: SM_StartingTheJourney_8
+  Option_2: dialogue_0KS40
+  OptionNext_2: SM_StartingTheJourney_Start_decline
+}
+{ +Dialogue Name: SM_StartingTheJourney_8
+  NPCName: "Data Analyzation and Visualization Entity (D.A.V.E.)"
+  Output: dialogue_quOOm
+  Option_1: dialogue_iMaua
+  OptionNext_1: SM_StartingTheJourney_9
+}
+{ +Dialogue Name: SM_StartingTheJourney_9
+  NPCName: "Integrated Data Assistan (IDA)"
+  Output: dialogue_YuCK8
+  Option_1: dialogue_4uMqS
+  OptionNext_1: SM_StartingTheJourney_Start_End
+}
+{ +Dialogue Name: SM_Human_Remains_HBConsole
+  NPCName: "UCH Heidelberg"
+  Next_1: SM_Human_Remains_HBConsole1
+  NextIf_1: "IsPdaChapterActive('txt_GeWm4')"
+  Next_2: SM_Human_Remains_HBConsole3
+}
+{ +Dialogue Name: SM_Human_Remains_HBConsole1
+  NPCName: "UCH Heidelberg"
+  Option_1: dialogue_GW8iG
+  OptionNext_1: SM_Human_Remains_HBConsole2
+  Output: dialogue_4eiOW
+}
+{ +Dialogue Name: SM_Human_Remains_HBConsole2
+  NPCName: "UCH Heidelberg"
+  Option_1: dialogue_e8miu
+  OptionNext_1: End
+  Output: dialogue_SWWiC
+}
+{ +Dialogue Name: SM_Human_Remains_HBConsole3
+  NPCName: "UCH Heidelberg"
+  Option_1: dialogue_2SCCQ
+  OptionNext_1: End
+  Output: dialogue_qGSO8
+}
+{ +Dialogue Name: SM_Human_Remains_Teleport_Station
+  NPCName: "Teleport Station"
+  Next_1: SM_Human_Remains_Teleport_Station1
+  NextIf_1: "IsPdaChapterActive('txt_GeWm4')"
+  Next_2: SM_Human_Remains_Teleport_Station3
+}
+{ +Dialogue Name: SM_Human_Remains_Teleport_Station1
+  NPCName: "Teleport Station"
+  Option_1: dialogue_aim4S
+  OptionNext_1: SM_Human_Remains_Teleport_Station2
+  Output: dialogue_Saq4K
+}
+{ +Dialogue Name: SM_Human_Remains_Teleport_Station2
+  NPCName: "Teleport Station"
+  Option_1: dialogue_4qGUG
+  OptionNext_1: End
+  Output: dialogue_6K0e0
+}
+{ +Dialogue Name: SM_Human_Remains_Teleport_Station3
+  NPCName: "Teleport Station"
+  Option_1: dialogue_0meSe
+  OptionNext_1: End
+  Output: dialogue_Q8i4O
+}
+{ +Dialogue Name: SM_Offworld_Grave_TitanAccessConsole_1_Start
+  NPCName: "UCH 002 TITAN Maintenance Console"
+  Option_1: dialogue_0Kimi
+  OptionNext_1: SM_Offworld_Grave_TitanAccessConsole_1_Init
+  Option_2: dialogue_uqK4E
+  OptionNext_2: End
+  Output: dialogue_mOKAK
+}
+{ +Dialogue Name: SM_Offworld_Grave_TitanAccessConsole_1_Init
+  Option_1: dialogue_8YWeU
+  OptionNext_1: SM_Offworld_Grave_TitanAccessConsole_1_Init2
+  Output: dialogue_0mu4m
+}
+{ +Dialogue Name: SM_Offworld_Grave_TitanAccessConsole_1_Init2
+  Option_1: dialogue_WSjeC
+  OptionNext_1: SM_Offworld_Grave_Waverider1
+  Output: dialogue_0qSGC
+}
+{ +Dialogue Name: SM_Offworld_Grave_TitanAccessConsole_1_Return
+  Option_1: dialogue_aub8m
+  OptionIf_1: "IsPdaChapterActive('txt_8ia80')"
+  OptionNext_1: SM_Offworld_Grave_OverrideCode_1
+  Option_2: dialogue_u8SmD
+  OptionNext_2: SM_Offworld_Grave_Waverider1
+  Option_3: dialogue_miiQm
+  OptionNext_3: End
+  Output: dialogue_IWOGC
+}
+{ +Dialogue Name: SM_Offworld_Grave_Waverider1
+  Option_1: dialogue_KO8uK
+  OptionNext_1: SM_Offworld_Grave_Waverider2
+  Option_2: dialogue_iWrGq
+  OptionNext_2: SM_Offworld_Grave_TitanAccessConsole_1_Return
+  Output: dialogue_COuB4
+}
+{ +Dialogue Name: SM_Offworld_Grave_Waverider2
+  Option_1: dialogue_88401
+  OptionNext_1: SM_Offworld_Grave_Waverider3
+  Option_2: dialogue_S6SWW
+  OptionNext_2: SM_Offworld_Grave_TitanAccessConsole_1_Return
+  Output: dialogue_eGGam
+}
+{ +Dialogue Name: SM_Offworld_Grave_Waverider3
+  Option_1: dialogue_8OSsW
+  OptionNext_1: SM_Offworld_Grave_Waverider4
+  Option_2: dialogue_iaTGm
+  OptionNext_2: SM_Offworld_Grave_TitanAccessConsole_1_Return
+  Output: dialogue_g40em
+}
+{ +Dialogue Name: SM_Offworld_Grave_Waverider4
+  Option_1: dialogue_0Oq8C
+  OptionNext_1: SM_Offworld_Grave_Waverider5
+  Option_2: dialogue_0amNh
+  OptionNext_2: SM_Offworld_Grave_TitanAccessConsole_1_Return
+  Output: dialogue_mC4WO
+}
+{ +Dialogue Name: SM_Offworld_Grave_Waverider5
+  Option_1: dialogue_85a4O
+  OptionNext_1: SM_Offworld_Grave_TitanAccessConsole_1_Return
+  Output: dialogue_4wuYu
+}
+{ +Dialogue Name: SM_Offworld_Grave_OverrideCode_1
+  Option_1: dialogue_OemSS
+  OptionNext_1: SM_Offworld_Grave_OverrideCode_2
+  Option_2: dialogue_mJ0Uc
+  OptionNext_2: SM_Offworld_Grave_TitanAccessConsole_1_Return
+  Output: dialogue_maOxu
+}
+{ +Dialogue Name: SM_Offworld_Grave_OverrideCode_2
+  Option_1: dialogue_iq0qS
+  OptionNext_1: End
+  Output: dialogue_mm4q8
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Fragment1_Init
+  NPCName: "Suit Fail-safe Module"
+  Output: dialogue_aam4W
+  Option_1: dialogue_meaae
+  OptionNext_1: SM_Offworld_Grave_Titan_Fragment1_HiddenFile
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Fragment1_Complete
+  NPCName: "Suit Fail-safe Module"
+  Output: dialogue_O4iku
+  Option_1: dialogue_4ueea
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Fragment1_HiddenFile
+  NPCName: "Suit Fail-safe Module"
+  Output: dialogue_0CQ4a
+  Option_1: dialogue_0iWaa
+  OptionIf_1: "IsPdaChapterActive('txt_8ia80')"
+  OptionNext_1: SM_Offworld_Grave_Titan_Fragment1_Play
+  Option_2: dialogue_m04aO
+  OptionIf_2: "IsPdaChapterActive('txt_8ia80')"
+  OptionNext_2: SM_Offworld_Grave_Titan_Fragment1_Complete
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Fragment1_Play
+  NPCName: "Suit Fail-safe Module"
+  Output: dialogue_Oaqei
+  Option_1: dialogue_GKSuK
+  OptionNext_1: SM_Offworld_Grave_Titan_Fragment1_Complete
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Fragment2_Init
+  NPCName: "Suit Fail-safe Module"
+  Output: dialogue_SiCKm
+  Option_1: dialogue_S8820
+  OptionNext_1: SM_Offworld_Grave_Titan_Fragment2_HiddenFile
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Fragment2_Complete
+  NPCName: "Suit Fail-safe Module"
+  Output: dialogue_oKd8q
+  Option_1: dialogue_8cOqi
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Fragment2_HiddenFile
+  NPCName: "Suit Fail-safe Module"
+  Output: dialogue_uGa44
+  Option_1: dialogue_sCWiu
+  OptionNext_1: SM_Offworld_Grave_Titan_Fragment2_Play
+  Option_2: dialogue_80OGC
+  OptionNext_2: SM_Offworld_Grave_Titan_Fragment2_Complete
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Fragment2_Play
+  NPCName: "Suit Fail-safe Module"
+  Output: dialogue_OOqGW
+  Option_1: dialogue_euSmq
+  OptionNext_1: SM_Offworld_Grave_Titan_Fragment2_Complete
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Fragment3_Init
+  NPCName: "Suit Fail-safe Module"
+  Output: dialogue_KQuWG
+  Option_1: dialogue_K008C
+  OptionNext_1: SM_Offworld_Grave_Titan_Fragment3_HiddenFile
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Fragment3_Complete
+  NPCName: "Suit Fail-safe Module"
+  Output: dialogue_ODCqa
+  Option_1: dialogue_CuWCi
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Fragment3_HiddenFile
+  NPCName: "Suit Fail-safe Module"
+  Output: dialogue_KqS4e
+  Option_1: dialogue_KOaim
+  OptionNext_1: SM_Offworld_Grave_Titan_Fragment3_Play
+  Option_2: dialogue_eCuWm
+  OptionNext_2: SM_Offworld_Grave_Titan_Fragment3_Complete
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Fragment3_Play
+  NPCName: "Suit Fail-safe Module"
+  Output: dialogue_0Ga8W
+  Option_1: dialogue_NaOGC
+  OptionNext_1: SM_Offworld_Grave_Titan_Fragment3_Complete
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_FragmentMessage_Init
+  NPCName: "Suit Fail-safe Module"
+  Option_1: dialogue_4CsKC
+  OptionNext_1: SM_Offworld_Grave_Titan_FragmentMessage_Playfile
+  Option_2: dialogue_qHaZe
+  OptionNext_2: SM_Offworld_Grave_Titan_FragmentMessage_End
+  Output: dialogue_CaOSS
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_FragmentMessage_Playfile
+  NPCName: "Suit Fail-safe Module"
+  Option_1: dialogue_Gg80S
+  OptionNext_1: SM_Offworld_Grave_Titan_FragmentMessage_End
+  Output: dialogue_GeGWK
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_FragmentMessage_End
+  NPCName: "Suit Fail-safe Module"
+  Option_1: dialogue_CaaOq
+  OptionNext_1: End
+  Output: dialogue_S808i
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Bridge_Init
+  NPCName: "Integrated Data Assistant (IDA)"
+  Output: dialogue_umGeK
+  Option_1: dialogue_q8mSq
+  OptionNext_1: SM_Offworld_Grave_Titan_Bridge_1
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Bridge_1
+  NPCName: "Integrated Data Assistant (IDA)"
+  Output: dialogue_A8Ium
+  Option_1: dialogue_K9C4e
+  OptionNext_1: SM_Offworld_Grave_Titan_Bridge_2
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Bridge_2
+  NPCName: "Integrated Data Assistant (IDA)"
+  Output: dialogue_Gh8i0
+  Option_1: dialogue_48OSm
+  OptionNext_1: SM_Offworld_Grave_Titan_Bridge_3
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Bridge_3
+  NPCName: "Integrated Data Assistant (IDA)"
+  Output: dialogue_aCWKm
+  Option_1: dialogue_se88m
+  OptionNext_1: SM_Offworld_Grave_Titan_Bridge_4
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Bridge_4
+  NPCName: "Integrated Data Assistant (IDA)"
+  Output: dialogue_Su00i
+  Option_1: dialogue_aOWOW
+  OptionNext_1: SM_Offworld_Grave_Titan_Bridge_5
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Bridge_5
+  NPCName: "THEIA UCH 002 TITAN Artificial Intelligence"
+  Output: dialogue_umSeK
+  Option_1: dialogue_QeGiq
+  OptionNext_1: SM_Offworld_Grave_Titan_Bridge_6
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Bridge_6
+  NPCName: "Integrated Data Assistant (IDA)"
+  Output: dialogue_4GVC8
+  Option_1: dialogue_KCI8a
+  OptionNext_1: SM_Offworld_Grave_Titan_Bridge_7
+}
+{ +Dialogue Name: SM_Offworld_Grave_Titan_Bridge_7
+  NPCName: "Integrated Data Assistant (IDA)"
+  Output: dialogue_O48GS
+  Option_1: dialogue_mCPuW
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TotP_Intro_Chief_1
+  NPCName: "Talon Chief"
+  Output: dialogue_KU4W8
+  Option_1: dialogue_iKWq8
+  OptionNext_1: SM_TotP_Intro_Chief_2
+}
+{ +Dialogue Name: SM_TotP_Intro_Chief_2
+  NPCName: "Talon Chief"
+  Output: dialogue_0FkAC
+  Option_1: dialogue_KuWKW
+  OptionNext_1: SM_TotP_Intro_Chief_3
+}
+{ +Dialogue Name: SM_TotP_Intro_Chief_3
+  NPCName: "Talon Chief"
+  Output: dialogue_Oms8q
+  Option_1: dialogue_q8Cui
+  OptionNext_1: SM_TotP_Intro_Chief_4
+}
+{ +Dialogue Name: SM_TotP_Intro_Chief_4
+  NPCName: "Talon Chief"
+  Output: dialogue_iuiOi
+  Option_1: dialogue_GuW4K
+  OptionNext_1: SM_TotP_Intro_Chief_5
+}
+{ +Dialogue Name: SM_TotP_Intro_Chief_5
+  NPCName: "Talon Chief"
+  Output: dialogue_m84qK
+  Option_1: dialogue_aOWKq
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TotP_Friendship_Chief_1
+  NPCName: "Talon Chief"
+  Output: dialogue_q08C8
+  Option_1: dialogue_mYOu0
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TotP_HistoryLesson_Chief_1
+  NPCName: "Talon Chief"
+  Output: dialogue_W5q0S
+  Option_1: dialogue_qWW0S
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TotP_Tower_1
+  NPCName: "Integrated Data Assistant (IDA)"
+  Output: dialogue_SO4Oi
+  Option_1: dialogue_0KCWe
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TotP_Tower_2
+  NPCName: "Integrated Data Assistant (IDA)"
+  Output: dialogue_iaKae
+  Option_1: dialogue_e34E0
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TotP_Prisoner_Talk_1
+  NPCName: Prisoner
+  Output: dialogue_UW6cC
+  Option_1: dialogue_ee8eq
+  OptionNext_1: SM_TotP_Prisoner_Talk_2
+}
+{ +Dialogue Name: SM_TotP_Prisoner_Talk_2
+  NPCName: Prisoner
+  Output: dialogue_A4KGa
+  Option_1: dialogue_iC0S4
+  OptionNext_1: SM_TotP_Prisoner_Talk_3
+}
+{ +Dialogue Name: SM_TotP_Prisoner_Talk_3
+  NPCName: Prisoner
+  Output: dialogue_0K8SO
+  Option_1: dialogue_qae8e
+  OptionNext_1: SM_TotP_Prisoner_Talk_4
+}
+{ +Dialogue Name: SM_TotP_Prisoner_Talk_4
+  NPCName: Prisoner
+  Output: dialogue_uGmG4
+  Option_1: dialogue_WQiCi
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TotP_Finale_Talk_1
+  NPCName: Chief
+  Output: dialogue_euKeS
+  Option_1: dialogue_i00WE
+  OptionNext_1: SM_TotP_Finale_Talk_2
+}
+{ +Dialogue Name: SM_TotP_Finale_Talk_2
+  NPCName: Chief
+  Output: dialogue_i8KaG
+  Option_1: dialogue_UOOs8
+  OptionNext_1: SM_TotP_Finale_Talk_3
+}
+{ +Dialogue Name: SM_TotP_Finale_Talk_3
+  NPCName: Chief
+  Output: dialogue_8KmGY
+  Option_1: dialogue_CmmW0
+  OptionNext_1: SM_TotP_Finale_Talk_4
+}
+{ +Dialogue Name: SM_TotP_Finale_Talk_4
+  NPCName: Chief
+  Output: dialogue_KiOie
+  Option_1: dialogue_iq4im
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_AR_Contact
+  NPCName: "Integrated Data Assistant (IDA)"
+  Output: dialogue_4uOmO
+  Option_1: dialogue_m00C6
+  OptionNext_1: SM_AR_Contact_Briefing
+  Option_2: dialogue_UqGIe
+  OptionNext_2: End
+}
+{ +Dialogue Name: SM_AR_Contact_Briefing
+  NPCName: "Talon Chief"
+  Output: dialogue_mOOai
+  Option_1: dialogue_gmCaS
+  OptionNext_1: SM_AR_Contact_Ilmarinen_Position
+}
+{ +Dialogue Name: SM_AR_Contact_Ilmarinen_Position
+  NPCName: "Talon Chief"
+  Output: dialogue_i48K0
+  Option_1: dialogue_aqi40
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_AR_ControlStation_Init
+  NPCName: "Outpost 34 Contol System"
+  Output: dialogue_00q00
+  Option_1: dialogue_A08uO
+  OptionNext_1: SM_AR_ControlStation_1
+}
+{ +Dialogue Name: SM_AR_ControlStation_1
+  NPCName: "Outpost 34 Contol System"
+  Output: dialogue_ue8mO
+  Option_1: dialogue_IWiqu
+  OptionNext_1: SM_AR_ControlStation_2
+}
+{ +Dialogue Name: SM_AR_ControlStation_2
+  NPCName: "Outpost 34 Contol System"
+  Output: dialogue_sS00q
+  Option_1: dialogue_m08sS
+  OptionNext_1: SM_AR_ControlStation_3
+}
+{ +Dialogue Name: SM_AR_ControlStation_3
+  NPCName: "Outpost 34 Contol System"
+  Output: dialogue_G8jO8
+  Option_1: dialogue_OOSG4
+  OptionNext_1: SM_AR_ControlStation_4
+}
+{ +Dialogue Name: SM_AR_ControlStation_4
+  NPCName: "Outpost 34 Contol System"
+  Output: dialogue_aQOqK
+  Option_1: dialogue_i0u6o
+  OptionNext_1: SM_AR_ControlStation_5
+}
+{ +Dialogue Name: SM_AR_ControlStation_5
+  NPCName: "Outpost 34 Contol System"
+  Output: dialogue_SmCiA
+  Option_1: dialogue_faaec
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_AR_Contact_Ilmarinen_AI_1
+  NPCName: "Ilmarinen AI"
+  Output: dialogue_qmKeO
+  Option_1: dialogue_GFim0
+  OptionNext_1: SM_AR_Contact_Ilmarinen_AI_2
+  Option_2: dialogue_emcSW
+  OptionNext_2: SM_AR_Contact_Ilmarinen_AI_End
+}
+{ +Dialogue Name: SM_AR_Contact_Ilmarinen_AI_2
+  NPCName: "SAINTJOHN Chief Engineer"
+  Output: dialogue_MG0KG
+  Option_1: dialogue_qQ4OS
+  OptionNext_1: SM_AR_Contact_Ilmarinen_AI_3
+  Option_2: dialogue_eOKie
+  OptionNext_2: SM_AR_Contact_Ilmarinen_AI_End
+}
+{ +Dialogue Name: SM_AR_Contact_Ilmarinen_AI_3
+  NPCName: "SAINTJOHN Chief Engineer"
+  Output: dialogue_6SqmC
+  Option_1: dialogue_Gmawq
+  OptionNext_1: SM_AR_Contact_Ilmarinen_AI_4
+  Option_2: dialogue_8Sa0O
+  OptionNext_2: SM_AR_Contact_Ilmarinen_AI_End
+}
+{ +Dialogue Name: SM_AR_Contact_Ilmarinen_AI_4
+  NPCName: "SAINTJOHN Chief Engineer"
+  Output: dialogue_OG4ui
+  Option_1: dialogue_WWimO
+  OptionNext_1: SM_AR_Contact_Ilmarinen_AI_5
+  Option_2: dialogue_qaakm
+  OptionNext_2: SM_AR_Contact_Ilmarinen_AI_End
+}
+{ +Dialogue Name: SM_AR_Contact_Ilmarinen_AI_5
+  NPCName: "SAINTJOHN Chief Engineer"
+  Output: dialogue_uabG0
+  Option_1: dialogue_GGmee
+  OptionNext_1: SM_AR_Contact_Ilmarinen_AI_6
+  Option_2: dialogue_OKqeC
+  OptionNext_2: SM_AR_Contact_Ilmarinen_AI_End
+}
+{ +Dialogue Name: SM_AR_Contact_Ilmarinen_AI_6
+  NPCName: "SAINTJOHN Chief Engineer"
+  Output: dialogue_aCC0S
+  Option_1: dialogue_0qS8a
+  OptionNext_1: SM_AR_Contact_Ilmarinen_AI_7
+  Option_2: dialogue_SW8Se
+  OptionNext_2: SM_AR_Contact_Ilmarinen_AI_End
+}
+{ +Dialogue Name: SM_AR_Contact_Ilmarinen_AI_7
+  NPCName: "SAINTJOHN Chief Engineer"
+  Output: dialogue_0aSKS
+  Option_1: dialogue_SWSe0
+  OptionNext_1: SM_AR_Contact_Ilmarinen_AI_End
+}
+{ +Dialogue Name: SM_AR_Contact_Ilmarinen_AI_End
+  NPCName: "Ilmarinen AI"
+  Output: dialogue_miuXa
+  Option_1: dialogue_mWOiA
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_AR_Debriefing_1
+  NPCName: "Integrated Data Assistant (IDA)"
+  Output: dialogue_SGCOS
+  Option_1: dialogue_LSmks
+  OptionNext_1: SM_AR_Debriefing_2
+}
+{ +Dialogue Name: SM_AR_Debriefing_2
+  NPCName: "Integrated Data Assistant (IDA)"
+  Output: dialogue_emSmq
+  Option_1: dialogue_qSOGO
+  OptionNext_1: SM_AR_Debriefing_3
+}
+{ +Dialogue Name: SM_AR_Debriefing_3
+  NPCName: "Talon Chief"
+  Output: dialogue_W0qCS
+  Option_1: dialogue_u00ea
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TOP_Yilk_1
+  NPCName: "TOP Manager Yilk"
+  Output: dialogue_S8S8A
+  Option_1: dialogue_qumMa
+  OptionNext_1: SM_TOP_Yilk_2
+}
+{ +Dialogue Name: SM_TOP_Yilk_2
+  NPCName: "TOP Manager Yilk"
+  Output: dialogue_8mii4
+  Option_1: dialogue_4ISC0
+  OptionNext_1: SM_TOP_Yilk_3
+}
+{ +Dialogue Name: SM_TOP_Yilk_3
+  NPCName: "TOP Manager Yilk"
+  Output: dialogue_eWS0S
+  Option_1: dialogue_KecW0
+  OptionNext_1: SM_TOP_Yilk_4
+}
+{ +Dialogue Name: SM_TOP_Yilk_4
+  NPCName: "TOP Manager Yilk"
+  Output: dialogue_qeKC4
+  Option_1: dialogue_Jmm4a
+  OptionNext_1: SM_TOP_Yilk_5
+}
+{ +Dialogue Name: SM_TOP_Yilk_5
+  NPCName: "TOP Manager Yilk"
+  Output: dialogue_uKaCm
+  Option_1: dialogue_0KWe0
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TOP_Lark_1
+  NPCName: "Brewmaster Lark"
+  Output: dialogue_enZai
+  Option_1: dialogue_S82Ga
+  OptionNext_1: SM_TOP_Lark_2
+}
+{ +Dialogue Name: SM_TOP_Lark_2
+  NPCName: "Brewmaster Lark"
+  Output: dialogue_eE4SK
+  Option_1: dialogue_KOhae
+  OptionNext_1: SM_TOP_Lark_3
+}
+{ +Dialogue Name: SM_TOP_Lark_3
+  NPCName: "Brewmaster Lark"
+  Output: dialogue_8Gm4q
+  Option_1: dialogue_S08eu
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TOP_Lark_Returned_Recipe_1
+  NPCName: "Brewmaster Lark"
+  Output: dialogue_0qKu0
+  Option_1: dialogue_C00ew
+  OptionNext_1: SM_TOP_Lark_Returned_Recipe_2
+}
+{ +Dialogue Name: SM_TOP_Lark_Returned_Recipe_2
+  NPCName: "Brewmaster Lark"
+  Output: dialogue_eC0ia
+  Option_1: dialogue_KupQa
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TOP_Urfk_1
+  NPCName: "Brewmaster Urfk"
+  Output: dialogue_mKmm4
+  Option_1: dialogue_6ee0i
+  OptionNext_1: SM_TOP_Urfk_2
+}
+{ +Dialogue Name: SM_TOP_Urfk_2
+  NPCName: dialogue_8e8W4
+  Output: dialogue_eRm4W
+  Option_1: dialogue_mgeKO
+  OptionNext_1: SM_TOP_Urfk_3
+}
+{ +Dialogue Name: SM_TOP_Urfk_3
+  NPCName: "Brewmaster Urfk"
+  Output: dialogue_a8C0i
+  Option_1: dialogue_6WWSa
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TOP_PirateCommander
+  NPCName: "Pirate Commander"
+  Next_1: SM_TOP_PirateCommanderStart
+  NextIf_1: "IsPdaChapterActive('pda_ea8Eq') && GetReputation(Faction.Pirates) >= Reputation.NeutralMin"
+  Next_2: SM_TOP_PirateNoStory
+}
+{ +Dialogue Name: SM_TOP_PirateNoStory
+  NPCName: "Pirate Commander"
+  Output: dialogue_A0Oeu
+  Option_1: dialogue_wa6aq
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TOP_PirateCommanderStart
+  NPCName: "Pirate Commander"
+  Output: dialogue_Oq8WC
+  Option_1: dialogue_KmS0C
+  OptionNext_1: SM_TOP_PirateBuyRound
+  Option_2: dialogue_Sq48C
+  OptionNext_2: SM_TOP_TOPRaid
+  Option_3: dialogue_mKauw
+  OptionNext_3: End
+}
+{ +Dialogue Name: SM_TOP_PirateBuyRound
+  NPCName: "Pirate Commander"
+  Output: dialogue_kWYRW
+  Option_1: dialogue_mQ04a
+  OptionNext_1: SM_TOP_Smuggler
+  Option_2: dialogue_oiWGS
+  OptionNext_2: SM_TOP_TOPRaid
+}
+{ +Dialogue Name: SM_TOP_Smuggler
+  NPCName: "Pirate Commander"
+  Output: dialogue_imaiW
+  Option_1: dialogue_0Sq4G
+  OptionNext_1: SM_TOP_SecretRecipes
+  Option_2: dialogue_GOS08
+  OptionNext_2: SM_TOP_ZiraxWeaponry
+  Option_3: dialogue_AK0ue
+  OptionNext_3: SM_TOP_Artifacts
+}
+{ +Dialogue Name: SM_TOP_ZiraxWeaponry
+  NPCName: "Pirate Commander"
+  Output: dialogue_qeiKS
+  Option_1: dialogue_0CcSq
+  OptionNext_1: SM_TOP_SecretRecipes
+  Option_2: dialogue_S0eW0
+  OptionNext_2: SM_TOP_Artifacts
+}
+{ +Dialogue Name: SM_TOP_Artifacts
+  NPCName: "Pirate Commander"
+  Output: dialogue_S40em
+  Option_1: dialogue_OeCKe
+  OptionNext_1: SM_TOP_SecretRecipes
+  Option_2: dialogue_mmWKG
+  OptionNext_2: SM_TOP_ZiraxWeaponry
+}
+{ +Dialogue Name: SM_TOP_SecretRecipes
+  NPCName: "Pirate Commander"
+  Output: dialogue_CeaeY
+  Option_1: dialogue_W44Cu
+  OptionNext_1: SM_TOP_TOPRaid
+}
+{ +Dialogue Name: SM_TOP_TOPRaid
+  NPCName: "Pirate Commander"
+  Output: dialogue_S8e8i
+  Option_1: dialogue_4CiGm
+  OptionNext_1: SM_TOP_PiratesPraise
+  Option_2: dialogue_mi4Yu
+  OptionNext_2: SM_TOP_PiratesThreaten
+}
+{ +Dialogue Name: SM_TOP_PiratesThreaten
+  NPCName: "Pirate Commander"
+  Execute_1: "AddItem('Token', 1, 9992)"
+  Output: dialogue_SOue8
+  Option_1: dialogue_uaOC4
+  OptionNext_1: SM_TOP_PiratesThreatenEnd
+}
+{ +Dialogue Name: SM_TOP_PiratesThreatenEnd
+  Execute_1: "AddReputation(Faction.Pirates, -12000)"
+  NPCName: "Pirate Commander"
+  Output: dialogue_uKai0
+  Option_1: dialogue_qqmCw
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TOP_PiratesPraise
+  NPCName: "Pirate Commander"
+  Output: dialogue_Kq0SP
+  Option_1: dialogue_keuGu
+  OptionNext_1: SM_TOP_PiratesTopRaidClient
+  Option_2: dialogue_8q4Si
+  OptionNext_2: SM_TOP_PiratesAskForRecipe
+}
+{ +Dialogue Name: SM_TOP_PiratesTopRaidClient
+  NPCName: "Pirate Commander"
+  Output: dialogue_M4CWi
+  Option_1: dialogue_pOqCi
+  OptionNext_1: SM_TOP_PiratesAskForRecipe
+}
+{ +Dialogue Name: SM_TOP_PiratesAskForRecipe
+  NPCName: "Pirate Commander"
+  Output: dialogue_YuOSi
+  Option_1: dialogue_K6Qq4
+  OptionNext_1: SM_TOP_PiratesAskForPrice
+  Option_2: dialogue_0V4eG
+  OptionNext_2: SM_TOP_PiratesThreaten
+}
+{ +Dialogue Name: SM_TOP_PiratesAskForPrice
+  NPCName: "Pirate Commander"
+  Output: dialogue_8ei04
+  Option_1: dialogue_Wiaai
+  OptionNext_1: SM_TOP_PiratesPriceAgree
+  Option_2: dialogue_KGKqG
+  OptionNext_2: SM_TOP_PiratesThreaten
+}
+{ +Dialogue Name: SM_TOP_PiratesPriceAgree
+  NPCName: "Pirate Commander"
+  Output: dialogue_uaCuq
+  Option_1: dialogue_mA8qi
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TOP_PirateMoebus
+  NPCName: dialogue_la8W3
+  Next_1: SM_TOP_PirateMoebusStart
+  NextIf_1: "IsPdaChapterActive('pda_ea8Eq') && GetReputation(Faction.Pirates) >= Reputation.NeutralMin"
+  Next_2: SM_TOP_PirateNoStory
+}
+{ +Dialogue Name: SM_TOP_PirateMoebusStart
+  NPCName: "Paymaster Moebus"
+  Next_1: SM_TOP_PirateMoebusDone
+  NextIf_1: "HasItem('PlatinOunce', 1) && GetReputation(Faction.Pirates) >= Reputation.NeutralMin"
+  Next_2: SM_TOP_PirateMoebusPmissing
+}
+{ +Dialogue Name: SM_TOP_PirateMoebusDone
+  NPCName: "Paymaster Moebus"
+  Execute_1: "AddItem('Token', 1, 9992)"
+  Execute_2: "RemoveItem('PlatinOunce', 1)"
+  Execute_3: "AddReputation(Faction.Pirates, 100)"
+  Output: dialogue_iu8ku
+  Option_1: dialogue_K8CGe
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TOP_PirateMoebusPmissing
+  NPCName: "Paymaster Moebus"
+  Output: dialogue_aae5O
+  Option_1: dialogue_8CJOd
+  OptionNext_1: End
+  Option_2: dialogue_S4iWG
+  OptionNext_2: SM_TOP_PirateMoebusPmissing2
+  Option_3: dialogue_CaD08
+  OptionNext_3: SM_TOP_PiratesThreaten
+}
+{ +Dialogue Name: SM_TOP_PirateMoebusPmissing2
+  NPCName: "Paymaster Moebus"
+  Output: dialogue_aaS8a
+  Option_1: dialogue_KqaUS
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TOP_Lark_Battlestations
+  NPCName: "Brewmaster Lark"
+  Output: dialogue_K0S8a
+  Option_1: dialogue_OmeO4
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TOP_Lark_Gratifikation_1
+  NPCName: "Brewmaster Lark"
+  Output: dialogue_CKuKe
+  Option_1: dialogue_4SmWm
+  OptionNext_1: SM_TOP_Lark_Gratifikation_2
+}
+{ +Dialogue Name: SM_TOP_Lark_Gratifikation_2
+  NPCName: "Brewmaster Lark"
+  Output: dialogue_qCee4
+  Option_1: dialogue_48040
+  OptionNext_1: SM_TOP_Lark_Gratifikation_3
+}
+{ +Dialogue Name: SM_TOP_Lark_Gratifikation_3
+  NPCName: "Brewmaster Lark"
+  Output: dialogue_COGKm
+  Option_1: dialogue_qGKTS
+  OptionNext_1: SM_TOP_Lark_Gratifikation_4
+}
+{ +Dialogue Name: SM_TOP_Lark_Gratifikation_4
+  NPCName: "Brewmaster Lark"
+  Output: dialogue_aYK80
+  Option_1: dialogue_GgS0m
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TOP_IC_Slick_1
+  NPCName: "Brewmaster Lark"
+  Output: dialogue_0a4W0
+  Option_1: dialogue_4e04q
+  OptionNext_1: SM_TOP_IC_Slick_2
+}
+{ +Dialogue Name: SM_TOP_IC_Slick_2
+  NPCName: "Brewmaster Lark"
+  Output: dialogue_OuOu4
+  Option_1: dialogue_aOmKo
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_TOP_IC_Bartender_1
+  NPCName: Bartender
+  Output: dialogue_uWmCi
+  Option_1: dialogue_CTCe8
+  OptionNext_1: SM_TOP_IC_Bartender_2
+}
+{ +Dialogue Name: SM_TOP_IC_Bartender_2
+  NPCName: Bartender
+  Output: dialogue_4m5q4
+  Option_1: dialogue_ecFq8
+  OptionNext_1: SM_TOP_IC_Bartender_3
+}
+{ +Dialogue Name: SM_TOP_IC_Bartender_3
+  NPCName: Bartender
+  Output: dialogue_0WWmS
+  Option_1: dialogue_C4Oqu
+  OptionNext_1: SM_TOP_IC_Bartender_4
+}
+{ +Dialogue Name: SM_TOP_IC_Bartender_4
+  NPCName: Bartender
+  Output: dialogue_CO00u
+  Option_1: dialogue_YmGMq
+  OptionNext_1: SM_TOP_IC_Bartender_5
+}
+{ +Dialogue Name: SM_TOP_IC_Bartender_5
+  NPCName: Bartender
+  Output: dialogue_ieqa8
+  Option_1: dialogue_SSe4Q
+  OptionNext_1: SM_TOP_IC_Bartender_6
+}
+{ +Dialogue Name: SM_TOP_IC_Bartender_6
+  NPCName: Bartender
+  Output: dialogue_WaIWW
+  Option_1: dialogue_e8iam
+  OptionNext_1: SM_TOP_IC_Bartender_7
+}
+{ +Dialogue Name: SM_TOP_IC_Bartender_7
+  NPCName: Bartender
+  Output: dialogue_WeOO4
+  Option_1: dialogue_iQOWa
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_UO_Sectioner32_1
+  NPCName: Sectioner32
+  Output: dialogue_Q2Gm8
+  Option_1: dialogue_mqqmK
+  OptionNext_1: SM_UO_Sectioner32_2
+}
+{ +Dialogue Name: SM_UO_Sectioner32_2
+  NPCName: Sectioner32
+  Output: dialogue_q8480
+  Option_1: dialogue_emoCq
+  OptionNext_1: SM_UO_Sectioner32_3
+}
+{ +Dialogue Name: SM_UO_Sectioner32_3
+  NPCName: Sectioner32
+  Output: dialogue_qmiW6
+  Option_1: dialogue_4K84F
+  OptionNext_1: SM_UO_Sectioner32_4
+}
+{ +Dialogue Name: SM_UO_Sectioner32_4
+  NPCName: Sectioner32
+  Output: dialogue_uWCem
+  Option_1: dialogue_GaemS
+  OptionNext_1: SM_UO_Sectioner32_5
+}
+{ +Dialogue Name: SM_UO_Sectioner32_5
+  NPCName: Sectioner32
+  Output: dialogue_iSeSW
+  Option_1: dialogue_qCOK4
+  OptionNext_1: SM_UO_Sectioner32_6
+}
+{ +Dialogue Name: SM_UO_Sectioner32_6
+  NPCName: Sectioner32
+  Output: dialogue_aK8Ou
+  Option_1: dialogue_uKWKS
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_UO_StationManager_1
+  NPCName: "Station Manager"
+  Output: dialogue_mGi4C
+  Option_1: dialogue_CWmqW
+  OptionNext_1: SM_UO_StationManager_2
+}
+{ +Dialogue Name: SM_UO_StationManager_2
+  NPCName: "Station Manager"
+  Output: dialogue_SiS0W
+  Option_1: dialogue_S0uB0
+  OptionNext_1: SM_UO_StationManager_3
+}
+{ +Dialogue Name: SM_UO_StationManager_3
+  NPCName: "Station Manager"
+  Output: dialogue_8W8Qa
+  Option_1: dialogue_MrK80
+  OptionNext_1: SM_UO_StationManager_4
+}
+{ +Dialogue Name: SM_UO_StationManager_4
+  NPCName: "Station Manager"
+  Output: dialogue_CuaOa
+  Option_1: dialogue_3CiJS
+  OptionNext_1: SM_UO_StationManager_5
+}
+{ +Dialogue Name: SM_UO_StationManager_5
+  NPCName: "Station Manager"
+  Output: dialogue_Wu08i
+  Option_1: dialogue_Ouw4S
+  OptionNext_1: SM_UO_StationManager_6
+}
+{ +Dialogue Name: SM_UO_StationManager_6
+  NPCName: "Station Manager"
+  Output: dialogue_a8Kau
+  Option_1: dialogue_u8q0C
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_UO_ShiftManager_1
+  NPCName: "Shift Manager"
+  Output: dialogue_AGmuO
+  Option_1: dialogue_mei89
+  OptionNext_1: SM_UO_ShiftManager_2
+}
+{ +Dialogue Name: SM_UO_ShiftManager_2
+  NPCName: "Shift Manager"
+  Output: dialogue_PiFKW
+  Option_1: dialogue_JiawW
+  OptionNext_1: SM_UO_ShiftManager_3
+}
+{ +Dialogue Name: SM_UO_ShiftManager_3
+  NPCName: "Shift Manager"
+  Output: dialogue_GC0s6
+  Option_1: dialogue_aeq0i
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_UO_StationAI_1
+  NPCName: "Station AI"
+  Output: dialogue_C4K0a
+  Option_1: dialogue_SGqbC
+  OptionNext_1: SM_UO_StationAI_2
+}
+{ +Dialogue Name: SM_UO_StationAI_2
+  NPCName: "Station AI"
+  Output: dialogue_4us4S
+  Option_1: dialogue_g04Oi
+  OptionNext_1: SM_UO_StationAI_3
+}
+{ +Dialogue Name: SM_UO_StationAI_3
+  NPCName: "Station AI"
+  Output: dialogue_4CE88
+  Option_1: dialogue_eKeiW
+  OptionNext_1: SM_UO_StationAI_4
+}
+{ +Dialogue Name: SM_UO_StationAI_4
+  NPCName: "Station AI"
+  Output: dialogue_O3mix
+  Option_1: dialogue_um0Gu
+  OptionNext_1: SM_UO_StationAI_5
+}
+{ +Dialogue Name: SM_UO_StationAI_5
+  NPCName: "Station AI"
+  Output: dialogue_aWmmq
+  Option_1: dialogue_4niPW
+  OptionNext_1: End
+}
+{ +Dialogue Name: SM_UO_Sectioner32_debriefing_1
+  NPCName: Sectioner32
+  Output: dialogue_SuSCe
+  Option_1: dialogue_qu8qA
+  OptionNext_1: SM_UO_Sectioner32_debriefing_2
+}
+{ +Dialogue Name: SM_UO_Sectioner32_debriefing_2
+  NPCName: "Integrated Data Assistant (IDA)"
+  Output: dialogue_4WqmS
+  Option_1: dialogue_ecqiO
+  OptionNext_1: SM_UO_Sectioner32_debriefing_3
+}
+{ +Dialogue Name: SM_UO_Sectioner32_debriefing_3
+  NPCName: "Integrated Data Assistant (IDA)"
+  Output: dialogue_0mWTq
+  Option_1: dialogue_2i0eq
+  OptionNext_1: End
+}
+{ +Dialogue Name: Tut_Intro_Welcome
+  NPCName: dialogue_uGSWi
+  Output: dialogue_OCKS4
+  Option_1: dialogue_WaOaG
+  OptionNext_1: End
+}
+{ +Dialogue Name: Tut_Intro_EmergencyPod
+  NPCName: dialogue_uSuiW
+  Output: dialogue_sKeGu
+  Option_1: dialogue_0KioS
+  OptionNext_1: End
+}
+{ +Dialogue Name: Tut_TuM_LittleFavor_Contact
+  NPCName: dialogue_q6Oi0
+  Output: dialogue_t00Ci
+  Option_1: dialogue_KOC4G
+  OptionNext_1: Tut_TuM_LittleFavor_Contact_2
+}
+{ +Dialogue Name: Tut_TuM_LittleFavor_Contact_2
+  Output: dialogue_VCuue
+  Option_1: dialogue_WXaq0
+  OptionNext_1: Tut_TuM_LittleFavor_Contact_3
+  NPCName: dialogue_OC8mG
+}
+{ +Dialogue Name: Tut_TuM_LittleFavor_Contact_3
+  Output: dialogue_qwm40
+  Option_1: dialogue_Wku24
+  OptionNext_1: End
+  NPCName: dialogue_SsqSC
+}
+{ +Dialogue Name: Tut_TuM_LittleFavor_Kanydan_1
+  Output: dialogue_iCGO6
+  Option_1: dialogue_aOm0M
+  OptionNext_1: Tut_TuM_LittleFavor_Kanydan_2
+  NPCName: dialogue_uqiai
+}
+{ +Dialogue Name: Tut_TuM_LittleFavor_Kanydan_2
+  Output: dialogue_WmqaW
+  Option_1: dialogue_eme4a
+  OptionNext_1: Tut_TuM_LittleFavor_Kanydan_3
+  NPCName: dialogue_C8q44
+}
+{ +Dialogue Name: Tut_TuM_LittleFavor_Kanydan_3
+  Output: dialogue_KGqmS
+  Option_1: dialogue_a2mui
+  OptionNext_1: Tut_TuM_LittleFavor_Kanydan_4
+  NPCName: dialogue_WOea4
+}
+{ +Dialogue Name: Tut_TuM_LittleFavor_Kanydan_4
+  Output: dialogue_0WMS4
+  Option_1: dialogue_awO88
+  OptionNext_1: Tut_TuM_LittleFavor_Kanydan_5
+  NPCName: dialogue_Zi8im
+}
+{ +Dialogue Name: Tut_TuM_LittleFavor_Kanydan_5
+  Output: dialogue_ie0uq
+  Option_1: dialogue_qSOGc
+  OptionNext_1: End
+  NPCName: dialogue_WOian
+}
+{ +Dialogue Name: Tut_TuM_LittleFavor_Kanydan_Fin_Int
+  Next_1: Tut_TuM_LittleFavor_Kanydan_Fin_1
+  NextIf_1: "HasItem('TechnicalArtifact', 1)"
+  Next_2: Tut_TuM_LittleFavor_Kanydan_Fin_NoItem
+  NPCName: dialogue_SWOa0
+}
+{ +Dialogue Name: Tut_TuM_LittleFavor_Kanydan_Fin_NoItem
+  Output: dialogue_40aSS
+  Option_1: dialogue_OmW0s
+  OptionNext_1: End
+  NPCName: dialogue_CKS8G
+}
+{ +Dialogue Name: Tut_TuM_LittleFavor_Kanydan_Fin_1
+  NPCName: dialogue_8h4mS
+  Output: dialogue_4We4m
+  Option_1: dialogue_C0b3K
+  OptionNext_1: Tut_TuM_LittleFavor_Kanydan_Fin_2
+  Execute_1: "RemoveItem('TechnicalArtifact', 1)"
+}
+{ +Dialogue Name: Tut_TuM_LittleFavor_Kanydan_Fin_2
+  Output: dialogue_OmokC
+  Option_1: dialogue_qCaS0
+  OptionNext_1: Tut_TuM_LittleFavor_Kanydan_Fin_3
+  NPCName: dialogue_KuK4m
+}
+{ +Dialogue Name: Tut_TuM_LittleFavor_Kanydan_Fin_3
+  Output: dialogue_aG4mW
+  Option_1: dialogue_0A404
+  OptionNext_1: End
+  NPCName: dialogue_iWS6S
+}
+{ +Dialogue Name: Tut_TuM_LittleFavor_Contact_Fin_1
+  NPCName: dialogue_SKCm4
+  Output: dialogue_8Kmig
+  Option_1: dialogue_OOW0G
+  OptionNext_1: End
+  Execute_1: "AddItem('EVABoost', 1) "
+  Execute_2: "AddItem('TeleporterBA', 1) "
+}
+{ +Dialogue Name: Tut_Registry_GiveCobaltPos_Start
+  NPCName: dialogue_iKVO8
+  Output: dialogue_mm4Wu
+  Option_1: dialogue_OCiK4
+  OptionNext_1: Tut_Registry_GiveCobaltPos_Pos
+}
+{ +Dialogue Name: Tut_Registry_GiveCobaltPos_Pos
+  NPCName: dialogue_enWqG
+  Output: dialogue_eWiGS
+  Option_1: dialogue_OSPOi
+  OptionNext_1: End
+  Execute_1: "AddBookmark('Copper deposit', 3, 'A01 Gamma', -1673, 194, 7114)"
+}
+{ +Dialogue Name: Tut_PilotingCV_CptHyde
+  NPCName: dialogue_WWWC4
+  Output: dialogue_e4eG8
+  Option_1: dialogue_GOWiE
+  OptionNext_1: End
+}
+{ +Dialogue Name: Tut_PilotingCV_CmdPorter
+  NPCName: dialogue_G8KWW
+  Output: dialogue_iaGaG
+  Option_1: dialogue_84SiC
+  OptionNext_1: Tut_PilotingCV_CmdPorter_1
+}
+{ +Dialogue Name: Tut_PilotingCV_CmdPorter_1
+  NPCName: dialogue_4kuGo
+  Output: dialogue_GaAIG
+  Option_1: dialogue_eaW0e
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Civilian_Random_Init
+  Variable_1: "randomizer", param1: int
+  Execute_1: "randomizer = Random(1,17)"
+  Next_1: Barking_Civilian_Random_1
+  NextIf_1: "randomizer == 1"
+  Next_2: Barking_Civilian_Random_2
+  NextIf_2: "randomizer == 2"
+  Next_3: Barking_Civilian_Random_3
+  NextIf_3: "randomizer == 3"
+  Next_4: Barking_Civilian_Random_4
+  NextIf_4: "randomizer == 4"
+  Next_5: Barking_Civilian_Random_5
+  NextIf_5: "randomizer == 5"
+  Next_6: Barking_Civilian_Random_6
+  NextIf_6: "randomizer == 6"
+  Next_7: Barking_Civilian_Random_7
+  NextIf_7: "randomizer == 7"
+  Next_8: Barking_Civilian_Random_8
+  NextIf_8: "randomizer == 8"
+  Next_9: Barking_Civilian_Random_9
+  NextIf_9: "randomizer == 9"
+  Next_10: Barking_Civilian_Random_10
+  NextIf_10: "randomizer == 10"
+  Next_11: Barking_Civilian_Random_11
+  NextIf_11: "randomizer == 11"
+  Next_12: Barking_Civilian_Random_12
+  NextIf_12: "randomizer == 12"
+  Next_13: Barking_Civilian_Random_13
+  NextIf_13: "randomizer == 13"
+  Next_14: Barking_Civilian_Random_14
+  NextIf_14: "randomizer == 14"
+  Next_15: Barking_Civilian_Random_15
+  NextIf_15: "randomizer == 15"
+  Next_16: Barking_Civilian_Random_16
+  NextIf_16: "randomizer == 16"
+  Next_17: Barking_Civilian_Random_17
+  NextIf_17: "randomizer == 17"
+}
+{ +Dialogue Name: Barking_Civilian_Random_1
+  Output: dialogue_O2uWK
+  Option_1: dialogue_6pmsM
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Civilian_Random_2
+  Output: dialogue_CKKaK
+  Option_1: dialogue_0EuCe
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Civilian_Random_3
+  Output: dialogue_W8uBS
+  Option_1: dialogue_GOi8I
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Civilian_Random_4
+  Output: dialogue_wWKTq
+  Option_1: dialogue_a4G8W
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Civilian_Random_5
+  Output: dialogue_oKiaa
+  Option_1: dialogue_mOqee
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Civilian_Random_6
+  Output: dialogue_aq0uu
+  Option_1: dialogue_eG9aS
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Civilian_Random_7
+  Option_1: dialogue_Cm84a
+  OptionNext_1: End
+  Output: dialogue_e8aaK
+}
+{ +Dialogue Name: Barking_Civilian_Random_8
+  Output: dialogue_4exuC
+  Option_1: dialogue_WQGAa
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Civilian_Random_9
+  Output: dialogue_OqiK0
+  Option_1: dialogue_SecG0
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Civilian_Random_10
+  Output: dialogue_4ieSe
+  Option_1: dialogue_GC4S4
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Civilian_Random_11
+  Output: dialogue_uqqiK
+  Option_1: dialogue_W8OqM
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Civilian_Random_12
+  Output: dialogue_3uku4
+  Option_1: dialogue_44OOm
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Civilian_Random_13
+  Output: dialogue_mqS04
+  Option_1: dialogue_04ila
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Civilian_Random_14
+  Output: dialogue_We84e
+  Option_1: dialogue_Pqsuq
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Civilian_Random_15
+  Output: dialogue_uECW0
+  Option_1: dialogue_8uuOW
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Civilian_Random_16
+  Output: dialogue_0UmSG
+  Option_1: dialogue_q4aqS
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Civilian_Random_17
+  Output: dialogue_6SG4t
+  Option_1: dialogue_OO8VS
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Military_Random_Init
+  Variable_1: "randomizer", param1: int
+  Execute_1: "randomizer = Random(1,12)"
+  Next_1: Barking_Military_Random_1
+  NextIf_1: "randomizer == 1"
+  Next_2: Barking_Military_Random_2
+  NextIf_2: "randomizer == 2"
+  Next_3: Barking_Military_Random_3
+  NextIf_3: "randomizer == 3"
+  Next_4: Barking_Military_Random_4
+  NextIf_4: "randomizer == 4"
+  Next_5: Barking_Military_Random_5
+  NextIf_5: "randomizer == 5"
+  Next_6: Barking_Military_Random_6
+  NextIf_6: "randomizer == 6"
+  Next_7: Barking_Military_Random_7
+  NextIf_7: "randomizer == 7"
+  Next_8: Barking_Military_Random_8
+  NextIf_8: "randomizer == 8"
+  Next_9: Barking_Military_Random_9
+  NextIf_9: "randomizer == 9"
+  Next_10: Barking_Military_Random_10
+  NextIf_10: "randomizer == 10"
+  Next_11: Barking_Military_Random_11
+  NextIf_11: "randomizer == 11"
+}
+{ +Dialogue Name: Barking_Military_Random_1
+  Output: dialogue_KWMmx
+  Option_1: dialogue_0SW4q
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Military_Random_2
+  Output: dialogue_OCsS4
+  Option_1: dialogue_ae40Y
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Military_Random_3
+  Output: dialogue_WW401
+  Option_1: dialogue_SSuuK
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Military_Random_4
+  Output: dialogue_mCeu0
+  Option_1: dialogue_iUSim
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Military_Random_5
+  Output: dialogue_YOwMq
+  Option_1: dialogue_SOeCe
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Military_Random_6
+  Output: dialogue_KKSeK
+  Option_1: dialogue_QKSOp
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Military_Random_7
+  Output: dialogue_WiTWq
+  Option_1: dialogue_KCeNm
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Military_Random_8
+  Output: dialogue_aASCi
+  Option_1: dialogue_Kqu0O
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Military_Random_9
+  Output: dialogue_G000a
+  Option_1: dialogue_uii0T
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Military_Random_10
+  Output: dialogue_0KcZq
+  Option_1: dialogue_OCceO
+  OptionNext_1: End
+}
+{ +Dialogue Name: Barking_Military_Random_11
+  Output: dialogue_qa8S8
+  Option_1: dialogue_4kSGu
+  OptionNext_1: End
+}

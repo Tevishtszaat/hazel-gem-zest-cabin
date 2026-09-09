@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Axis 2026 Creator Particlewave",
+      "hasCanvas": false,
+      "bodyTextLen": 935,
+      "bodyTextHash": "cb3e9a16f182d687356acfa15b48c7642d4a335d4a992907c1a215984f3e7072",
+      "bodyTextPrefix": "AX Axis 2026 Creator Particlewave Creator Axis 2026 Creator Part",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/rebrand.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Axis 2026 Creator Particlewave",
+      "hasCanvas": false,
+      "bodyTextLen": 360,
+      "bodyTextHash": "87d335c3734295cd9de219882875e94ee78a330f92ae0812c5f2fbe49e2d8abe",
+      "bodyTextPrefix": "AX Axis 2026 Creator Particlewave Creator Axis 2026 Creator Part",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/rebrand-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/rebrand.json"
+}

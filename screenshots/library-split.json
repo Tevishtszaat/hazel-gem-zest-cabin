@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/library",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "PulsePDA",
+      "hasCanvas": false,
+      "bodyTextLen": 375,
+      "bodyTextHash": "89d47b8b0479c8010733ee811260dcd8ee26ee0eae97d152d3f237b1a099813b",
+      "bodyTextPrefix": "P PulsePDA Creator PulsePDA PDA Language English Export YAML Exp",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/library-split.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "PulsePDA",
+      "hasCanvas": false,
+      "bodyTextLen": 375,
+      "bodyTextHash": "89d47b8b0479c8010733ee811260dcd8ee26ee0eae97d152d3f237b1a099813b",
+      "bodyTextPrefix": "P PulsePDA Creator PulsePDA PDA Language English Export YAML Exp",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/library-split-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/library-split.json"
+}
