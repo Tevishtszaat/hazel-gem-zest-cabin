@@ -1,0 +1,1790 @@
+## Item line: "Group|Name_x" (x incrementing), data: "probability" [, xdata="count range"] (default = 1,1)
+## NOTE: Please currently always use 8 columns! (first number in "Size" line)
+## =======
+## Important: ONLY a total of 255 IDs available!
+## ========
+## To add a Token with a specific META to a loot table, use for example:  
+## Name_0: Token, param1: 1, param2: "meta=9992"
+## meta = use the token meta from TokenConfig.ecf
+## ========
+## Custom Loot tables for use with NPC Spawners > enter the ID Number of the Container, f.ex 255 to the slot next to the spawn-entity dropdown
+## ========
+
+## Empty Medium
+{ +Container Id: 1
+  Count: 1
+  Size: "8,8"
+  SfxOpen: UseActions/KEYUnlockingMetalDoor(mono)
+  SfxClose: UseActions/KEYUnlockingMetalDoor(mono)
+
+  { Child Items
+    Group_0: empty
+  }
+}
+
+## ContainerRandom: used for Junk POIs 
+{ +Container Id: 2
+  Count: "1,3"
+  Size: "8,8" # "8,1"
+  SfxOpen: UseActions/ContainerOpen
+  SfxClose: UseActions/ContainerClose
+
+  { Child Items
+  ## Food
+    Name_0: CannedVegetables, param1: 0.4, param2: "1,2"
+    Name_1: CannedMeat, param1: 0.4, param2: "1,2"
+    Name_2: EmergencyRations, param1: 0.1, param2: "1,1"
+    Name_3: WaterBottle, param1: 0.4, param2: "1,3"
+    Name_4: RottenFood, param1: 0.4, param2: "1,1"
+  ## Medical Stuff
+    Name_5: AntibioticInjection, param1: 0.3, param2: "1,2"
+    Name_6: Medikit02, param1: 0.3, param2: "1,2"
+    Name_7: EnergyPills, param1: 0.3, param2: "1,2"
+    Name_8: StomachPills, param1: 0.3, param2: "1,2"
+    Name_9: AntibioticOintment, param1: 0.3, param2: "1,2"
+    Name_10: AntibioticPills, param1: 0.3, param2: "1,2"
+  ## Components
+    Name_11: SteelPlate, param1: 0.2, param2: "1,2"
+    Name_12: Electronics, param1: 0.2, param2: "1,2"
+    Name_13: OpticalFiber, param1: 0.2, param2: "1,2"
+    Name_14: MechanicalComponents, param1: 0.2, param2: "1,2"
+  }
+}
+
+## PentaxidTank 
+{ +Container Id: 3
+  Count: 1
+  Size: "8,8"
+  SfxOpen: UseActions/electric
+  SfxClose: UseActions/electric
+
+  { Child Items
+    Group_0: empty
+  }
+}
+
+## Container Blocks: Extra Large 
+{ +Container Id: 4
+  Count: 1
+  Size: "8,8"
+  SfxOpen: UseActions/KEYUnlockingMetalDoor(mono)
+  SfxClose: UseActions/KEYUnlockingMetalDoor(mono)
+
+  { Child Items
+    Group_0: OresBasic, param1: 0.1
+    Group_1: IngotsBasic, param1: 0.1
+    Group_2: ComponentsBasic, param1: 0.1
+    Group_3: CraftingMaterial, param1: 0.1
+    Group_4: EnergyItems, param1: 0.1
+    Group_5: Seeds, param1: 0.1
+    Group_6: MedicalItems, param1: 0.1
+    Group_7: FoodItems, param1: 0.1
+    Group_8: BuildingBlocks, param1: 0.05
+    Group_9: DevicesCommon, param1: 0.02
+    Group_10: Tools, param1: 0.02
+    Group_11: WeaponsBasic, param1: 0.02
+    Group_12: WeaponsBasicKit, param1: 0.1
+  }
+}
+
+## GolemSwamp 
+{ +Container Id: 5
+  Count: "3,4"
+  Size: "8,1"
+  SfxOpen: UseActions/stone_open_close
+  SfxClose: UseActions/stone_open_close
+
+  { Child Items
+    Name_0: CrushedStone, param1: 0.4, param2: "5,15"
+    Name_1: XenoSubstrate, param1: 0.6, param2: "2,3"
+    Group_0: OresBasic, param1: 0.9
+    Group_1: OresAdvanced, param1: 0.6
+    Group_2: OresRare, param1: 0.4
+  }
+}
+
+## GolemIce 
+{ +Container Id: 6
+  Count: "3,4"
+  Size: "8,1"
+  SfxOpen: UseActions/stone_open_close
+  SfxClose: UseActions/stone_open_close
+
+  { Child Items
+    Name_0: CrushedStone, param1: 0.4, param2: "5,15"
+    Name_1: PentaxidCrystal, param1: 0.6, param2: "1,2"
+    Group_0: OresBasic, param1: 0.9
+    Group_1: OresAdvanced, param1: 0.6
+    Group_2: OresRare, param1: 0.4
+  }
+}
+
+## WoodWalker 
+{ +Container Id: 7
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/stone_open_close
+  SfxClose: UseActions/stone_open_close
+
+  { Child Items
+    Name_0: WoodLogs, param1: 0.9, param2: "5,15"    
+    Group_0: Seeds, param1: 0.6
+    Group_1: Biological01, param1: 0.6
+  }
+}
+
+## Talon Guardian 
+{ +Container Id: 8
+  Count: "2,4"
+  Size: "8,1"
+  SfxOpen: UseActions/ZIPPERShort3(mono)
+  SfxClose: UseActions/ZIPPERShort3(mono)
+
+  { Child Items
+    Name_0: HerbalLeaves, param1: 0.3, param2: "1,2"
+    Name_1: PlantProtein, param1: 0.3, param2: "1,3"
+    Name_2: PowerBar, param1: 0.2, param2: "1,2"
+    Name_3: Bandages, param1: 0.3, param2: "1,2"
+    Name_4: HerbalLeaves, param1: 0.3, param2: "1,2"
+  #  Name_5: PentaxidOre, param1: 0.02, param2: "1,2"
+  #  Name_6: MoneyCard, param1: 0.05, param2: "10,20"
+
+    Group_0: Sprouts, param1: 0.3
+  }
+}
+
+## Oviraptor 
+{ +Container Id: 9
+  Count: "1,2"
+  Size: "8,1"
+  SfxOpen: UseActions/body_open
+  SfxClose: UseActions/body_close
+
+  { Child Items
+    Name_0: Meat, param2: "1,2"
+  #  Name_1: PlantProtein, param1: 0.3, param2: "1,2"
+    Name_2: Egg, param1: 0.6, param2: "1,2"
+  }
+}
+## Dino small (Raptor, Megalonops, Parasaur) 
+{ +Container Id: 10
+  Count: "1,2"
+  Size: "8,1"
+  SfxOpen: UseActions/body_open
+  SfxClose: UseActions/body_close
+
+  { Child Items
+    Name_0: Meat, param2: "1,2"
+    Name_1: Egg, param1: 0.6, param2: "1,2"
+  }
+}
+
+## Backpack and DropContainer 
+{ +Container Id: 11
+  Count: 1
+  Size: "8,8"
+  /*         SfxOpen: UseActions/ZIPPERShort3(mono)
+  SfxClose: UseActions/ZIPPERShort3(mono)      */
+  SfxOpen: UseActions/KEYUnlockingMetalDoor(mono)
+  SfxClose: UseActions/KEYUnlockingMetalDoor(mono)
+  DestroyOnClose: False
+
+  { Child Items
+    Group_0: empty
+  }
+}
+
+## Container Blocks: Large 
+{ +Container Id: 12
+  Count: 1
+  Size: "8,8" # "8,4"
+  SfxOpen: UseActions/KEYUnlockingMetalDoor(mono)
+  SfxClose: UseActions/KEYUnlockingMetalDoor(mono)
+
+  { Child Items
+    Group_0: empty
+  }
+}
+
+
+## PentaxidTankSV 
+{ +Container Id: 13
+  Count: 1
+  Size: "8,8"
+  SfxOpen: UseActions/electric
+  SfxClose: UseActions/electric
+
+  { Child Items
+    Group_0: empty
+  }
+}
+
+## DroneSmallFast01Rocket _OLD_
+{ +Container Id: 14
+  Count: "1,2"
+  Size: "8,1"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Name_0: EnergyCell, param1: 0.7, param2: "1,2"
+    Name_1: SlowRocket, param1: 0.7, param2: "2,4"
+    Group_0: BasicComponents, param1: 0.3
+    Group_1: CompositeComponents, param1: 0.3
+  }
+}
+
+## TurretRobot
+{ +Container Id: 15
+  Count: "1,2"
+  Size: "8,1"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Name_0: EnergyCell, param1: 0.7, param2: "1,2"
+    Name_1: 5.8mmBullet, param1: 0.7, param2: "20,40"
+    Name_2: 50Caliber, param1: 0.7, param2: "10,20"
+    Group_0: BasicComponents, param1: 0.3
+    Group_1: CompositeComponents, param1: 0.3
+  }
+}
+
+## TroopTransporters 
+{ +Container Id: 16
+  Count: "2,4"
+  Size: "8,2"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Group_0: WeaponsVeryRare, param1: 0.3
+    # Group_1: WeaponsEpic, param1: 0.05
+    Group_1: EnergyItems, param1: 0.9
+    Group_2: MedicalItems, param1: 0.8
+    Group_3: WeaponsRare, param1: 0.6
+    Group_4: WeaponsRareKit, param1: 0.6
+  }
+}
+
+## MegalonopsGreen 
+{ +Container Id: 17
+  Count: "1,2"
+  Size: "8,1"
+  SfxOpen: UseActions/body_open
+  SfxClose: UseActions/body_close
+
+  { Child Items
+    Name_0: Meat, param2: 1
+    Name_1: Egg, param1: 0.6, param2: "1,2"
+  }
+}
+
+## LizardMule Large   
+{ +Container Id: 18
+  Count: "3,4"
+  Size: "8,1"
+  SfxOpen: UseActions/body_open
+  SfxClose: UseActions/body_close
+
+  { Child Items
+    Name_0: Meat, param1: 1, param2: "2,3"
+    Name_1: Milk, param1: 0.9, param2: "1,2"
+  }
+}
+
+## Overseer 
+{ +Container Id: 19
+  Count: "2,4"
+  Size: "8,1"
+  SfxOpen: UseActions/body_open
+  SfxClose: UseActions/body_close
+
+  { Child Items
+    Name_0: Meat, param1: 0.7, param2: 1
+    Name_1: PentaxidCrystal, param1: 0.3, param2: 1
+  }
+}
+
+## CaveWorm,Spider01 
+{ +Container Id: 20
+  Count: "3,4"
+  Size: "8,1"
+  SfxOpen: UseActions/body_open
+  SfxClose: UseActions/body_close
+
+  { Child Items
+    Name_0: Meat, param1: 0.8, param2: 1
+    Name_1: AlienParts02, param1: 0.5, param2: "1,2"
+    Name_2: AlienTooth, param1: 1, param2: "1,2"
+  }
+}
+
+## not used anymore
+## LizardMule and Triceratops Baby 
+{ +Container Id: 21
+  Count: "1"
+  Size: "8,1"
+  SfxOpen: UseActions/body_open
+  SfxClose: UseActions/body_close
+
+  { Child Items
+    Name_0: Meat, param1: 1, param2: "4,6"
+  }
+}
+
+## SPECIAL FuelTankMSSmall  
+{ +Container Id: 22
+  Count: 1
+  Size: "8,1"
+  SfxOpen: UseActions/electric
+  SfxClose: UseActions/KEYUnlockingMetalDoor(mono)
+
+  { Child Items
+    Group_0: empty
+  }
+}
+
+## SPECIAL FuelTankMSLarge
+{ +Container Id: 23
+  Count: 1
+  Size: "8,3"
+  SfxOpen: UseActions/electric
+  SfxClose: UseActions/KEYUnlockingMetalDoor(mono)
+
+  { Child Items
+    Group_0: empty
+  }
+}
+
+## SPECIAL OxygenTank 
+{ +Container Id: 24
+  Count: 1
+  Size: "8,1"
+  SfxOpen: UseActions/oxygen_tank_open
+  SfxClose: UseActions/oxygen_tank_open
+
+  { Child Items
+    Group_0: empty
+  }
+}
+
+## SPECIAL OxygenTankSV 
+{ +Container Id: 25
+  Count: 1
+  Size: "8,1"
+  SfxOpen: UseActions/oxygen_tank_open
+  SfxClose: UseActions/oxygen_tank_open
+
+  { Child Items
+    Group_0: empty
+  }
+}
+
+## SPECIAL FuelTankSV 
+{ +Container Id: 26
+  Count: 1
+  Size: "8,1"
+  SfxOpen: UseActions/electric
+  SfxClose: UseActions/KEYUnlockingMetalDoor(mono)
+
+  { Child Items
+    Group_0: empty
+  }
+}
+
+## GolemDesert 
+{ +Container Id: 27
+  Count: "3,4"
+  Size: "8,1"
+  SfxOpen: UseActions/stone_open_close
+  SfxClose: UseActions/stone_open_close
+
+  { Child Items
+    Name_0: CrushedStone, param1: 0.4, param2: "5,15"
+    Name_1: GoldOre, param1: 0.4, param2: "1,2"
+    Group_0: OresBasic, param1: 0.9
+    Group_1: OresAdvanced, param1: 0.6
+    Group_2: OresRare, param1: 0.4
+  }
+}
+
+## TotalHorror 
+{ +Container Id: 28
+  Count: "2,4"
+  Size: "8,1"
+  SfxOpen: UseActions/body_open
+  SfxClose: UseActions/body_close
+
+  { Child Items
+    Name_0: AlienParts02, param1: 0.5, param2: "2,3"
+    Name_1: AlienTooth, param1: 0.3, param2: "2,3"
+  }
+}
+
+## AlienAssassin,Hexapod 
+{ +Container Id: 29
+  Count: "3,5"
+  Size: "8,1"
+  SfxOpen: UseActions/body_open
+  SfxClose: UseActions/body_close
+
+  { Child Items
+    Name_0: AlienParts02, param1: 0.3, param2: "1,3"
+    Name_1: ConfettiMossScrapings, param1: 0.5, param2: "1,3"
+    Name_2: FireMossScrapings, param1: 0.5, param2: "1,3"
+  }
+}
+
+## PlantMonster / Creepy 
+{ +Container Id: 30
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/body_open
+  SfxClose: UseActions/body_close
+
+  { Child Items
+    Name_0: Meat, param1: 0.8, param2: "2,3"
+    Name_1: AlienParts02, param1: 0.5, param2: "1,2"
+    Name_2: AlienTooth, param1: 0.8, param2: "1,2"
+    # Group_0: Sprouts, param1: 0.9
+  }
+}
+
+## Dino large (Triceratops, Pangolin) 
+{ +Container Id: 31
+  Count: "4,6"
+  Size: "8,1"
+  SfxOpen: UseActions/body_open
+  SfxClose: UseActions/body_close
+
+  { Child Items
+    Name_0: Meat, param1: 1, param2: "3,4"
+    Name_1: Egg, param1: 0.6, param2: "1,2"
+  }
+}
+
+
+## Dino baby (Parasaur Baby) 
+{ +Container Id: 32
+  Count: "1,2"
+  Size: "8,1"
+  SfxOpen: UseActions/body_open
+  SfxClose: UseActions/body_close
+
+  { Child Items
+    Name_0: Meat, param1: 0.6, param2: 1
+  }
+}
+
+/* Zirax OLD 
+{ +Container Id: 32
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/ZIPPERShort3(mono)
+  SfxClose: UseActions/ZIPPERShort3(mono)
+
+  { Child Items
+    Name_0: 50Caliber, param1: 0.8, param2: "5,15"
+    Name_1: 5.8mmBullet, param1: 0.5, param2: "5,10"
+    Name_2: CannedVegetables, param1: 0.3, param2: "1,2"
+    Name_3: MoneyCard, param1: 0.05, param2: "50,150"
+    Group_0: MedicalItems, param1: 0.2
+  }
+} */
+
+## AlienBug01 
+{ +Container Id: 33
+  Count: "1,2"
+  Size: "8,1"
+  SfxOpen: UseActions/body_open
+  SfxClose: UseActions/body_close
+
+  { Child Items
+    Name_0: Meat, param1: 0.6, param2: 1
+    Name_1: AlienParts02, param1: 0.5, param2: "2,3"
+    Name_2: AlienTooth, param1: 0.3, param2: "2,3"
+  }
+}
+
+# free
+
+## ESCAPE POD - new start  
+{ +Container Id: 35
+  Count: 1
+  Size: "8,4"
+  SfxOpen: UseActions/KEYUnlockingMetalDoor(mono)
+  SfxClose: UseActions/KEYUnlockingMetalDoor(mono)
+
+  { Child Items
+    Group_0: StartingEquipment_NewStart
+  }
+}
+
+## ContainerSpecialEvent - for special events 
+{ +Container Id: 36
+  Count: 1
+  Size: "2,1"
+  SfxOpen: UseActions/ContainerOpen
+  SfxClose: UseActions/ContainerClose
+
+  { Child Items
+    Name_0: ArmorHeavyEpic, param1: 1, param2: 1
+    Name_1: DrillEpic, param1: 1, param2: 1
+  }
+}
+
+# not used anymore as container?
+## SawAttachment 
+{ +Container Id: 37
+  Count: 1
+  Size: "8,3"
+  SfxOpen: UseActions/KEYUnlockingMetalDoor(mono)
+  SfxClose: UseActions/KEYUnlockingMetalDoor(mono)
+
+  { Child Items
+    Group_0: empty
+  }
+}
+
+/* AlienContainer: Common _old 
+{ +Container Id: 38
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/BarrelOpen
+  SfxClose: UseActions/BarrelClose
+
+  { Child Items
+    Group_0: OresBasic, param1: 0.5
+    Group_1: IngotsBasic, param1: 0.5
+    Group_2: ComponentsBasic, param1: 0.6
+    Group_3: CraftingMaterial, param1: 0.4
+    Group_4: EnergyItems, param1: 0.3
+    Group_5: BuildingBlocks, param1: 0.08
+    Group_6: DevicesCommon, param1: 0.05
+    Group_7: Tools, param1: 0.3
+    Group_8: WeaponsBasic, param1: 0.05
+    Group_9: WeaponsBasicKit, param1: 0.15
+    Group_10: Seeds, param1: 0.4
+    Group_11: MedicalItems, param1: 0.4
+  #  Group_12: FoodItems, param1: 0.1
+  }
+} */
+
+## AlienContainer: Common - grey_NEW 
+{ +Container Id: 38
+  Count: "5,6"
+  Size: "8,8" # "8,1"
+  SfxOpen: UseActions/BarrelOpen
+  SfxClose: UseActions/BarrelClose
+
+  { Child Items
+    Name_0: CobaltIngot, param1: 0.8, param2: "50,75"
+    Name_1: MagnesiumPowder, param1: 0.8, param2: "50,75"
+    Name_2: ForcefieldEmitterBlocks, param1: 0.7, param2: "2,3"
+    Name_3: PistolT2, param1: 0.5, param2: 1
+    Name_4: AssaultRifleT2, param1: 0.5, param2: 1
+    Name_5: Explosives, param1: 0.5, param2: "3,5"
+    Name_6: DrillAttachment, param1: 0.2, param2: 1
+    Name_7: EnergyCell, param1: 1, param2: "15,25"
+    Name_8: Shotgun, param1: 0.2, param2: 1
+    Name_9: NightVision, param1: 0.3, param2: 1
+    Name_10: CopperIngot, param1: 0.9, param2: "100,125"
+    Name_11: SiliconIngot, param1: 0.9, param2: "100,125"
+    Name_12: IronIngot, param1: 0.9, param2: "125,150"
+	
+    Group_0: MedicalItems, param1: 1
+    Group_1: WeaponsBasic, param1: 0.8
+    Group_2: WeaponsBasicKit, param1: 0.2
+  }
+}
+
+/* AlienContainer: Rare - yellow_OLD 
+{ +Container Id: 39
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/BarrelOpen
+  SfxClose: UseActions/BarrelClose
+
+  { Child Items
+    Group_0: DevicesRare, param1: 0.08
+    Group_1: DevicesVesselRare, param1: 0.08
+    Group_2: ComponentsRare, param1: 0.5
+  #  Group_3: FoodItems, param1: 0.1
+    Group_4: WeaponsRare, param1: 0.05
+    Group_5: WeaponsRareKit, param1: 0.15
+    Group_6: OresRare, param1: 0.5
+    Group_7: LootGoldIngot, param1: 0.1
+    Group_8: AutoMinerCore, param1: 0.08
+    Group_9: IngotsRare, param1: 0.4
+  }
+} */
+
+## AlienContainer: Rare - yellow_NEW 
+{ +Container Id: 39
+  Count: "4,5"
+  Size: "8,8" # "8,1"
+  SfxOpen: UseActions/BarrelOpen
+  SfxClose: UseActions/BarrelClose
+
+  { Child Items
+    Name_0: SathiumIngot, param1: 0.5, param2: "15,30"
+    Name_1: NeodymiumIngot, param1: 0.7, param2: "25,50"
+    Name_2: PulseRifleT2, param1: 0.4, param2: 1
+    Name_3: Shotgun2, param1: 0.4, param2: 1
+    Name_4: WeaponSV01, param1: 0.2, param2: 1
+    Name_5: EnergyCellLarge, param1: 1, param2: "15,25"
+    Name_6: MultiToolT2, param1: 0.6, param2: 1
+    Name_7: AutoMinerCore, param1: 0.04, param2: "1,2"
+    Name_8: ArmorMedium, param1: 0.05, param2: 1
+    Name_9: DrillAttachmentT2, param1: 0.04, param2: "1,2"
+    Name_10: TitanRods, param1: 0.7, param2: "75,100"
+    Name_11: FlameThrower, param1: 0.5, param2: 1
+	
+    Group_0: WeaponsBasic, param1: 0.08
+    Group_1: WeaponsBasicKit, param1: 0.08
+    Group_2: Medikits, param1: 1
+    Group_3: SuitBooster, param1: 0.7
+  }
+}
+
+/* AlienContainer: Very Rare - red_OLD
+{ +Container Id: 40
+  Count: "1,2"
+  Size: "8,1"
+  SfxOpen: UseActions/BarrelOpen
+  SfxClose: UseActions/BarrelClose
+
+  { Child Items
+    Group_0: DevicesVeryRare, param1: 0.1
+    Group_1: AutoMinerCore, param1: 0.1
+    Group_2: DevicesVesselVeryRare, param1: 0.1
+    Group_3: DevicesCVVeryRare, param1: 0.1
+    Group_4: WeaponsVeryRare, param1: 0.1
+    Group_5: LootGoldCoins, param1: 0.1
+  }
+} */
+
+## AlienContainer: Very Rare - red_NEW 
+{ +Container Id: 40
+  Count: "3,4"
+  Size: "8,8" # "8,1"
+  SfxOpen: UseActions/BarrelOpen
+  SfxClose: UseActions/BarrelClose
+
+  { Child Items
+    Name_0: ZascosiumIngot, param1: 0.8, param2: "10,15"
+    Name_1: ErestrumIngot, param1: 0.8, param2: "10,15"
+    Name_2: Minigun, param1: 0.5, param2: 1
+    Name_3: LaserRifle, param1: 0.5, param2: 1
+    Name_4: RepairBayBAT2, param1: 0.6, param2: 1
+    Name_5: FusionCell, param1: 0.9, param2: "15,25"
+    Name_6: TurretGVToolBlocks, param1: 0.4, param2: 1
+    Name_7: AutoMinerCore, param1: 0.09, param2: "2,3"
+    Name_8: ArmorHeavy, param1: 0.5, param2: 1
+    Name_9: PentaxidOre, param1: 0.8, param2: "30,60"
+    Name_10: MedicalStationBlocks, param1: 0.9, param2: 1
+    Name_11: AlienLargeBlocks, param1: 0.8, param2: "75,100"
+    Name_12: GoldIngot, param1: 0.2, param2: "10,15"
+    Name_13: WeaponSV03, param1: 0.5, param2: 1
+    Name_14: SmallOptronicBridge, param1: 0.09, param2: "2,3"
+    Name_15: SmallOptronicMatrix, param1: 0.07, param2: "2,3"
+    Name_16: LargeOptronicBridge, param1: 0.05, param2: "2,3"
+    Name_17: LargeOptronicMatrix, param1: 0.03, param2: "2,3"
+	
+    Group_0: WeaponsRare, param1: 0.1
+    Group_1: WeaponsRareKit, param1: 0.09
+  }
+}
+
+## AlienContainer: Ultra Rare - purple 
+{ +Container Id: 41
+  Count: "2,3"
+  Size: "8,8" # "4,1"
+  SfxOpen: UseActions/BarrelOpen
+  SfxClose: UseActions/BarrelClose
+
+  { Child Items
+    Name_0: AutoMinerCore, param1: 0.1, param2: "2,3"
+    Name_1: GoldIngot, param1: 0.2, param2: "20,50"
+    Name_2: SmallOptronicBridge, param1: 0.09, param2: "1,2"
+    Name_3: SmallOptronicMatrix, param1: 0.07, param2: "1,2"
+    Name_4: LargeOptronicBridge, param1: 0.05, param2: "1,2"
+    Name_5: LargeOptronicMatrix, param1: 0.03, param2: "1,2"
+    Name_6: PlasmaCannonAlien, param1: 0.01, param2: "1,1"
+	
+    Group_0: WeaponsEpic, param1: 0.5
+  }
+}
+
+## Space drones _OLD 
+{ +Container Id: 42
+  Count: "4,6"
+  Size: "8,2"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Name_0: EnergyCell, param1: 0.8, param2: "5,10"
+    Group_0: CompositeComponents, param1: 0.6
+    Group_1: ComponentsRare, param1: 0.6
+  }
+}
+
+## Escape Pod - Difficulty: Easy  
+{ +Container Id: 43
+  Count: 1
+  Size: "8,7"
+  SfxOpen: UseActions/KEYUnlockingMetalDoor(mono)
+  SfxClose: UseActions/KEYUnlockingMetalDoor(mono)
+
+  { Child Items
+    Group_0: EscapePodEasy
+  }
+}
+
+## Escape Pod - Difficulty: Medium  
+{ +Container Id: 44
+  Count: 1
+  Size: "8,4"
+  SfxOpen: UseActions/KEYUnlockingMetalDoor(mono)
+  SfxClose: UseActions/KEYUnlockingMetalDoor(mono)
+
+  { Child Items
+    Group_0: EscapePodMedium
+  }
+}
+
+## Escape Pod - Difficulty: Hard  
+{ +Container Id: 45
+  Count: 1
+  Size: "8,3"
+  SfxOpen: UseActions/KEYUnlockingMetalDoor(mono)
+  SfxClose: UseActions/KEYUnlockingMetalDoor(mono)
+
+  { Child Items
+    Group_0: EscapePodHard
+  }
+}
+
+## ArmoredGolem 
+{ +Container Id: 46
+  Count: "3,4"
+  Size: "8,2"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Group_0: EnergyItems, param1: 0.6
+    Group_1: ComponentsRare, param1: 0.8
+    Group_2: WeaponsBasicKit, param1: 0.4
+    Group_3: WeaponsRareKit, param1: 0.08
+  }
+}
+
+## SPECIAL FuelTankMSLargeT2 
+{ +Container Id: 47
+  Count: 1
+  Size: "8,8"
+  SfxOpen: UseActions/electric
+  SfxClose: UseActions/KEYUnlockingMetalDoor(mono)
+
+  { Child Items
+    Group_0: empty
+  }
+}
+
+## ContainerMS01, ContainerHarvest 
+{ +Container Id: 48
+  Count: "1,2"
+  Size: "8,8" # "8,4"
+  SfxOpen: UseActions/KEYUnlockingMetalDoor(mono)
+  SfxClose: UseActions/KEYUnlockingMetalDoor(mono)
+
+  { Child Items
+    Group_0: OresBasic, param1: 0.5
+ #   Group_1: IngotsBasic, param1: 0.1
+ #   Group_2: ComponentsBasic, param1: 0.1
+ #   Group_3: CraftingMaterial, param1: 0.1
+  #  Group_4: EnergyItems, param1: 0.1
+    Group_5: Seeds, param1: 0.3
+  #  Group_6: MedicalItems, param1: 0.1
+  #  Group_7: FoodItems, param1: 0.1
+  #  Group_8: BuildingBlocks, param1: 0.05
+  #  Group_9: DevicesCommon, param1: 0.02
+ #   Group_10: Tools, param1: 0.02
+ #   Group_11: WeaponsBasic, param1: 0.02
+ #   Group_12: WeaponsBasicKit, param1: 0.15
+  }
+}
+
+## ContainerUltraRare - human container - purple
+{ +Container Id: 49
+  Count: 1
+  Size: "8,8" # "1,1"
+  SfxOpen: UseActions/ContainerOpen
+  SfxClose: UseActions/ContainerClose
+
+  { Child Items
+    Name_0: SmallOptronicBridge, param1: 0.09, param2: 1
+    Name_1: SmallOptronicMatrix, param1: 0.07, param2: 1
+    Name_2: LargeOptronicBridge, param1: 0.05, param2: 1
+    Name_3: LargeOptronicMatrix, param1: 0.03, param2: 1
+    Name_4: AutoMinerCore, param1: 0.2, param2: "1,2"
+	
+    Group_1: WeaponsEpic, param1: 0.5
+  }
+}
+## Very Common NOT USED ATM 
+{ +Container Id: 50
+  Count: "1,2"
+  Size: "8,8" # "8,1"
+  SfxOpen: UseActions/ContainerOpen
+  SfxClose: UseActions/ContainerClose
+
+  { Child Items
+    Group_0: OresBasic, param1: 0.1
+    Group_1: IngotsBasic, param1: 0.1
+    Group_2: ComponentsBasic, param1: 0.1
+    Group_3: CraftingMaterial, param1: 0.1
+    Group_4: EnergyItems, param1: 0.1
+    Group_5: Seeds, param1: 0.1
+    Group_6: MedicalItems, param1: 0.1
+    Group_7: FoodItems, param1: 0.1
+    Group_8: BuildingBlocks, param1: 0.03
+    Group_9: DevicesCommon, param1: 0.01
+    Group_10: Tools, param1: 0.01
+    Group_11: WeaponsBasic, param1: 0.01
+    Group_12: WeaponsBasicKit, param1: 0.15
+  }
+}
+## LabTable1 LabTable2 LabTable3 
+{ +Container Id: 51
+  Count: 1
+  Size: "8,8" # "8,1"
+  SfxOpen: UseActions/ContainerOpenClose
+  SfxClose: UseActions/ContainerOpenClose
+
+  { Child Items
+    Name_0: AlienParts02, param1: 0.3, param2: "2,3"
+    Name_1: AlienThorn, param1: 0.3, param2: "2,3"
+    Name_2: AlienParts01, param1: 0.3, param2: "2,3"
+    Name_3: AlienParts03, param1: 0.3, param2: "2,3"
+    Name_4: AntibioticInjection, param1: 0.2, param2: 1
+    Name_5: AntibioticOintment, param1: 0.2, param2: 1
+    Name_6: AdrenalineShot, param1: 0.2, param2: 1
+    Name_7: RespiratorCharge, param1: 0.2, param2: "2,3"
+    Name_8: Medikit02, param1: 0.2, param2: "1,2"
+    Name_9: NightVision, param1: 0.2, param2: "2,3"
+    Name_10: ArmorBoost, param1: 0.01, param2: 1
+    Name_11: JetpackBoost, param1: 0.01, param2: 1
+    Name_12: MultiBoost, param1: 0.01, param2: 1
+    Name_13: OxygenBoost, param1: 0.01, param2: 1
+    Name_14: InsulationBoost, param1: 0.01, param2: 1
+    Name_15: MobilityBoost, param1: 0.01, param2: 1
+    Name_16: RadiationBoost, param1: 0.01, param2: 1
+    Name_17: EVABoost, param1: 0.025, param2: 1
+
+    Group_0: WeaponsBasicKit, param1: 0.2
+  }
+}
+## Locker LockerWShelves 
+{ +Container Id: 52
+  Count: "1"
+  Size: "8,8" # "8,1"
+  SfxOpen: UseActions/BarrelOpen
+  SfxClose: UseActions/BarrelClose
+
+  { Child Items
+    Name_0: StomachPills, param1: 0.3, param2: "1,2"
+    Name_1: EnergyPills, param1: 0.3, param2: "1,2"
+    Name_2: EmergencyRations, param1: 0.3, param2: 1
+    Name_3: HotBeverage, param1: 0.3, param2: 1
+    Name_4: BioFuel, param1: 0.2, param2: 1
+    Name_5: RespiratorCharge, param1: 0.2, param2: "1,2"
+    Name_6: DrillCharge, param1: 0.2, param2: 1
+    Name_7: MultiCharge, param1: 0.2, param2: 1
+    # Name_8: Drill, param1: 0.1, param2: 1
+    Name_9: Chainsaw, param1: 0.1, param2: 1
+    Name_10: Flashlight, param1: 0.1, param2: 1
+    Name_11: MultiTool, param1: 0.1, param2: 1
+    Name_12: ShotgunShells, param1: 0.3, param2: "5,10"
+    Name_13: 5.8mmBullet, param1: 0.3, param2: "8,10"
+    Name_14: 12.7mmBullet, param1: 0.2, param2: "2,4"
+    Name_15: 8.3mmBullet, param1: 0.2, param2: "10,15"
+    Name_16: 50Caliber, param1: 0.3, param2: "5,10"
+    Name_17: ArmorMedium, param1: 0.1, param2: 1
+    Name_18: FlameThrowerCanister, param1: 0.3, param2: "2,3"
+    Group_0: WeaponsBasicKit, param1: 0.02
+  }
+}
+## Operation Table OperationTableWDrawers 
+{ +Container Id: 53
+  Count: "1,2"
+  Size: "8,8" # "8,1"
+  SfxOpen: UseActions/ContainerOpenClose
+  SfxClose: UseActions/ContainerOpenClose
+
+  { Child Items
+    Name_0: AntibioticInjection, param1: 0.3, param2: 1
+    Name_1: AntibioticPills, param1: 0.3, param2: 1
+    Name_2: AntibioticOintment, param1: 0.3, param2: 1
+    Name_3: AdrenalineShot, param1: 0.3, param2: 1
+    Name_4: Medikit02, param1: 0.3, param2: 1
+    Name_5: Bandages, param1: 0.4, param2: "3,4"
+    Name_6: RespiratorCharge, param1: 0.3, param2: "1,2"
+  }
+}
+## Box Medium Props6BoxMedium1 
+{ +Container Id: 54
+  Count: "1,2"
+  Size: "8,8" # "8,1"
+  SfxOpen: UseActions/ContainerOpenClose
+  SfxClose: UseActions/ContainerOpenClose
+
+  { Child Items
+    Name_0: DurianRoot, param1: 0.4, param2: "1,2"
+    Name_1: TomatoStage1, param1: 0.4, param2: "1,2"
+    Name_2: WheatStage1, param1: 0.4, param2: "1,2"
+    Name_3: CornStage1, param1: 0.4, param2: "1,2"
+    Name_4: PumpkinStage1, param1: 0.4, param2: "1,2"
+    Name_5: PearthingStage1, param1: 0.4, param2: "1,2"
+    Name_6: InsanityPepperStage1, param1: 0.4, param2: "1,2"
+    Name_7: DesertPlant20Stage1, param1: 0.4, param2: "1,2"
+    Name_8: AlienPlantTube2Stage1, param1: 0.4, param2: "1,2"
+    Name_9: ElderberryStage1, param1: 0.4, param2: "1,2"
+    Name_10: AlienPalmTreeStage1, param1: 0.4, param2: "1,2"
+    Name_11: AlienplantWormStage1, param1: 0.4, param2: "1,2"
+    Name_12: BulbShroomYoungStage1, param1: 0.4, param2: "1,2"
+  }
+}
+## Box Large 3 Freezer 
+{ +Container Id: 55
+  Count: "1,2"
+  Size: "8,8" # "8,1"
+  SfxOpen: UseActions/ContainerOpenClose
+  SfxClose: UseActions/ContainerOpenClose
+
+  { Child Items
+    Name_0: Vegetables, param1: 0.3, param2: "1,2"
+    Name_1: Meat, param1: 0.3, param2: "1,2"
+    Name_2: Spice, param1: 0.3, param2: "1,2"
+    Name_3: AlienThorn, param1: 0.3, param2: "1,2"
+    Name_4: Egg, param1: 0.3, param2: "1,2"
+    Name_5: NaturalStimulant, param1: 0.3, param2: "1,2"
+    Name_6: PlantProtein, param1: 0.3, param2: "1,2"
+    Name_7: Grain, param1: 0.3, param2: "1,2"
+    Name_8: Fruit, param1: 0.3, param2: "1,2"
+
+  }
+}
+## Box Large 1 and 2 Props6BoxLarge2 Props6BoxLarge1 
+{ +Container Id: 56
+  Count: "1,2"
+  Size: "8,8" # "8,1"
+  SfxOpen: UseActions/BarrelOpen
+  SfxClose: UseActions/BarrelClose
+
+  { Child Items
+    Name_0: NutrientSolution, param1: 0.4, param2: 1
+    Name_1: AlienParts01, param1: 0.2, param2: "1,2"
+    Name_2: AlienParts02, param1: 0.2, param2: "1,2"
+    Name_3: AlienParts03, param1: 0.2, param2: "1,2"
+    Name_4: AlienThorn, param1: 0.2, param2: "1,2"
+    Name_5: AlienTooth, param1: 0.2, param2: "1,2"
+    Name_6: PhoenixFernFonds, param1: 0.2, param2: "1,2"
+    Name_7: ConfettiMossScrapings, param1: 0.3, param2: "1,2"
+    Name_8: TrumpetGreens, param1: 0.3, param2: "1,2"
+    Name_9: FireMossScrapings, param1: 0.3, param2: "1,2"
+    Name_10: MushroomBrown, param1: 0.3, param2: "1,2"
+    Name_11: AlienSpikeLemon, param1: 0.3, param2: "1,2"
+    Name_12: HerbalLeaves, param1: 0.3, param2: "1,2"
+    Name_14: MushroomSpiky, param1: 0.3, param2: "1,2"
+    Name_15: Varonroot, param1: 0.3, param2: "1,2"
+    Name_16: Vegetables, param1: 0.3, param2: "1,2"
+    Name_17: Fiber, param1: 0.3, param2: "1,2"
+    Name_18: Spice, param1: 0.3, param2: "1,2"
+
+  }
+}
+## Repository 1 Level4Prop2 
+{ +Container Id: 57
+  Count: 1
+  Size: "8,8" # "8,1"
+  SfxOpen: UseActions/BarrelOpen
+  SfxClose: UseActions/BarrelClose
+
+  { Child Items
+    Name_0: Medikit02, param1: 0.3, param2: 1
+    Name_1: NutrientSolution, param1: 0.2, param2: 1
+    Name_2: EmergencyRations, param1: 0.3, param2: 1
+    Name_3: EnergyCell, param1: 0.2, param2: "1,2"
+    Name_4: EnergyCellLarge, param1: 0.2, param2: "1,2"
+    Name_5: BioFuel, param1: 0.2, param2: 1
+    Name_6: ShotgunShells, param1: 0.3, param2: "5,10"
+    Name_7: 5.8mmBullet, param1: 0.3, param2: "8,10"
+    Name_8: 12.7mmBullet, param1: 0.2, param2: "2,4"
+    Name_9: 8.3mmBullet, param1: 0.2, param2: "10,15"
+    Name_10: DrillCharge, param1: 0.2, param2: 1
+    Name_11: NightVision, param1: 0.05, param2: 1
+    Name_12: InsulationBoost, param1: 0.01, param2: 1
+    Name_13: MobilityBoost, param1: 0.01, param2: 1
+    Name_14: ArmorBoost, param1: 0.01, param2: 1
+    Name_15: JetpackBoost, param1: 0.01, param2: 1
+    Name_16: MultiBoost, param1: 0.01, param2: 1
+    Name_17: OxygenBoost, param1: 0.01, param2: 1
+    Name_18: RadiationBoost, param1: 0.01, param2: 1
+    Name_19: EVABoost, param1: 0.0025, param2: 1
+    Name_20: FlameThrowerCanister, param1: 0.3, param2: "2,3"
+	
+    Group_0: WeaponsBasicKit, param1: 0.02
+  }
+}
+## Repository 2 Level4Prop3 
+{ +Container Id: 58
+  Count: "1"
+  Size: "8,8" # "8,1"
+  SfxOpen: UseActions/BarrelOpen
+  SfxClose: UseActions/BarrelClose
+
+  { Child Items
+    Name_0: Medikit02, param1: 0.3, param2: 1
+    Name_1: NutrientSolution, param1: 0.2, param2: 1
+    Name_2: EmergencyRations, param1: 0.3, param2: 1
+    Name_3: EnergyCell, param1: 0.2, param2: "1,2"
+    Name_4: EnergyCellLarge, param1: 0.2, param2: "1,2"
+    Name_5: BioFuel, param1: 0.2, param2: 1
+    Name_6: ShotgunShells, param1: 0.3, param2: "5,10"
+    Name_7: 5.8mmBullet, param1: 0.3, param2: "8,10"
+    Name_8: 12.7mmBullet, param1: 0.2, param2: "2,4"
+    Name_9: 8.3mmBullet, param1: 0.2, param2: "10,15"
+    Name_10: DrillCharge, param1: 0.2, param2: 1
+    Name_11: NightVision, param1: 0.05, param2: 1
+    Name_12: InsulationBoost, param1: 0.01, param2: 1
+    Name_13: MobilityBoost, param1: 0.01, param2: 1
+    Name_14: ArmorBoost, param1: 0.01, param2: 1
+    Name_15: JetpackBoost, param1: 0.01, param2: 1
+    Name_16: MultiBoost, param1: 0.01, param2: 1
+    Name_17: OxygenBoost, param1: 0.01, param2: 1
+    Name_18: RadiationBoost, param1: 0.01, param2: 1
+    Name_19: EVABoost, param1: 0.0025, param2: 1
+    Name_20: FlameThrowerCanister, param1: 0.1, param2: "2,3"
+	
+    Group_0: WeaponsBasicKit, param1: 0.02
+  }
+}
+## Cryo Chamber Level5FreezerOpened 
+{ +Container Id: 59
+  Count: 1
+  Size: "8,8" # 1
+  SfxOpen: UseActions/ContainerOpenClose
+  SfxClose: UseActions/ContainerOpenClose
+
+  { Child Items
+    Name_0: Medikit02, param1: 0.09, param2: 1
+    Name_1: StomachPills, param1: 0.3, param2: 1
+    Name_2: EmergencyRations, param1: 0.3, param2: 1
+    Name_3: AdrenalineShot, param1: 0.3, param2: "1,2"
+  }
+}
+## Tank1 Tank2 
+{ +Container Id: 60
+  Count: 1
+  Size: "8,8" # 1
+  SfxOpen: UseActions/ContainerOpenClose
+  SfxClose: UseActions/ContainerOpenClose
+
+  { Child Items
+    Name_0: WaterJug, param1: 0.2, param2: "1,2"
+    Name_1: WaterBottle, param1: 0.4, param2: "2,4"
+    Name_2: NutrientSolution, param1: 0.3, param2: "2,3"
+    Name_3: RespiratorCharge, param1: 0.4, param2: "2,4"
+    Name_4: OxygenBottleLarge, param1: 0.3, param2: "2,3"
+    Name_5: HydrogenBottle, param1: 0.4, param2: "2,4"
+    Name_6: BioFuel, param1: 0.2, param2: "1,2"
+  }
+}
+## Power Storage ScifiContainerEnergy 
+{ +Container Id: 61
+  Count: 1
+  Size: "8,8" # "8,1"
+  SfxOpen: UseActions/ContainerOpenClose
+  SfxClose: UseActions/ContainerOpenClose
+
+  { Child Items
+    Name_0: EnergyCell, param1: 0.5, param2: "3,5"
+    Name_1: EnergyCellLarge, param1: 0.3, param2: "2,3"
+    Name_2: FusionCell, param1: 0.01, param2: 1
+    Name_3: PentaxidCrystal, param1: 0.02, param2: "1,2"
+  }
+}
+## Bathroom Vanity BathroomCounter 
+{ +Container Id: 62
+  Count: "1,2"
+  Size: "8,8" # "8,1"
+  SfxOpen: UseActions/BarrelOpen
+  SfxClose: UseActions/BarrelClose
+
+  { Child Items
+    Name_0: Medikit03, param1: 0.09, param2: "1"
+    Name_1: Bandages, param1: 0.3, param2: "3,4"
+    Name_2: StomachPills, param1: 0.3, param2: 1
+    Name_3: AntibioticInjection, param1: 0.05, param2: 1
+    Name_4: AntibioticPills, param1: 0.3, param2: 1
+  }
+}
+## Kitchen Counter KitchenCounter 
+{ +Container Id: 63
+  Count: "1,2"
+  Size: "8,8"  # "8,1"  
+  SfxOpen: UseActions/BarrelOpen
+  SfxClose: UseActions/BarrelClose
+
+  { Child Items
+    Name_1: Medikit02, param1: 0.09, param2: "1,2"
+    Name_2: Bandages, param1: 0.2, param2: "3,4"
+    Name_3: StomachPills, param1: 0.2, param2: 1
+    Name_4: AdrenalineShot, param1: 0.2, param2: 1
+    Name_5: EnergyPills, param1: 0.2, param2: 1
+    Name_6: Milk, param1: 0.2, param2: 1
+    Name_7: CannedVegetables, param1: 0.1, param2: 1
+    Name_8: CannedMeat, param1: 0.1, param2: 1
+  }
+}
+## Closet ScifiStorage 
+{ +Container Id: 64
+  Count: 1
+  Size: "8,8" # "8,1"
+  SfxOpen: UseActions/BarrelOpen
+  SfxClose: UseActions/BarrelClose
+
+  { Child Items
+    Name_0: LaserRifle, param1: 0.3, param2: 1
+    Name_1: Minigun, param1: 0.3, param2: 1
+    Name_2: PulseRifle, param1: 0.3, param2: 1
+    Name_3: Sniper2, param1: 0.3, param2: 1
+    Name_4: Shotgun2, param1: 0.3, param2: 1
+    Name_5: DrillT2, param1: 0.3, param2: 1
+    Name_6: MultiToolT2, param1: 0.3, param2: 1
+    Name_7: EmergencyRations, param1: 0.5, param2: "1,2"
+    Name_8: Medikit02, param1: 0.5, param2: 1
+    Name_9: NightVision, param1: 0.1, param2: 1
+    Name_10: ArmorMedium, param1: 0.01, param2: 1
+    Name_11: ArmorHeavy, param1: 0.05, param2: 1
+    Name_12: ArmorBoost, param1: 0.01, param2: 1
+    Name_13: JetpackBoost, param1: 0.01, param2: 1
+    Name_14: MultiBoost, param1: 0.01, param2: 1
+    Name_15: OxygenBoost, param1: 0.01, param2: 1
+    Name_16: InsulationBoost, param1: 0.01, param2: 1
+    Name_17: MobilityBoost, param1: 0.01, param2: 1
+    Name_18: RadiationBoost, param1: 0.01, param2: 1
+    Name_19: EVABoost, param1: 0.0025, param2: 1
+    Name_20: PulseRifleT2, param1: 0.015, param2: 1
+    Name_21: FlameThrower, param1: 0.3, param2: 1
+	
+    Group_0: WeaponsRareKit, param1: 0.02
+  }
+}
+## Nightstand ScifiNightstand 
+{ +Container Id: 65
+  Count: 1
+  Size: "8,8" # "8,1"
+  SfxOpen: UseActions/ContainerOpenClose
+  SfxClose: UseActions/ContainerOpenClose
+
+  { Child Items
+    Name_0: PistolT2, param1: 0.3, param2: 1
+    Name_1: LaserPistol, param1: 0.3, param2: 1
+    Name_2: EmergencyRations, param1: 0.4, param2: 1
+    Name_3: GoldCoins, param1: 0.2, param2: 1
+    Name_4: ArmorBoost, param1: 0.01, param2: 1
+    Name_5: JetpackBoost, param1: 0.01, param2: 1
+    Name_6: MultiBoost, param1: 0.01, param2: 1
+    Name_7: OxygenBoost, param1: 0.01, param2: 1
+    Name_8: InsulationBoost, param1: 0.01, param2: 1
+    Name_9: MobilityBoost, param1: 0.01, param2: 1
+    Name_10: RadiationBoost, param1: 0.01, param2: 1
+    Name_11: EVABoost, param1: 0.0025, param2: 1
+    Name_12: NightVision, param1: 0.1, param2: 1
+	
+    Group_0: WeaponsBasicKit, param1: 0.02
+
+  }
+}
+## Cargo Box ContainerMS01 
+{ +Container Id: 66
+  Count: "1,2"
+  Size: "8,8" # "8,4"
+  SfxOpen: UseActions/ContainerOpen
+  SfxClose: UseActions/ContainerClose
+
+  { Child Items
+    Name_0: IronIngot, param1: 0.5, param2: "1,3"
+    Name_1: CobaltIngot, param1: 0.5, param2: "1,3"
+    Name_2: CopperIngot, param1: 0.5, param2: "1,3"
+    Name_3: SiliconIngot, param1: 0.5, param2: "1,3"
+    Name_4: NeodymiumIngot, param1: 0.2, param2: "1,2"
+    Name_5: MagnesiumPowder, param1: 0.5, param2: "1,3"
+    Name_6: PromethiumPellets, param1: 0.2, param2: "1,2"
+    Name_7: SathiumIngot, param1: 0.2, param2: "1,2"
+    Name_8: PlasticMaterial, param1: 0.5, param2: "1,3"
+    Name_9: ErestrumIngot, param1: 0.2, param2: "1,2"
+    Name_10: ZascosiumIngot, param1: 0.1, param2: 1
+    Name_11: GoldIngot, param1: 0.1, param2: 1
+    Name_12: PentaxidCrystal, param1: 0.1, param2: 1
+    Name_13: BioFuel, param1: 0.3, param2: 1
+    Name_14: MultiCharge, param1: 0.3, param2: 1
+    Name_15: DrillCharge, param1: 0.3, param2: 1
+    Name_16: Cement, param1: 0.5, param2: "2,5"
+    Name_17: WoodPlanks, param1: 0.5, param2: "2,5"
+    Name_18: RockDust, param1: 0.5, param2: "2,5"
+    Name_19: TitanRods, param1: 0.4, param2: "1,2"
+    Name_20: PlatinBar, param1: 0.01, param2: "1,2"
+    Name_21: AluminiumPowder, param1: 0.2, param2: "1,2"
+
+  }
+}
+## Cargo Box 1 ScifiContainer2 
+{ +Container Id: 67
+  Count: "1,2"
+  Size: "8,8" # "8,4"
+  SfxOpen: UseActions/ContainerOpen
+  SfxClose: UseActions/ContainerClose
+
+  { Child Items
+    Name_0: SteelPlate, param1: 0.5, param2: "5,7"
+    Name_1: Electronics, param1: 0.5, param2: "4,5"
+    Name_2: OpticalFiber, param1: 0.5, param2: "4,5"
+    Name_3: EnergyMatrix, param1: 0.4, param2: "4,5"
+    Name_4: GlassPlate, param1: 0.4, param2: "4,5"
+    Name_5: MechanicalComponents, param1: 0.4, param2: "4,5"
+    Name_6: Motor, param1: 0.4, param2: "2,3"
+    Name_7: Nanotubes, param1: 0.4, param2: "4,5"
+    Name_8: Computer, param1: 0.3, param2: "2,3"
+    Name_9: CapacitorComponent, param1: 0.3, param2: "2,3"
+    Name_10: SteelPlateArmored, param1: 0.5, param2: "5,7"
+    Name_11: CobaltAlloy, param1: 0.1, param2: "1,2"
+    Name_12: Oscillator, param1: 0.1, param2: 1
+    Name_13: FluxCoil, param1: 0.1, param2: 1
+    Name_14: PowerCoil, param1: 0.1, param2: 1
+    Name_15: MultiTool, param1: 0.3, param2: 1
+    Name_16: MultiCharge, param1: 0.3, param2: 1
+    # Name_17: MetalPieces, param1: 0.5, param2: "5,7"
+	
+    Group_0: WeaponsBasicKit, param1: 0.02
+    Group_1: WeaponsRareKit, param1: 0.01
+  }
+}
+## Cargo Box 2 und 3 ScifiContainer1 ScifiContainerPower 
+{ +Container Id: 68
+  Count: "2,3"
+  Size: "8,8"
+  SfxOpen: UseActions/ContainerOpen
+  SfxClose: UseActions/ContainerClose
+
+  { Child Items    
+    Name_0: IronOre, param1: 0.5, param2: "3,5"
+    Name_1: CobaltOre, param1: 0.5, param2: "3,5"
+    Name_2: CopperOre, param1: 0.5, param2: "3,5"
+    Name_3: SiliconOre, param1: 0.5, param2: "3,5"
+    Name_4: NeodymiumOre, param1: 0.2, param2: "1,3"
+    Name_5: MagnesiumOre, param1: 0.5, param2: "3,5"
+    Name_6: PromethiumOre, param1: 0.2, param2: "2,3"
+    Name_7: ErestrumOre, param1: 0.1, param2: "1,2"
+    Name_8: ZascosiumOre, param1: 0.1, param2: "1,2"
+    Name_9: PentaxidOre, param1: 0.1, param2: "1,3"
+    Name_10: SathiumOre, param1: 0.1, param2: "1,3"
+    Name_11: GoldOre, param1: 0.1, param2: 1
+    Name_12: BioFuel, param1: 0.3, param2: 1
+    Name_13: MultiCharge, param1: 0.3, param2: 1
+    Name_14: DrillCharge, param1: 0.3, param2: 1
+    Name_15: Cement, param1: 0.5, param2: "2,5"
+    Name_16: WoodPlanks, param1: 0.5, param2: "2,5"
+    Name_17: RockDust, param1: 0.5, param2: "2,5"
+    Name_18: MultiTool, param1: 0.3, param2: 1
+    Name_19: MultiCharge, param1: 0.3, param2: 1
+    Name_20: TitanOre, param1: 0.4, param2: "1,3"
+  }
+}
+## Ammo Box Small ContainerAmmoSmall 
+{ +Container Id: 69
+  Count: "1,2"
+  Size: "8,8"  
+  SfxOpen: UseActions/ContainerOpen
+  SfxClose: UseActions/ContainerClose
+
+  { Child Items    
+    Name_0: ShotgunShells, param1: 0.5, param2: "5,8"
+    Name_1: 50Caliber, param1: 0.5, param2: "5,10"
+    Name_2: 8.3mmBullet, param1: 0.5, param2: "20,25"
+    Name_3: 5.8mmBullet, param1: 0.5, param2: "5,10"
+    Name_4: 12.7mmBullet, param1: 0.5, param2: "1,3"
+    Name_5: BioFuel, param1: 0.5, param2: 1
+    Name_6: DrillCharge, param1: 0.5, param2: 1
+    Name_7: MultiCharge, param1: 0.5, param2: 1
+    Name_8: PulseLaserChargePistol, param1: 0.5, param2: "5,8"
+    Name_9: PulseLaserChargeRifle, param1: 0.1, param2: "5,10"
+    Name_10: SlowRocket, param1: 0.2, param2: "1,2"
+    Name_11: SlowRocketHoming, param1: 0.1, param2: "1,2"
+    Name_12: SciFiCannonPlasmaCharge, param1: 0.05, param2: "1,2"
+    Name_13: Explosives, param1: 0.5, param2: 1
+    Name_14: FlameThrowerCanister, param1: 0.5, param2: 1
+  }
+}
+## Ammo Box Large ContainerAmmoLarge 
+{ +Container Id: 70
+  Count: "1,2"
+  Size: "8,8"  
+  SfxOpen: UseActions/ContainerOpen
+  SfxClose: UseActions/ContainerClose
+
+  { Child Items    
+    Name_0: 30mmBullet, param1: 0.5, param2: "100,200"
+    Name_1: 15mmBullet, param1: 0.5, param2: "200,300"
+    Name_2: FastRocketHoming, param1: 0.2, param2: "3,4"
+    Name_3: FastRocketMS, param1: 0.2, param2: "3,5"
+    Name_4: FastRocketBA, param1: 0.2, param2: "3,5"
+    Name_5: LargeRocket, param1: 0.1, param2: "2,3"
+    Name_6: LargeRocketMS, param1: 0.1, param2: "2,3"
+    Name_7: PlasmaCannonChargeSS, param1: 0.05, param2: "20,30"
+    Name_8: TurretMSPlasmaCharge, param1: 0.05, param2: "5,8"
+    Name_9: TurretBAPlasmaCharge, param1: 0.05, param2: "5,8"
+    Name_10: TurretGVPlasmaCharge, param1: 0.05, param2: "20,30"
+    Name_11: PulseLaserChargeSS, param1: 0.1, param2: "75,100"
+    Name_12: PulseLaserChargeMS, param1: 0.1, param2: "75,100"
+    Name_13: PulseLaserChargeBA, param1: 0.1, param2: "75,100"
+    Name_14: RailgunBullet, param1: 0.1, param2: "5,8"
+  }
+}
+## Fridge T1 FridgeMS 
+{ +Container Id: 71
+  Count: 1
+  Size: "8,8" # "8,2"
+  SfxOpen: UseActions/ContainerOpenClose
+  SfxClose: UseActions/ContainerOpenClose
+
+  { Child Items    
+    Name_0: Stew, param1: 0.2, param2: 1
+    Name_1: Milk, param1: 0.5, param2: 1
+ #   Name_2: CannedVegetables, param1: 0.3, param2: 1
+ #   Name_3: CannedMeat, param1: 0.2, param2: 1
+    Name_4: Salami, param1: 0.4, param2: 1
+    Name_5: Steak, param1: 0.4, param2: 1
+ #   Name_6: Bread, param1: 0.4, param2: 1
+ #   Name_7: Ribs, param1: 0.4, param2: 1
+    Name_8: VeggieBurger, param1: 0.3, param2: 1
+    Name_9: Cheese, param1: 0.4, param2: 1
+    Name_10: FriedVegetables, param1: 0.4, param2: 1
+    Name_11: MeatBurger, param1: 0.3, param2: 1
+    Name_12: Ham, param1: 0.4, param2: 1
+    Name_13: Pizza, param1: 0.2, param2: 1
+    Name_14: Sandwich, param1: 0.2, param2: 1
+    Name_15: Ratatouille, param1: 0.3, param2: 1
+    Name_16: Waffles, param1: 0.4, param2: 1
+  #  Name_17: PumpkinCookie, param1: 0.4, param2: 1
+    Name_18: PowerBar, param1: 0.4, param2: 1
+  #  Name_19: FriedVegetables, param1: 0.4, param2: 1
+    Name_20: Cereals, param1: 0.5, param2: 1
+    Name_21: FruitPie, param1: 0.4, param2: 1
+  }
+}
+## Fridge T2 FridgeMS02 
+{ +Container Id: 72
+  Count: "1,2"
+  Size: "8,8" # "8,4"
+  SfxOpen: UseActions/ContainerOpenClose
+  SfxClose: UseActions/ContainerOpenClose
+
+  { Child Items    
+    Name_0: Stew, param1: 0.2, param2: 1
+    Name_1: Milk, param1: 0.5, param2: 1
+  #  Name_2: CannedVegetables, param1: 0.3, param2: 1
+  #  Name_3: CannedMeat, param1: 0.2, param2: 1
+    Name_4: Salami, param1: 0.4, param2: 1
+    Name_5: Steak, param1: 0.4, param2: 1
+  #  Name_6: Bread, param1: 0.4, param2: 1
+  #  Name_7: Ribs, param1: 0.4, param2: 1
+    Name_8: VeggieBurger, param1: 0.3, param2: 1
+    Name_9: Cheese, param1: 0.4, param2: 1
+    Name_10: FriedVegetables, param1: 0.4, param2: 1
+    Name_11: MeatBurger, param1: 0.3, param2: 1
+    Name_12: Ham, param1: 0.4, param2: 1
+    Name_13: Pizza, param1: 0.2, param2: 1
+    Name_14: Sandwich, param1: 0.2, param2: 1
+    Name_15: Ratatouille, param1: 0.3, param2: 1
+    Name_16: Waffles, param1: 0.4, param2: 1
+ #   Name_17: PumpkinCookie, param1: 0.4, param2: 1
+    Name_18: PowerBar, param1: 0.4, param2: 1
+  #  Name_19: FriedVegetables, param1: 0.4, param2: 1
+    Name_20: Cereals, param1: 0.5, param2: 1
+    Name_21: FruitPie, param1: 0.4, param2: 1
+  }
+}
+
+## Trader NPC 
+{ +Container Id: 73
+  Count: 1
+  Size: "8,1"
+  SfxOpen: UseActions/ZIPPERShort3(mono)
+  SfxClose: UseActions/ZIPPERShort3(mono)
+
+  { Child Items
+    Name_0: MoneyCard, param1: 0.5, param2: "100,200"
+    Name_1: PentaxidOre, param1: 0.1, param2: "1,2"
+    Name_2: GoldCoins, param1: 0.2, param2: "1,2"
+    Name_3: PulseLaserChargePistol, param1: 0.7, param2: "10,20"
+  }
+}
+
+## Assault Cyborg 
+{ +Container Id: 74
+  Count: "1,2"
+  Size: "8,1"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Name_0: PulseLaserChargeRifle, param1: 0.9, param2: "50,75"
+    Name_1: MoneyCard, param1: 0.3, param2: "5,10"
+    Group_0: ComponentsBasic, param1: 0.6
+    Group_1: ComponentsRare, param1: 0.1
+  }
+}
+
+## Civilian 
+{ +Container Id: 75
+  Count: 1
+  Size: "8,1"
+  SfxOpen: UseActions/ZIPPERShort3(mono)
+  SfxClose: UseActions/ZIPPERShort3(mono)
+
+  { Child Items
+    Name_0: MoneyCard, param1: 0.5, param2: "5,10"
+    Name_1: PulseLaserChargePistol, param1: 0.7, param2: "5,10"
+  }
+}
+## ContainerController and large containers
+{ +Container Id: 76
+  Count: "1,2"
+  Size: "8,16"  
+  SfxOpen: UseActions/ContainerOpen
+  SfxClose: UseActions/ContainerClose
+
+  { Child Items
+    Name_0: SteelPlate, param1: 0.5, param2: "5,7"
+    Name_1: Electronics, param1: 0.5, param2: "4,5"
+    Name_2: OpticalFiber, param1: 0.5, param2: "4,5"
+    Name_3: EnergyMatrix, param1: 0.4, param2: "4,5"
+    Name_4: GlassPlate, param1: 0.4, param2: "4,5"
+    Name_5: MechanicalComponents, param1: 0.4, param2: "4,5"
+    Name_6: Motor, param1: 0.4, param2: "2,3"
+    Name_7: Nanotubes, param1: 0.4, param2: "4,5"
+    Name_8: Computer, param1: 0.3, param2: "2,3"
+    Name_9: CapacitorComponent, param1: 0.3, param2: "2,3"
+    Name_10: SteelPlateArmored, param1: 0.5, param2: "5,7"
+    Name_11: CobaltAlloy, param1: 0.1, param2: "1,2"
+    Name_12: Oscillator, param1: 0.1, param2: 1
+    Name_13: FluxCoil, param1: 0.1, param2: 1
+    Name_14: PowerCoil, param1: 0.1, param2: 1
+    Name_15: MultiTool, param1: 0.3, param2: 1
+    Name_16: MultiCharge, param1: 0.3, param2: 1
+    # Name_17: MetalPieces, param1: 0.5, param2: "5,7"
+	
+    Group_0: WeaponsBasicKit, param1: 0.02
+    Group_1: WeaponsRareKit, param1: 0.01
+
+  }
+}
+
+
+# ==== Alien Troopers LOOTBALANCING v76 (ID 100-149) ===== 
+
+## Zirax Male Minigun + Sniper 
+{ +Container Id: 100
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/ZIPPERShort3(mono)
+  SfxClose: UseActions/ZIPPERShort3(mono)
+
+  { Child Items
+    Name_0: 5.8mmBullet, param1: 0.9, param2: "150,250"
+    Name_1: HeavyWeaponKit, param1: 0.08, param2: "1"
+    Name_2: MoneyCard, param1: 0.2, param2: "50,100"
+    Group_0: MedicalItems, param1: 0.4
+    Group_1: TroopersFood, param1: 0.6
+  }
+}
+
+## Zirax Male Laser 
+{ +Container Id: 101
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/ZIPPERShort3(mono)
+  SfxClose: UseActions/ZIPPERShort3(mono)
+
+  { Child Items
+    Name_0: PulseLaserChargeRifle, param1: 0.9, param2: "12,25"
+    Name_1: LaserKit, param1: 0.08, param2: "1"
+    Name_2: MoneyCard, param1: 0.2, param2: "50,100"
+    Group_0: MedicalItems, param1: 0.4
+    Group_1: TroopersFood, param1: 0.6
+  }
+}
+
+## Zirax Male Shotgun 
+{ +Container Id: 102
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/ZIPPERShort3(mono)
+  SfxClose: UseActions/ZIPPERShort3(mono)
+
+  { Child Items
+    Name_0: ShotgunShells, param1: 0.9, param2: "4,8"
+    Name_1: ShotgunKit, param1: 0.08, param2: "1"
+    Name_2: MoneyCard, param1: 0.2, param2: "50,100"
+    Group_0: MedicalItems, param1: 0.4
+    Group_1: TroopersFood, param1: 0.6
+  }
+}
+
+## Zirax Male Rocket 
+{ +Container Id: 103
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/ZIPPERShort3(mono)
+  SfxClose: UseActions/ZIPPERShort3(mono)
+
+  { Child Items
+ #   Name_0: 50Caliber, param1: 0.7, param2: "20,40"
+    Name_0: SlowRocket, param1: 0.9, param2: "1,3"
+    Name_1: HeavyWeaponKit, param1: 0.08, param2: "1"
+    Name_2: MoneyCard, param1: 0.2, param2: "50,100"
+    Group_0: MedicalItems, param1: 0.4
+    Group_1: TroopersFood, param1: 0.6
+  }
+}
+## Zirax Male Commander
+{ +Container Id: 104
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/ZIPPERShort3(mono)
+  SfxClose: UseActions/ZIPPERShort3(mono)
+
+  { Child Items
+    Name_0: 5.8mmBullet, param1: 0.9, param2: "150,250"
+    Name_1: PlatinOunce, param1: 0.5, param2: "1"
+    Name_2: MoneyCard, param1: 0.2, param2: "50,100"
+    Group_0: MedicalItems, param1: 0.4
+    Group_1: TroopersFood, param1: 0.6
+  }
+}
+
+# ==== Alien Drone Lootbalancing v76 (ID 150-199)===== 
+
+
+## DroneSmallFast01Minigun and DroneSmallAttackBase DroneSmallFast01Minigun and DroneSmallAttackBase 
+{ +Container Id: 150
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Name_0: 8.3mmBullet, param1: 0.9, param2: "125,250"
+    Name_1: EnergyCell, param1: 0.8, param2: "2,3"
+    Group_0: ComponentsBasic, param1: 0.6
+    Group_1: ComponentsRare, param1: 0.4
+  }
+}
+
+## DroneSmallFast01Rocket 
+{ +Container Id: 151
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Name_0: SlowRocket, param1: 0.9, param2: "2,4"
+    Name_1: EnergyCell, param1: 0.8, param2: "2,3"
+    Group_0: ComponentsBasic, param1: 0.6
+    Group_1: ComponentsRare, param1: 0.4
+  }
+}
+
+## DroneSmallSlow01Cannon 
+{ +Container Id: 152
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Name_0: 12.7mmBullet, param1: 0.9, param2: "4,6"
+    Name_1: EnergyCell, param1: 0.8, param2: "2,3"
+    Group_0: ComponentsBasic, param1: 0.6
+    Group_1: ComponentsRare, param1: 0.4
+  }
+}
+
+## DroneSmallFast01Plasma 
+{ +Container Id: 153
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Name_0: SciFiCannonPlasmaCharge, param1: 0.9, param2: "4,7"
+    Name_1: EnergyCell, param1: 0.8, param2: "2,3"
+    Group_0: ComponentsBasic, param1: 0.6
+    Group_1: ComponentsRare, param1: 0.4
+  }
+}
+
+## DroneSmallSlow01Minigun and DroneSmallSlow02Minigun 
+{ +Container Id: 154
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Name_0: 8.3mmBullet, param1: 0.9, param2: "100,200"
+    Name_1: EnergyCell, param1: 0.8, param2: "2,3"
+    Group_0: ComponentsBasic, param1: 0.6
+    Group_1: ComponentsRare, param1: 0.5
+  }
+}
+
+## DroneLargeSlow01Plasma 
+{ +Container Id: 155
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Name_0: PlasmaCannonChargeSS, param1: 0.9, param2: "25,50"
+    Name_1: EnergyCellLarge, param1: 0.8, param2: "2,3"
+  #  Name_2: WeaponSV04, param1: 0.1, param2: "1"
+    Group_0: ComponentsBasic, param1: 0.4
+    Group_1: ComponentsRare, param1: 0.6
+  }
+}
+
+## DroneLargeSlow02Minigun and DroneLargeSlow01Minigun
+{ +Container Id: 156
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Name_0: 15mmBullet, param1: 0.9, param2: "150,300"
+    Name_1: EnergyCellLarge, param1: 0.8, param2: "3,4"
+  #  Name_2: WeaponSV02, param1: 0.1, param2: "1"
+    Group_0: ComponentsBasic, param1: 0.4
+    Group_1: ComponentsRare, param1: 0.6
+  }
+}
+
+## DroneLargeSlow02Cannon 
+{ +Container Id: 157
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Name_0: RailgunBullet, param1: 0.9, param2: "10,20"
+    Name_1: EnergyCellLarge, param1: 0.8, param2: "3,4"
+  #  Name_2: WeaponSV01, param1: 0.05, param2: "1"
+    Group_0: ComponentsBasic, param1: 0.4
+    Group_1: ComponentsRare, param1: 0.6
+  }
+}
+
+## EnemyDroneV2Minigun 
+{ +Container Id: 158
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Name_0: 15mmBullet, param1: 0.9, param2: "300,600"
+    Name_1: FusionCell, param1: 0.8, param2: "2,3"
+    Name_2: WeaponSV02, param1: 0.05, param2: "1"
+    Group_1: ComponentsRare, param1: 0.6
+  }
+}
+
+## EnemyDroneV2Plasma 
+{ +Container Id: 159
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Name_0: PlasmaCannonChargeSS, param1: 0.9, param2: "50,100"
+    Name_1: FusionCell, param1: 0.8, param2: "2,3"
+    Name_2: WeaponSV04, param1: 0.05, param2: "1"
+    Group_1: ComponentsRare, param1: 0.6
+  }
+}
+
+## DroneLargeAttackBase 
+{ +Container Id: 160
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Name_0: FastRocket, param1: 0.9, param2: "15,30"
+    Name_1: FusionCell, param1: 0.8, param2: "2,3"
+    Name_2: WeaponSV05, param1: 0.05, param2: "1"
+    Group_1: ComponentsRare, param1: 0.6
+  }
+}
+
+## DroneLargeSlowGardian 
+{ +Container Id: 161
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Name_0: 15mmBullet, param1: 0.9, param2: "600,1000"
+    Name_1: FusionCell, param1: 0.8, param2: "3,4"
+    Name_2: WeaponSV02, param1: 0.05, param2: "1"
+    Group_1: ComponentsRare, param1: 0.8
+  }
+}
+
+#================== CUSTOM LOOTGROUPS
+
+{ +Container Id: 254
+  Count: "1,1"
+  Size: "8,1"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Name_0: CoreNoCPU, param1: 1, param2: "1"
+  }
+}
+{ +Container Id: 255
+  Count: "2,3"
+  Size: "8,1"
+  SfxOpen: UseActions/drone_open
+  SfxClose: UseActions/drone_close
+
+  { Child Items
+    Name_0: Token, param1: 1, param2: "meta=9992"
+    Name_1: PlatinOunce, param1: 1, param2: "1,2"
+  }
+}

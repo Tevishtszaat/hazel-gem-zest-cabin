@@ -23,4 +23,49 @@
   StarClass: G
   Model: SunYellow
   Probability: 0.2
+  SizeClass: 10
+  Color: "1,0.95,0.63"
+  LightColor: "1,0.96,0.85"
+  SurfaceTemperature: "5500, 6000"
+  Mass: 1
+  Radius: 1
+  Luminosity: 1
+  ColorName: Yellow
+  InnerSystem: "5, 56"
+  HabitableHot: "57, 63"
+  HabitableTemperate: "64, 69"
+  HabitableCold: "70, 75"
+  OuterSystem: "76, 132"
+}
+{ GalaxyConfig Name: K Type Star
+  StarClass: K
+  Model: SunRedGiant
+  Probability: 0.4
+  Color: "1,0.85,0.44"
+  SurfaceTemperature: "4000, 5500"
+  Mass: 0.7
+  Radius: 0.8
+  Luminosity: 0.3
+  ColorName: Yellow-Orange
+  InnerSystem: "5, 48"
+  HabitableHot: "49, 53"
+  HabitableTemperate: "54, 59"
+  HabitableCold: "60, 64"
+  OuterSystem: "65, 112"
+}
+{ GalaxyConfig Name: M Type Star
+  StarClass: M
+  Model: SunRedDwarf
+  Probability: 0.8
+  Color: "0.97,0.64,0.19"
+  SurfaceTemperature: "2500, 4000"
+  Mass: 0.3
+  Radius: 0.4
+  Luminosity: 0.002
+  ColorName: Red
+  InnerSystem: "5, 41"
+  HabitableHot: "42, 45"
+  HabitableTemperate: "46, 50"
+  HabitableCold: "51, 54"
+  OuterSystem: "55, 95"
 }

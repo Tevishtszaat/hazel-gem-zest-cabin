@@ -1,0 +1,40 @@
+{
+  "url": "http://127.0.0.1:8799/export",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Axis 2026 Creator Particlewave",
+      "hasCanvas": false,
+      "bodyTextLen": 908,
+      "bodyTextHash": "b157a8408c6a19dc7df6fda015f97d6da9903ce91ad958adb26d260a062432a5",
+      "bodyTextPrefix": "AX Axis 2026 Creator Particlewave PDA Language English PDA Dialo",
+      "horizontalOverflow": false,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 ()"
+      ],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/standalone-export.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Axis 2026 Creator Particlewave",
+      "hasCanvas": false,
+      "bodyTextLen": 908,
+      "bodyTextHash": "b157a8408c6a19dc7df6fda015f97d6da9903ce91ad958adb26d260a062432a5",
+      "bodyTextPrefix": "AX Axis 2026 Creator Particlewave PDA Language English PDA Dialo",
+      "horizontalOverflow": false,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 ()"
+      ],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/standalone-export-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/standalone-export.json"
+}

@@ -1,4 +1,5 @@
 import type { EcfObject } from "./ecf.ts";
+import { configMeta } from "./config-roles.ts";
 
 export const ITEM_STATS = [
   "Category",
@@ -63,6 +64,9 @@ export const GALAXY_GENERAL_STATS = [
   "StarCount",
   "Radius",
   "NebulaCount",
+  "NebulaColors1",
+  "NebulaColors2",
+  "NebulaColors3",
   "StarterSystemLYCoord",
   "StarterSystemName",
   "StarterSystemStarClass",
@@ -72,11 +76,109 @@ export const GALAXY_GENERAL_STATS = [
 
 export const TERRITORY_STATS = ["Faction", "Center", "Radius"];
 
-export function statsFor(role: "items" | "blocks" | "tokens" | "templates") {
-  if (role === "items") return ITEM_STATS;
-  if (role === "tokens") return TOKEN_STATS;
-  if (role === "templates") return TEMPLATE_STATS;
-  return BLOCK_STATS;
+export function statsFor(role: string) {
+  return configMeta(role)?.stats ?? [];
+}
+
+export function objectLabel(obj: EcfObject): string {
+  if (obj.id && /^\d+$/.test(obj.id.trim()) && obj.name) return obj.name;
+  if (obj.name) return obj.name;
+  if (obj.id) return `#${obj.id}`;
+  return obj.kind || "entry";
+}
+
+export function objectKey(obj: EcfObject, index: number): string {
+  return `${obj.kind}:${obj.id ?? ""}:${obj.name}:${index}`;
+}
+
+export const ENTITY_CLASS_KEYS = ["EntityType", "Class", "Parent", "Faction", "Ref"] as const;
+export type EntityClassKey = (typeof ENTITY_CLASS_KEYS)[number];
+
+export function entityByName(objects: EcfObject[]): Map<string, EcfObject> {
+  const map = new Map<string, EcfObject>();
+  for (const obj of objects) {
+    if (obj.name) map.set(obj.name.toLowerCase(), obj);
+  }
+  return map;
+}
+
+export function resolvedField(
+  obj: EcfObject,
+  key: string,
+  byName: Map<string, EcfObject>,
+  seen?: Set<string>,
+): string {
+  const own = (obj.fields[key] ?? "").trim();
+  if (own) return own;
+  const ref = (obj.fields.Ref ?? "").trim();
+  if (!ref) return "";
+  const walk = seen ?? new Set<string>();
+  const id = (obj.name || "").toLowerCase();
+  if (id) {
+    if (walk.has(id)) return "";
+    walk.add(id);
+  }
+  const parent = byName.get(ref.toLowerCase());
+  if (!parent || parent === obj) return "";
+  return resolvedField(parent, key, byName, walk);
+}
+
+export function classFieldValue(obj: EcfObject, key: EntityClassKey, byName: Map<string, EcfObject>): string {
+  if (key === "Ref") return (obj.fields.Ref ?? "").trim();
+  return resolvedField(obj, key, byName);
+}
+
+export function fieldIndex(objects: EcfObject[], key: EntityClassKey, byName?: Map<string, EcfObject>): string[] {
+  const map = byName ?? entityByName(objects);
+  const set = new Set<string>();
+  for (const obj of objects) {
+    const value = classFieldValue(obj, key, map);
+    if (value) set.add(value);
+  }
+  return [...set].sort((a, b) => a.localeCompare(b));
+}
+
+export function matchesClassFilter(
+  obj: EcfObject,
+  filters: Record<EntityClassKey, string>,
+  byName: Map<string, EcfObject>,
+): boolean {
+  for (const key of ENTITY_CLASS_KEYS) {
+    const wanted = filters[key];
+    if (!wanted || wanted === "all") continue;
+    const got = classFieldValue(obj, key, byName);
+    if (wanted === "__none") {
+      if (got) return false;
+    } else if (got !== wanted) return false;
+  }
+  return true;
+}
+
+export function entityGroupKey(obj: EcfObject, byName: Map<string, EcfObject>): string {
+  return resolvedField(obj, "EntityType", byName) || resolvedField(obj, "Parent", byName) || "Unclassified";
+}
+
+export function entityClassLine(obj: EcfObject, byName: Map<string, EcfObject>): string {
+  const type = resolvedField(obj, "EntityType", byName);
+  const faction = resolvedField(obj, "Faction", byName);
+  const klass = resolvedField(obj, "Class", byName);
+  return [type, faction || klass].filter(Boolean).join(" · ");
+}
+
+export function groupByEntityType(
+  objects: EcfObject[],
+  byName: Map<string, EcfObject>,
+): { key: string; rows: EcfObject[] }[] {
+  const groups = new Map<string, EcfObject[]>();
+  for (const obj of objects) {
+    const key = entityGroupKey(obj, byName);
+    const rows = groups.get(key);
+    if (rows) rows.push(obj);
+    else groups.set(key, [obj]);
+  }
+  return [...groups.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([key, rows]) => ({ key, rows }));
 }
 
 export function numericIds(objects: EcfObject[]): number[] {
@@ -84,6 +186,19 @@ export function numericIds(objects: EcfObject[]): number[] {
     .map((obj) => Number(obj.id))
     .filter((n) => Number.isInteger(n) && n > 0)
     .sort((a, b) => a - b);
+}
+
+/** Empyrion treats a block Name (with or without +) as a floating ID when Id is omitted. */
+export function blockIdentity(obj: EcfObject): { kind: "numeric" | "floating"; label: string } {
+  if (obj.id && /^\d+$/.test(obj.id.trim())) {
+    return { kind: "numeric", label: obj.id.trim() };
+  }
+  const name = (obj.name || "unnamed").trim();
+  return { kind: "floating", label: `${obj.plus ? "+" : ""}${name}` };
+}
+
+export function floatingBlocks(objects: EcfObject[]): EcfObject[] {
+  return objects.filter((obj) => blockIdentity(obj).kind === "floating" && obj.name);
 }
 
 export function unusedNumericIds(

@@ -1,0 +1,5 @@
+{ Material Name: tutorialium
+  collidable: true
+  Mass: 2
+  lightopacity: 1
+}

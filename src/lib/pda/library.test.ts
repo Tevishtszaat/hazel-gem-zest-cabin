@@ -11,8 +11,8 @@ import {
   serializeDialogueDoc,
   serializeDialogues,
 } from "./dialogues.ts";
-import { BLOCK_STATS, compareObjects, similarBlocks } from "./config-stats.ts";
-import { extractEcfRecords, parseEcfObjects } from "./ecf.ts";
+import { BLOCK_STATS, blockIdentity, compareObjects, floatingBlocks, similarBlocks } from "./config-stats.ts";
+import { extractEcfRecords, parseEcfObjects, stringifyEcfObjects } from "./ecf.ts";
 import { iconCandidates, iconLookupKeys } from "./image-store.ts";
 import { indexScenario } from "./scenario-index.ts";
 
@@ -114,6 +114,28 @@ describe("library parsers", () => {
     const hp = rows.find((r) => r.key === "HitPoints");
     assert.equal(hp?.delta, 50);
     assert.equal(similarBlocks([a, b], a)[0]?.name, "GenB");
+  });
+
+  it("treats +Block Name and Block Name as floating ids", () => {
+    const text = fs.readFileSync(path.join(sampleDir, "Configuration/BlocksConfig.ecf"), "utf8");
+    const blocks = parseEcfObjects(text);
+    const numeric = blocks.find((b) => b.name === "GeneratorMS");
+    const plusFloat = blocks.find((b) => b.name === "TutorialFloatCore");
+    const baseFloat = blocks.find((b) => b.name === "TutorialBaseFloat");
+    assert.equal(numeric?.id, "400");
+    assert.equal(blockIdentity(numeric!).kind, "numeric");
+    assert.equal(blockIdentity(numeric!).label, "400");
+    assert.equal(plusFloat?.id, undefined);
+    assert.equal(plusFloat?.plus, true);
+    assert.equal(blockIdentity(plusFloat!).kind, "floating");
+    assert.equal(blockIdentity(plusFloat!).label, "+TutorialFloatCore");
+    assert.equal(baseFloat?.plus, false);
+    assert.equal(blockIdentity(baseFloat!).label, "TutorialBaseFloat");
+    assert.equal(floatingBlocks(blocks).length, 2);
+    const back = stringifyEcfObjects([plusFloat!, baseFloat!]);
+    assert.match(back, /\{\s*\+Block Name: TutorialFloatCore/);
+    assert.match(back, /\{\s*Block Name: TutorialBaseFloat/);
+    assert.doesNotMatch(back, /Id:/);
   });
 
   it("prefers CustomIcon over the item name for icon lookup", () => {

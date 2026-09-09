@@ -30,6 +30,19 @@ describe("scenario folder index", () => {
     assert.equal(classifyScenarioPath("Content/Configuration/DefReputation.ecf"), "reputation");
     assert.equal(classifyScenarioPath("Content/Configuration/FactionWarfare.ecf"), "warfare");
     assert.equal(classifyScenarioPath("Content/Configuration/GalaxyConfig.ecf"), "galaxy");
+    assert.equal(classifyScenarioPath("Content/Configuration/Containers.ecf"), "containers");
+    assert.equal(classifyScenarioPath("Content/Configuration/LootGroups.ecf"), "lootgroups");
+    assert.equal(classifyScenarioPath("Content/Configuration/TraderNPCConfig.ecf"), "traders");
+    assert.equal(classifyScenarioPath("Content/Configuration/MaterialConfig.ecf"), "materials");
+    assert.equal(classifyScenarioPath("Content/Configuration/StatusEffects.ecf"), "statuseffects");
+    assert.equal(classifyScenarioPath("Content/Configuration/GlobalDefsConfig.ecf"), "globaldefs");
+    assert.equal(classifyScenarioPath("Content/Configuration/BlockGroupsConfig.ecf"), "blockgroups");
+    assert.equal(classifyScenarioPath("Content/Configuration/BlockShapesWindow.ecf"), "blockshapes");
+    assert.equal(classifyScenarioPath("Content/Configuration/BlockShapeWindow.ecf"), "blockshapes");
+    assert.equal(classifyScenarioPath("Content/Configuration/Animations.ecf"), "animations");
+    assert.equal(classifyScenarioPath("Content/Configuration/BAIConfig.ecf"), "baiconfig");
+    assert.equal(classifyScenarioPath("Content/Configuration/EGroupsConfig.ecf"), "egroups");
+    assert.equal(classifyScenarioPath("Content/Configuration/Config.ecf"), null);
     assert.equal(classifyScenarioPath("Prefabs/DroneBaseT1.epb"), "poi");
     assert.equal(classifyScenarioPath("Playfields/Akua/playfield.yaml"), "playfieldYaml");
     assert.equal(classifyScenarioPath("Extras/PDA/readfirst.jpg"), "picture");
@@ -79,6 +92,12 @@ describe("scenario folder index", () => {
     assert.ok(lookupCatalog(indexed.catalog, "Sathium Freighter Mission"));
     assert.ok(lookupCatalog(indexed.catalog, "Artifacts"));
     assert.ok(lookupCatalog(indexed.catalog, "GeneratorMS"));
+    assert.ok(indexed.catalog.texts.some((t) => t.role === "containers"));
+    assert.ok(indexed.catalog.texts.some((t) => t.role === "lootgroups"));
+    assert.ok(indexed.catalog.texts.some((t) => t.role === "traders"));
+    assert.ok(indexed.catalog.texts.some((t) => t.role === "sectors"));
+    assert.ok(indexed.catalog.texts.some((t) => t.role === "eclass"));
+    assert.ok(indexed.catalog.texts.some((t) => t.role === "statuseffects"));
     const hits = suggestionsFor(indexed.catalog, ["entity"], "alien");
     assert.ok(hits.some((h) => h.name === "AlienBug01"));
 

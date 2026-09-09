@@ -1,0 +1,14 @@
+/* For items with weapon hold type=="X" we have a ray cast delay of Y */
+/* name=holdtype, value=delay, param1=holster, param2=unholster */
+{ Animation Name: animation
+  0: 0, param1: 0, param2: 0 	   /* block */
+  1: 0.16, param1: 0.3, param2: 0.3    /* hand player */
+  3: 0.6, param1: 0.3, param2: 0.3    /*  */
+  4: 0.65, param1: 0.3, param2: 0.3    /* hand total horror */
+  5: 0.6, param1: 0.3, param2: 0.3    /* hand talon guardian */
+  6: 0.6, param1: 0.3, param2: 0.3    /* hand zirax melee, cave worm, megalonops */
+  14: 0, param1: 0.5, param2: 0.5    /* Player Pistol */
+  15: 0, param1: 0.5, param2: 0.5    /* Player Rifle */
+  16: 0, param1: 0.5, param2: 0.5    /* Player Rifle + weaker shooting animation */
+  20: 0, param1: 0.0, param2: 0.0    /* Animation driven animals */
+}

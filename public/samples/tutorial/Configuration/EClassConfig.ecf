@@ -1,21 +1,70 @@
+{ Entity Name: AlienTemplate
+  EntityType: Animal
+  Class: Enemy
+  Parent: Enemies
+  Faction: Predator
+  Prefab: AlienFat
+  IsEnemy: true
+  AllowInSpawners: true
+}
+{ Entity Name: PredatorTemplate
+  EntityType: Animal
+  Class: BehaviorAI
+  Parent: Enemies
+  Faction: Predator
+  IsEnemy: true
+  AllowInSpawners: true
+}
 { +Entity Name: AlienBug01, Ref: AlienTemplate
   Faction: Predator
+  MaxHealth: 400
 }
-{ +Entity Name: AlienBug02 }
-{ +Entity Name: AlienBug03 }
-{ +Entity Name: AlienBug04 }
-{ +Entity Name: CaveWormGreen }
-{ +Entity Name: CaveWormGrey }
-{ +Entity Name: CaveWormWhite }
-{ +Entity Name: Otyugh }
-{ +Entity Name: Oviraptor }
-{ +Entity Name: Raptor }
-{ +Entity Name: RaptorNight }
-{ +Entity Name: Spider01 }
-{ +Entity Name: Spider02 }
-{ +Entity Name: Spider03 }
-{ +Entity Name: Spinosaurus }
-{ +Entity Name: Telluropod }
-{ +Entity Name: PlantMonster }
-{ +Entity Name: CaveWormGreyOld }
-{ +Entity Name: Creepy }
+{ +Entity Name: AlienBug02, Ref: AlienTemplate }
+{ +Entity Name: AlienBug03, Ref: AlienTemplate }
+{ +Entity Name: AlienBug04, Ref: PredatorTemplate
+  Faction: Prey
+  IsEnemy: false
+}
+{ +Entity Name: CaveWormGreen, Ref: PredatorTemplate }
+{ +Entity Name: CaveWormGrey, Ref: PredatorTemplate }
+{ +Entity Name: CaveWormWhite, Ref: PredatorTemplate }
+{ +Entity Name: Otyugh, Ref: PredatorTemplate }
+{ +Entity Name: Oviraptor, Ref: PredatorTemplate }
+{ +Entity Name: Raptor, Ref: PredatorTemplate }
+{ +Entity Name: RaptorNight, Ref: PredatorTemplate }
+{ +Entity Name: Spider01, Ref: PredatorTemplate }
+{ +Entity Name: Spider02, Ref: PredatorTemplate }
+{ +Entity Name: Spider03, Ref: PredatorTemplate }
+{ +Entity Name: Spinosaurus, Ref: PredatorTemplate }
+{ +Entity Name: Telluropod, Ref: PredatorTemplate }
+{ +Entity Name: PlantMonster, Ref: PredatorTemplate }
+{ +Entity Name: CaveWormGreyOld, Ref: PredatorTemplate }
+{ +Entity Name: Creepy, Ref: PredatorTemplate }
+{ +Entity Name: PlyMale
+  EntityType: Player
+  Class: Player
+  Parent: Players
+  Faction: Player
+  IsEnemy: false
+}
+{ +Entity Name: DroneSmallFast01Rocket
+  EntityType: EnemyDrone
+  Class: MeshDrone
+  Parent: Drones
+  Faction: Zirax
+  IsEnemy: true
+  AllowInSpawners: true
+}
+{ +Entity Name: HV_Player
+  EntityType: HV
+  Class: ShipHV
+  Parent: HV
+  Faction: Player
+}
+{ +Entity Name: TutorialTraderNpc
+  EntityType: Trader
+  Class: TraderNPC
+  Parent: Traders
+  Faction: Trader
+  IsEnemy: false
+}

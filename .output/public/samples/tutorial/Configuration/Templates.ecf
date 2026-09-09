@@ -1,0 +1,15 @@
+{ Template Name: GoldCoins
+  OutputCount: 1
+  CraftTime: 2
+  Target: "SurvC,SmallC"
+  { Child Inputs
+    GoldIngot: 5
+  }
+}
+{ Template Name: ConstructorSurvival
+  CraftTime: 3
+  Target: "SurvC,SmallC,LargeC,AdvC"
+  { Child Inputs
+    SteelPlate: 10
+  }
+}

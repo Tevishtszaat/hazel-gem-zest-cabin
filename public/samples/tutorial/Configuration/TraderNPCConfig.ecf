@@ -1,0 +1,6 @@
+{ Trader Name: TutorialTrader
+  SellingText: "Welcome."
+  SellingGoods: "trwSpecial"
+  Discount: 0.1
+  Item1: "GoldCoins, 10-20, 1-5"
+}

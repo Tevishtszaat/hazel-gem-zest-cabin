@@ -25,7 +25,12 @@ describe("export slots", () => {
         { role: "galaxy", path: "Configuration/GalaxyConfig.ecf", text: `{ GalaxyConfig Name: General\n  StarCount: "80, 120"\n}\n` },
         { role: "localization", path: "Localization.csv", text: "KEY,English\nItems_GoldCoins,Gold Coins\n" },
         { role: "dialogues", path: "Configuration/Dialogues.ecf", text: `{ +Dialogue Name: TC_Start\n  Output: txt_tc_start\n}\n` },
-        { role: "dialoguesCsv", path: "Configuration/Dialogues.csv", text: "KEY,English\ntxt_tc_start,The Talon remember their debts.\n" },
+        { role: "containers", path: "Configuration/Containers.ecf", text: `{ +Container Id: 1\n  Count: 1\n}\n` },
+        { role: "lootgroups", path: "Configuration/LootGroups.ecf", text: `{ +LootGroup Name: TutorialLoot\n  Count: 1\n}\n` },
+        { role: "traders", path: "Configuration/TraderNPCConfig.ecf", text: `{ Trader Name: TutorialTrader\n  Discount: 0.1\n}\n` },
+        { role: "eclass", path: "Configuration/EClassConfig.ecf", text: `{ +Entity Name: AlienBug01\n  MaxHealth: 100\n}\n` },
+        { role: "factions", path: "Configuration/Factions.ecf", text: `{ Faction Id: 1, Name: Talon }\n` },
+        { role: "sectors", path: "Sectors.yaml", text: "Sectors:\n  - Coordinates: [0, 0, 0]\n" },
       ],
       files: [
         { role: "items", path: "Configuration/ItemsConfig.ecf", count: 1 },
@@ -67,5 +72,13 @@ describe("export slots", () => {
     assert.equal(byId.dialoguesCsv?.filename, "Dialogues.csv");
     assert.match(byId.dialoguesCsv!.build(), /txt_tc_start/);
     assert.doesNotMatch(byId.dialoguesCsv!.build(), /Gold Coins/);
+    assert.equal(byId.containers?.ready, true);
+    assert.match(byId.containers!.build(), /\+Container Id: 1/);
+    assert.equal(byId.lootgroups?.ready, true);
+    assert.equal(byId.traders?.ready, true);
+    assert.equal(byId.eclass?.ready, true);
+    assert.equal(byId.factions?.ready, true);
+    assert.equal(byId.sectors?.ready, true);
+    assert.match(byId.sectors!.build(), /Coordinates/);
   });
 });

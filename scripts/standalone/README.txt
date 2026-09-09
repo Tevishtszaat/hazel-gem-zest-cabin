@@ -15,7 +15,9 @@ Typical flow
   1. Import a scenario folder (or the twelve slots)
   2. Edit PDA / Dialogues
   3. Debug names
-  4. Library for item/block stats
-  5. Export YAML + CSV back into your Empyrion scenario
+  4. Library: items, blocks, templates, reputation, warfare, galaxy
+  5. Export tab: PDA, Items, Blocks, Tokens, Localization,
+     Dialogues.ecf + Dialogues.csv, DefReputation, FactionWarfare,
+     GalaxyConfig
 
 FAQ sits at the bottom of the PDA tree so missions show first.

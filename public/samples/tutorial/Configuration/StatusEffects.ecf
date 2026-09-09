@@ -1,0 +1,9 @@
+{ StatusEffect Name: TutorialBoost
+  Duration: 30
+  Type: buff
+  Icon: TmpEff_LowFood
+  { Child Modify0
+    Stat: speedmodifier
+    SetValue: 1.2
+  }
+}

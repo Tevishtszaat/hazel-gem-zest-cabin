@@ -16,7 +16,7 @@ export type EcfObject = {
 const BLOCK_START = /^\s*\{\s*(\+)?([A-Za-z][A-Za-z0-9]*)\b(.*)$/;
 const NAME_FIELD = /\bName:\s*(?:"([^"]+)"|'([^']+)'|([^,#}\n]+))/;
 const ID_FIELD = /\bId:\s*(\d+)/;
-const PROP = /^\s*([A-Za-z][A-Za-z0-9_]*)\s*:\s*(.*)$/;
+const PROP = /^\s*([A-Za-z_][A-Za-z0-9_]*|\d+)\s*:\s*(.*)$/;
 
 export function stripEcfComments(text: string): string {
   return text.replace(/\/\*[\s\S]*?\*\//g, "\n").replace(/^\s*#.*$/gm, "");
@@ -112,11 +112,12 @@ export function extractEcfRecords(text: string): EcfRecord[] {
   const seen = new Set<string>();
   const out: EcfRecord[] = [];
   for (const obj of parseEcfObjects(text)) {
-    if (!obj.name) continue;
-    const key = `${obj.kind}:${obj.name}`;
+    const name = obj.name || obj.id;
+    if (!name) continue;
+    const key = `${obj.kind}:${name}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    out.push({ kind: obj.kind, name: obj.name, id: obj.id });
+    out.push({ kind: obj.kind, name, id: obj.id });
   }
   return out;
 }
@@ -133,15 +134,19 @@ export function stringifyEcfObjects(objects: EcfObject[]): string {
     const lines = [`${pad}{ ${head.join(" ")}`];
     for (const [key, value] of Object.entries(obj.fields)) {
       if (value === "" || value == null) continue;
-      lines.push(
-        `${pad}  ${key}: ${needsQuote(value) || /[:(),]/.test(value) ? `"${value.replace(/"/g, '\\"')}"` : value}`,
-      );
+      lines.push(`${pad}  ${key}: ${formatEcfValue(value)}`);
     }
     for (const child of obj.children ?? []) lines.push(...emit(child, indent + 2));
     lines.push(`${pad}}`);
     return lines;
   };
   return objects.map((obj) => emit(obj, 0).join("\n")).join("\n") + "\n";
+}
+
+function formatEcfValue(value: string) {
+  if (/,\s*param\d+\s*:/i.test(value)) return value;
+  if (needsQuote(value) || /[:(),]/.test(value)) return `"${value.replace(/"/g, '\\"')}"`;
+  return value;
 }
 
 function needsQuote(value: string) {

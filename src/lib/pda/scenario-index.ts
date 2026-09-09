@@ -1,6 +1,7 @@
 import * as yaml from "js-yaml";
 import { parseCsv } from "./csv.ts";
 import { extractEcfRecords } from "./ecf.ts";
+import { configMetaByFile, CONFIG_TEXT_ROLES } from "./config-roles.ts";
 import type { ImportFiles } from "./yaml-import.ts";
 
 export type CatalogKind =
@@ -82,6 +83,9 @@ const KIND_FROM_ECF: Record<string, CatalogKind> = {
   token: "token",
   egroup: "group",
   entitygroup: "group",
+  lootgroup: "group",
+  trader: "entity",
+  container: "item",
 };
 
 export function emptyCatalog(): ScenarioCatalog {
@@ -112,19 +116,12 @@ export function classifyScenarioPath(path: string, hint?: string): string | null
   if (base === "localization.csv") return "localization";
   if (base === "sectors.yaml" || base === "sectors.yml") return "sectors";
   if (base === "playfield.yaml" || base === "playfield.yml") return "playfieldYaml";
-  if (base === "itemsconfig.ecf") return "items";
-  if (base === "blocksconfig.ecf") return "blocks";
-  if (base === "eclassconfig.ecf") return "eclass";
-  if (base === "factions.ecf") return "factions";
+  if (base === "config.ecf" || base === "config_example.ecf") return null;
+  const meta = configMetaByFile(base);
+  if (meta) return meta.role;
   if (base === "dialogues.ecf") return "dialogues";
   if (base === "dialogues.csv") return "dialoguesCsv";
   if (hint === "dialogues" && /\.csv$/.test(base)) return "dialoguesCsv";
-  if (base === "tokenconfig.ecf") return "tokens";
-  if (base === "templates.ecf") return "templates";
-  if (base === "defreputation.ecf") return "reputation";
-  if (base === "factionwarfare.ecf") return "warfare";
-  if (base === "galaxyconfig.ecf") return "galaxy";
-  if (base === "egroupsconfig.ecf") return "egroups";
   if (base.endsWith(".ecf")) return hint === "configs" || hint === "scenario" ? "ecf" : "ecf";
   if (base.endsWith(".epb")) return "poi";
   if (/\.(png|jpe?g|webp|gif)$/.test(base)) {
@@ -268,7 +265,13 @@ export function indexScenario(files: ScenarioSource[], hint?: string): IndexedSc
         }
       }
       count = Object.keys(loc).length;
-    } else if (file.text && (role.endsWith("s") || role === "eclass" || role === "ecf" || role === "dialogues")) {
+    } else if (
+      file.text &&
+      role !== "localization" &&
+      role !== "dialoguesCsv" &&
+      role !== "sectors" &&
+      (CONFIG_TEXT_ROLES.has(role) || role === "ecf" || role === "dialogues")
+    ) {
       const records = extractEcfRecords(file.text);
       for (const rec of records) {
         const kind = KIND_FROM_ECF[rec.kind.toLowerCase()];
@@ -278,7 +281,7 @@ export function indexScenario(files: ScenarioSource[], hint?: string): IndexedSc
       }
     }
 
-    if (file.text && ["localization", "items", "blocks", "tokens", "templates", "dialogues", "dialoguesCsv", "factions", "eclass", "egroups", "reputation", "warfare", "galaxy"].includes(role)) {
+    if (file.text && (CONFIG_TEXT_ROLES.has(role) || role === "ecf")) {
       texts.push({ role, path: normalizePath(file.path), text: file.text });
     }
 

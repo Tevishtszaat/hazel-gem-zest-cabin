@@ -43,7 +43,29 @@ function slotCount(kind: ImportKind, files: { role: string; count: number }[], p
     case "scenario":
       return files.length;
     case "configs":
-      return sum("items", "blocks", "templates", "eclass", "tokens", "egroups", "reputation", "warfare", "galaxy", "ecf");
+      return sum(
+        "items",
+        "blocks",
+        "templates",
+        "eclass",
+        "tokens",
+        "egroups",
+        "reputation",
+        "warfare",
+        "galaxy",
+        "factions",
+        "containers",
+        "lootgroups",
+        "traders",
+        "materials",
+        "statuseffects",
+        "globaldefs",
+        "blockgroups",
+        "blockshapes",
+        "animations",
+        "baiconfig",
+        "ecf",
+      );
     case "localization":
       return sum("localization");
     case "itemImages":

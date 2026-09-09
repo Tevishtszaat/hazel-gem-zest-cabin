@@ -1,0 +1,14 @@
+{ +Container Id: 1
+  Count: 1
+  Size: "8,8"
+  { Child Items
+    Group_0: empty
+  }
+}
+{ +Container Id: 2, Name: TutorialLoot
+  Count: "1,3"
+  Size: "8,8"
+  { Child Items
+    Name_0: GoldCoins, param1: 0.8, param2: "1,5"
+  }
+}

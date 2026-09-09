@@ -5,7 +5,29 @@ import { ItemIcon } from "@/components/editor/pda-image.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Input, Textarea } from "@/components/ui/input.tsx";
 import { GalaxyEditor, ReputationTable, WarfareEditor } from "@/components/library/config-tabs.tsx";
-import { compareObjects, numericIds, similarBlocks, statsFor, templateInputs, unusedNumericIds, withTemplateInputs } from "@/lib/pda/config-stats.ts";
+import {
+  blockIdentity,
+  classFieldValue,
+  compareObjects,
+  ENTITY_CLASS_KEYS,
+  entityByName,
+  entityClassLine,
+  fieldIndex,
+  floatingBlocks,
+  groupByEntityType,
+  matchesClassFilter,
+  numericIds,
+  objectKey,
+  objectLabel,
+  resolvedField,
+  similarBlocks,
+  statsFor,
+  templateInputs,
+  unusedNumericIds,
+  withTemplateInputs,
+  type EntityClassKey,
+} from "@/lib/pda/config-stats.ts";
+import { configMeta, type ConfigGroup, type ConfigRole } from "@/lib/pda/config-roles.ts";
 import { stringifyEcfObjects, type EcfObject } from "@/lib/pda/ecf.ts";
 import {
   catalogText,
@@ -19,7 +41,29 @@ import type { CsvTable } from "@/lib/pda/types.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
 import { warmImageCache } from "@/lib/pda/image-store.ts";
 
-type Tab = "items" | "blocks" | "templates" | "tokens" | "reputation" | "warfare" | "galaxy" | "compare" | "localization";
+type Tab = ConfigRole | "compare" | "localization";
+
+const GROUPS: { id: ConfigGroup; label: string }[] = [
+  { id: "catalog", label: "Catalog" },
+  { id: "world", label: "World" },
+  { id: "loot", label: "Loot" },
+  { id: "defs", label: "Defs" },
+  { id: "text", label: "Text" },
+];
+
+const GROUP_TABS: Record<ConfigGroup, Tab[]> = {
+  catalog: ["items", "blocks", "templates", "tokens", "compare"],
+  world: ["factions", "eclass", "egroups", "reputation", "warfare", "galaxy"],
+  loot: ["containers", "lootgroups", "traders"],
+  defs: ["materials", "statuseffects", "globaldefs", "blockgroups", "blockshapes", "animations", "baiconfig"],
+  text: ["localization", "sectors"],
+};
+
+function tabLabel(id: Tab) {
+  if (id === "compare") return "Compare";
+  if (id === "localization") return "Localization";
+  return configMeta(id)?.label || id;
+}
 
 function download(name: string, text: string, type: string) {
   const blob = new Blob([text], { type });
@@ -33,18 +77,14 @@ function download(name: string, text: string, type: string) {
 export function LibraryPage() {
   const catalog = usePdaStore((s) => s.catalog);
   const [tab, setTab] = useState<Tab>("items");
+  const [group, setGroup] = useState<ConfigGroup>("catalog");
   const [compareLeft, setCompareLeft] = useState<string | null>(null);
-  const tabs: { id: Tab; label: string }[] = [
-    { id: "items", label: "Items" },
-    { id: "blocks", label: "Blocks" },
-    { id: "templates", label: "Templates" },
-    { id: "tokens", label: "Tokens" },
-    { id: "reputation", label: "Reputation" },
-    { id: "warfare", label: "Warfare" },
-    { id: "galaxy", label: "Galaxy" },
-    { id: "compare", label: "Compare" },
-    { id: "localization", label: "Localization" },
-  ];
+  const tabs = GROUP_TABS[group];
+  const setGroupAndTab = (next: ConfigGroup) => {
+    setGroup(next);
+    if (!GROUP_TABS[next].includes(tab)) setTab(GROUP_TABS[next][0]!);
+  };
+  const meta = configMeta(tab);
   return (
     <div className="flex h-dvh flex-col overflow-x-hidden bg-bg text-fg">
       <AppHeader />
@@ -52,46 +92,68 @@ export function LibraryPage() {
         <div>
           <h1 className="text-xl font-medium tracking-tight">Library</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted">
-            Edit items, blocks, templates, reputation, faction warfare, and galaxy config. Unused IDs show as empty
-            slots you can claim.
+            Edit scenario configs. Items and tokens need numeric Ids. Blocks can use a number or a floating{" "}
+            <span className="font-mono text-fg/80">+Block Name</span>.
           </p>
         </div>
       </div>
-      <div className="flex gap-1 border-b border-border px-3">
-        {tabs.map((item) => (
+      <div className="flex gap-1 overflow-x-auto border-b border-border px-3">
+        {GROUPS.map((item) => (
           <button
             key={item.id}
-            onClick={() => setTab(item.id)}
-            className={`relative h-10 px-3 text-sm ${tab === item.id ? "text-fg" : "text-muted hover:text-fg"}`}
+            onClick={() => setGroupAndTab(item.id)}
+            className={`relative h-9 shrink-0 px-3 text-xs uppercase tracking-[0.14em] ${
+              group === item.id ? "text-fg" : "text-muted hover:text-fg"
+            }`}
           >
             {item.label}
-            {tab === item.id ? <span className="absolute inset-x-2 bottom-0 h-px bg-accent" /> : null}
+            {group === item.id ? <span className="absolute inset-x-2 bottom-0 h-px bg-accent" /> : null}
+          </button>
+        ))}
+      </div>
+      <div className="flex gap-1 overflow-x-auto border-b border-border px-3">
+        {tabs.map((id) => (
+          <button
+            key={id}
+            onClick={() => setTab(id)}
+            className={`relative h-10 shrink-0 px-3 text-sm ${tab === id ? "text-fg" : "text-muted hover:text-fg"}`}
+          >
+            {tabLabel(id)}
+            {tab === id ? <span className="absolute inset-x-2 bottom-0 h-px bg-accent" /> : null}
           </button>
         ))}
       </div>
       <div className="min-h-0 flex-1">
-        {tab === "items" ? <ObjectBrowser role="items" title="Items" /> : null}
-        {tab === "blocks" ? (
+        {tab === "compare" ? (
+          <BlockCompare initial={compareLeft} />
+        ) : tab === "localization" ? (
+          <LocaEditor />
+        ) : tab === "reputation" ? (
+          <ReputationTable />
+        ) : tab === "warfare" ? (
+          <WarfareEditor />
+        ) : tab === "galaxy" ? (
+          <GalaxyEditor />
+        ) : tab === "sectors" ? (
+          <YamlEditor role="sectors" fileName="Sectors.yaml" title="Sectors" />
+        ) : meta ? (
           <ObjectBrowser
-            role="blocks"
-            title="Blocks"
-            onCompare={(name) => {
-              setCompareLeft(name);
-              setTab("compare");
-            }}
+            key={meta.role}
+            role={meta.role}
+            title={meta.label}
+            onCompare={
+              meta.role === "blocks"
+                ? (name) => {
+                    setCompareLeft(name);
+                    setGroup("catalog");
+                    setTab("compare");
+                  }
+                : undefined
+            }
           />
         ) : null}
-        {tab === "tokens" ? <ObjectBrowser role="tokens" title="Tokens" /> : null}
-        {tab === "templates" ? <ObjectBrowser role="templates" title="Templates" /> : null}
-        {tab === "reputation" ? <ReputationTable /> : null}
-        {tab === "warfare" ? <WarfareEditor /> : null}
-        {tab === "galaxy" ? <GalaxyEditor /> : null}
-        {tab === "compare" ? <BlockCompare initial={compareLeft} /> : null}
-        {tab === "localization" ? <LocaEditor /> : null}
       </div>
-      {!catalog.texts?.length && !catalog.entries.length ? (
-        <p className="sr-only">Empty library</p>
-      ) : null}
+      {!catalog.texts?.length && !catalog.entries.length ? <p className="sr-only">Empty library</p> : null}
     </div>
   );
 }
@@ -101,10 +163,11 @@ function ObjectBrowser({
   title,
   onCompare,
 }: {
-  role: "items" | "blocks" | "tokens" | "templates";
+  role: ConfigRole;
   title: string;
   onCompare?: (name: string) => void;
 }) {
+  const meta = configMeta(role)!;
   const catalog = usePdaStore((s) => s.catalog);
   const setCatalogText = usePdaStore((s) => s.setCatalogText);
   const loca = useMemo(() => localizationTable(catalog), [catalog]);
@@ -112,7 +175,7 @@ function ObjectBrowser({
   const objects = useMemo(() => objectsFor(catalog, role), [catalog, role]);
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState<string | null>(null);
-  const [idFilter, setIdFilter] = useState<"all" | "missing">("all");
+  const [idFilter, setIdFilter] = useState<"all" | "missing" | "numeric" | "floating">("all");
   useEffect(() => {
     void warmImageCache();
   }, []);
@@ -122,56 +185,90 @@ function ObjectBrowser({
     return [...set].sort();
   }, [objects]);
   const [cat, setCat] = useState("all");
+  const [classFilter, setClassFilter] = useState<Record<EntityClassKey, string>>({
+    EntityType: "all",
+    Class: "all",
+    Parent: "all",
+    Faction: "all",
+    Ref: "all",
+  });
+  const isEntities = role === "eclass";
+  const byName = useMemo(() => entityByName(objects), [objects]);
+  const classOptions = useMemo(() => {
+    if (!isEntities) return null;
+    return Object.fromEntries(ENTITY_CLASS_KEYS.map((key) => [key, fieldIndex(objects, key, byName)])) as Record<
+      EntityClassKey,
+      string[]
+    >;
+  }, [isEntities, objects, byName]);
   const q = query.trim().toLowerCase();
   const missingIds = objects.filter((obj) => !obj.id);
   const unused = useMemo(() => unusedNumericIds(numericIds(objects)), [objects]);
-  const usesIds = role === "items" || role === "blocks" || role === "tokens";
-  const visible = objects.filter((obj) => {
+  const floats = useMemo(() => floatingBlocks(objects), [objects]);
+  const usesNumericIds = meta.idMode === "required";
+  const usesBlockIds = role === "blocks";
+  const usesIds = usesNumericIds || usesBlockIds;
+  const visible = objects.filter((obj, index) => {
+    const ident = usesBlockIds ? blockIdentity(obj) : null;
     if (idFilter === "missing" && obj.id) return false;
+    if (idFilter === "numeric" && ident?.kind !== "numeric") return false;
+    if (idFilter === "floating" && ident?.kind !== "floating") return false;
     if (cat !== "all" && obj.fields.Category !== cat) return false;
+    if (isEntities && !matchesClassFilter(obj, classFilter, byName)) return false;
     if (!q) return true;
     const label = locaLabel(loca, obj.name, language);
-    return `${obj.name} ${obj.id ?? ""} ${label} ${obj.fields.Category ?? ""}`.toLowerCase().includes(q);
+    const idText = ident?.label ?? obj.id ?? objectLabel(obj);
+    const classText = isEntities
+      ? ENTITY_CLASS_KEYS.map((key) => classFieldValue(obj, key, byName)).join(" ")
+      : "";
+    return `${objectLabel(obj)} ${obj.name} ${idText} ${label} ${obj.fields.Category ?? ""} ${classText} ${index}`
+      .toLowerCase()
+      .includes(q);
   });
-  const selected = objects.find((o) => o.name === picked) ?? visible[0];
+  const selected = objects.find((o, i) => objectKey(o, i) === picked) ?? visible[0] ?? objects[0];
+  const selectedIndex = selected ? objects.indexOf(selected) : -1;
   const hasText = Boolean(catalogText(catalog, role));
-  const fileName =
-    role === "items"
-      ? "ItemsConfig.ecf"
-      : role === "blocks"
-        ? "BlocksConfig.ecf"
-        : role === "templates"
-          ? "Templates.ecf"
-          : "TokenConfig.ecf";
-  const kindName = role === "items" ? "Item" : role === "blocks" ? "Block" : role === "templates" ? "Template" : "Token";
+  const fileName = catalogText(catalog, role)?.path.split(/[\\/]/).pop() || meta.file;
+  const kindName = objects[0]?.kind || meta.kind;
 
   const persist = (next: EcfObject[]) => {
     setCatalogText(role, stringifyEcfObjects(next), catalogText(catalog, role)?.path || fileName);
   };
 
-  const patch = (name: string, mut: (obj: EcfObject) => EcfObject) => {
-    persist(objects.map((obj) => (obj.name === name ? mut({ ...obj, fields: { ...obj.fields }, children: obj.children }) : obj)));
+  const patch = (index: number, mut: (obj: EcfObject) => EcfObject) => {
+    persist(
+      objects.map((obj, i) => (i === index ? mut({ ...obj, fields: { ...obj.fields }, children: obj.children }) : obj)),
+    );
   };
 
   const claim = (id?: number) => {
-    const used = new Set(objects.map((o) => o.name.toLowerCase()));
-    let n = id ?? unused.next;
-    let name = role === "templates" ? "NewTemplate" : `New${kindName}${n}`;
+    const used = new Set(objects.map((o) => o.name.toLowerCase()).filter(Boolean));
+    const floating = role === "blocks" && id == null;
+    const skipId = meta.idMode === "none" || floating;
+    const n = id ?? unused.next;
+    let name = kindName === "Container" ? "" : skipId ? `New${kindName}` : `New${kindName}${n}`;
     let suffix = 2;
-    while (used.has(name.toLowerCase())) {
-      name = role === "templates" ? `NewTemplate${suffix}` : `New${kindName}${n}_${suffix}`;
+    while (name && used.has(name.toLowerCase())) {
+      name = `New${kindName}${suffix}`;
       suffix += 1;
+    }
+    const fields: Record<string, string> = {};
+    if (isEntities) {
+      for (const key of ENTITY_CLASS_KEYS) {
+        const value = classFilter[key];
+        if (value && value !== "all" && value !== "__none") fields[key] = value;
+      }
     }
     const obj: EcfObject = {
       kind: kindName,
-      plus: true,
+      plus: meta.plus,
       name,
-      id: role === "templates" ? undefined : String(n),
-      fields: {},
+      id: skipId ? undefined : String(n),
+      fields,
       children: role === "templates" ? [{ kind: "Child", plus: false, name: "Inputs", fields: {} }] : undefined,
     };
     persist([...objects, obj]);
-    setPicked(name);
+    setPicked(objectKey(obj, objects.length));
   };
 
   return (
@@ -184,7 +281,7 @@ function ObjectBrowser({
             placeholder={`Filter ${title.toLowerCase()}…`}
             className="h-8 w-full rounded-sm border border-border bg-surface px-2 text-sm outline-none placeholder:text-subtle"
           />
-          {cats.length ? (
+          {cats.length && !isEntities ? (
             <select
               className="mt-2 h-8 w-full rounded-sm border border-border bg-surface px-2 text-xs"
               value={cat}
@@ -196,6 +293,24 @@ function ObjectBrowser({
               ))}
             </select>
           ) : null}
+          {isEntities && classOptions
+            ? ENTITY_CLASS_KEYS.map((key) => (
+                <select
+                  key={key}
+                  className="mt-2 h-8 w-full rounded-sm border border-border bg-surface px-2 text-xs"
+                  value={classFilter[key]}
+                  onChange={(e) => setClassFilter((prev) => ({ ...prev, [key]: e.target.value }))}
+                >
+                  <option value="all">All {key === "Ref" ? "templates" : key}</option>
+                  {classOptions[key].map((value) => (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  ))}
+                  <option value="__none">Unclassified</option>
+                </select>
+              ))
+            : null}
           <div className="mt-2 flex flex-wrap gap-2">
             <Button size="sm" onClick={() => claim()}>
               New {kindName}
@@ -217,23 +332,73 @@ function ObjectBrowser({
               >
                 All
               </button>
-              <button
-                className={idFilter === "missing" ? "text-fg" : "text-muted hover:text-fg"}
-                onClick={() => setIdFilter("missing")}
-              >
-                No ID ({missingIds.length})
-              </button>
+              {usesBlockIds ? (
+                <>
+                  <button
+                    className={idFilter === "numeric" ? "text-fg" : "text-muted hover:text-fg"}
+                    onClick={() => setIdFilter("numeric")}
+                  >
+                    Numeric ({objects.filter((o) => blockIdentity(o).kind === "numeric").length})
+                  </button>
+                  <button
+                    className={idFilter === "floating" ? "text-fg" : "text-muted hover:text-fg"}
+                    onClick={() => setIdFilter("floating")}
+                  >
+                    Floating ({floats.length})
+                  </button>
+                </>
+              ) : (
+                <button
+                  className={idFilter === "missing" ? "text-fg" : "text-muted hover:text-fg"}
+                  onClick={() => setIdFilter("missing")}
+                >
+                  No ID ({missingIds.length})
+                </button>
+              )}
             </div>
           ) : null}
           <p className="mt-2 text-xs text-subtle">
             {visible.length} / {objects.length}
-            {usesIds ? ` · ${unused.total} unused IDs` : ""}
+            {usesNumericIds ? ` · ${unused.total} unused IDs` : ""}
+            {usesBlockIds ? ` · ${floats.length} floating · ${unused.total} free numbers` : ""}
           </p>
         </div>
+        {usesBlockIds && floats.length ? (
+          <div className="border-b border-border p-2">
+            <p className="text-xs uppercase tracking-[0.14em] text-accent">Floating IDs</p>
+            <p className="mt-1 text-xs text-subtle">
+              No number — the game treats <span className="font-mono">+Block Name</span> /{" "}
+              <span className="font-mono">Block Name</span> as the ID.
+            </p>
+            <div className="mt-2 flex flex-wrap gap-1">
+              {floats.slice(0, 24).map((obj) => {
+                const ident = blockIdentity(obj);
+                return (
+                  <button
+                    key={ident.label}
+                    className="rounded-sm border border-border px-1.5 py-0.5 font-mono text-[11px] text-muted hover:bg-elevated hover:text-fg"
+                    onClick={() => {
+                      setIdFilter("floating");
+                      setPicked(objectKey(obj, objects.indexOf(obj)));
+                    }}
+                    title={obj.plus ? `{ +Block Name: ${obj.name} }` : `{ Block Name: ${obj.name} }`}
+                  >
+                    {ident.label}
+                  </button>
+                );
+              })}
+              {floats.length > 24 ? <span className="px-1 text-[11px] text-subtle">+{floats.length - 24}</span> : null}
+            </div>
+          </div>
+        ) : null}
         {usesIds && unused.total ? (
           <div className="border-b border-border p-2">
-            <p className="text-xs uppercase tracking-[0.14em] text-accent">Empty IDs</p>
-            <p className="mt-1 text-xs text-subtle">Claim a free Id to add a new {kindName.toLowerCase()}.</p>
+            <p className="text-xs uppercase tracking-[0.14em] text-accent">Empty numeric IDs</p>
+            <p className="mt-1 text-xs text-subtle">
+              {usesBlockIds
+                ? "Optional. Claim a number, or New Block to add a floating +Block Name."
+                : `Claim a free Id to add a new ${kindName.toLowerCase()}.`}
+            </p>
             <div className="mt-2 flex flex-wrap gap-1">
               {unused.ranges.slice(0, 8).map((range) => (
                 <button
@@ -265,20 +430,64 @@ function ObjectBrowser({
             <p className="p-4 text-sm text-muted">
               Import {fileName} from the Import page, or create a new {kindName.toLowerCase()} here.
             </p>
+          ) : isEntities ? (
+            groupByEntityType(visible.slice(0, 500), byName).map((group) => (
+              <div key={group.key}>
+                <p className="sticky top-0 z-10 bg-surface px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-accent">
+                  {group.key}
+                  <span className="ml-2 text-subtle">{group.rows.length}</span>
+                </p>
+                {group.rows.map((obj) => {
+                  const index = objects.indexOf(obj);
+                  const label = locaLabel(loca, obj.name, language) || objectLabel(obj);
+                  const key = objectKey(obj, index);
+                  const line = entityClassLine(obj, byName);
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => setPicked(key)}
+                      className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm ${
+                        selected && objectKey(selected, selectedIndex) === key ? "bg-elevated" : "hover:bg-elevated/50"
+                      }`}
+                    >
+                      <ItemIcon name={obj.name} fields={obj.fields} className="size-6 rounded-sm" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate">{label}</span>
+                        {line ? <span className="block truncate font-mono text-[11px] text-subtle">{line}</span> : null}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            ))
           ) : (
             visible.slice(0, 500).map((obj) => {
-              const label = locaLabel(loca, obj.name, language);
+              const index = objects.indexOf(obj);
+              const label = locaLabel(loca, obj.name, language) || objectLabel(obj);
+              const key = objectKey(obj, index);
               return (
                 <button
-                  key={obj.name}
-                  onClick={() => setPicked(obj.name)}
+                  key={key}
+                  onClick={() => setPicked(key)}
                   className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm ${
-                    selected?.name === obj.name ? "bg-elevated" : "hover:bg-elevated/50"
+                    selected && objectKey(selected, selectedIndex) === key ? "bg-elevated" : "hover:bg-elevated/50"
                   }`}
                 >
                   <ItemIcon name={obj.name} fields={obj.fields} className="size-6 rounded-sm" />
-                  <span className="min-w-0 flex-1 truncate">{label || obj.name}</span>
-                  {role === "templates" ? null : (
+                  <span className="min-w-0 flex-1 truncate">{label}</span>
+                  {meta.idMode === "none" && role !== "blocks" ? (
+                    obj.plus ? (
+                      <span className="shrink-0 font-mono text-[11px] text-subtle">+{obj.kind}</span>
+                    ) : null
+                  ) : usesBlockIds ? (
+                    <span
+                      className={`shrink-0 font-mono text-xs ${
+                        blockIdentity(obj).kind === "floating" ? "text-accent" : "text-subtle"
+                      }`}
+                    >
+                      {blockIdentity(obj).label}
+                    </span>
+                  ) : (
                     <span className={`shrink-0 font-mono text-xs ${obj.id ? "text-subtle" : "text-warn"}`}>
                       {obj.id || "no id"}
                     </span>
@@ -290,14 +499,15 @@ function ObjectBrowser({
         </div>
       </aside>
       <section className="min-h-0 overflow-auto p-6">
-        {selected ? (
+        {selected && selectedIndex >= 0 ? (
           <ObjectDetail
             obj={selected}
             role={role}
             label={locaLabel(loca, selected.name, language)}
             thin={!hasText}
-            onPatch={(mut) => patch(selected.name, mut)}
+            onPatch={(mut) => patch(selectedIndex, mut)}
             onCompare={onCompare}
+            inherit={isEntities ? (key) => resolvedField(selected, key, byName) : undefined}
           />
         ) : (
           <p className="text-sm text-muted">Select an entry.</p>
@@ -314,14 +524,17 @@ function ObjectDetail({
   thin,
   onPatch,
   onCompare,
+  inherit,
 }: {
   obj: EcfObject;
-  role: "items" | "blocks" | "tokens" | "templates";
+  role: ConfigRole;
   label: string;
   thin: boolean;
   onPatch: (mut: (obj: EcfObject) => EcfObject) => void;
   onCompare?: (name: string) => void;
+  inherit?: (key: string) => string;
 }) {
+  const meta = configMeta(role);
   const preferred = statsFor(role);
   const extra = Object.keys(obj.fields).filter((k) => k !== "Label" && !preferred.includes(k));
   const [newKey, setNewKey] = useState("");
@@ -329,8 +542,7 @@ function ObjectDetail({
   const inputs = role === "templates" ? templateInputs(obj) : [];
   const setField = (key: string, value: string) =>
     onPatch((cur) => ({ ...cur, fields: { ...cur.fields, [key]: value } }));
-  const setInputs = (rows: { name: string; count: string }[]) =>
-    onPatch((cur) => withTemplateInputs(cur, rows));
+  const setInputs = (rows: { name: string; count: string }[]) => onPatch((cur) => withTemplateInputs(cur, rows));
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -338,11 +550,29 @@ function ObjectDetail({
         <ItemIcon name={obj.name} fields={obj.fields} className="size-16 rounded-sm" />
         <div className="min-w-0 flex-1">
           <p className="text-xs uppercase tracking-[0.14em] text-accent">{obj.kind}</p>
-          <h2 className="mt-1 text-2xl font-medium tracking-tight">{label || obj.name}</h2>
+          <h2 className="mt-1 text-2xl font-medium tracking-tight">{label || objectLabel(obj)}</h2>
           <p className="mt-1 font-mono text-sm text-muted">
-            {obj.name}
-            {obj.id ? ` · Id ${obj.id}` : role === "templates" ? "" : " · no id"}
+            {objectLabel(obj)}
+            {obj.id ? ` · Id ${obj.id}` : meta?.idMode === "required" ? " · no id" : ""}
           </p>
+          {role === "eclass" ? (
+            <p className="mt-2 flex flex-wrap gap-1 text-[11px]">
+              {ENTITY_CLASS_KEYS.map((key) => {
+                const own = (obj.fields[key] ?? "").trim();
+                const value = own || inherit?.(key) || "";
+                if (!value) return null;
+                return (
+                  <span
+                    key={key}
+                    className={`rounded-sm px-1.5 py-0.5 font-mono ${own ? "bg-elevated text-fg" : "bg-bg text-subtle"}`}
+                    title={own ? key : `${key} inherited from ${obj.fields.Ref || "Ref"}`}
+                  >
+                    {key}:{value}
+                  </span>
+                );
+              })}
+            </p>
+          ) : null}
         </div>
         {onCompare ? (
           <Button size="sm" variant="secondary" onClick={() => onCompare(obj.name)}>
@@ -360,23 +590,46 @@ function ObjectDetail({
         <Field label="Name">
           <Input value={obj.name} onChange={(e) => onPatch((cur) => ({ ...cur, name: e.target.value }))} />
         </Field>
-        {role === "templates" ? null : (
-          <Field label="Id">
+        {meta?.idMode === "none" && role !== "blocks" ? null : (
+          <Field label={role === "blocks" ? "Numeric Id (optional)" : "Id"}>
             <Input
               value={obj.id ?? ""}
-              placeholder="empty — assign an unused Id"
+              placeholder={role === "blocks" ? "empty — Name is the floating ID" : "empty — assign an unused Id"}
               onChange={(e) => onPatch((cur) => ({ ...cur, id: e.target.value || undefined }))}
             />
           </Field>
         )}
+        <div className="sm:col-span-2">
+          <Field label="Header">
+            <button
+              type="button"
+              className="flex h-10 w-full items-center justify-between rounded-sm border border-border bg-bg px-3 font-mono text-sm"
+              onClick={() => onPatch((cur) => ({ ...cur, plus: !cur.plus }))}
+            >
+              <span className="truncate">
+                {`{ ${obj.plus ? "+" : ""}${obj.kind}${obj.id ? ` Id: ${obj.id}` : ""}${obj.name ? ` Name: ${obj.name}` : ""} }`}
+              </span>
+              <span className="ml-2 shrink-0 text-xs uppercase tracking-[0.12em] text-accent">
+                {obj.plus ? `+${obj.kind}` : obj.kind}
+              </span>
+            </button>
+          </Field>
+        </div>
       </div>
       <h3 className="mt-6 text-xs font-medium uppercase tracking-[0.14em] text-accent">Stats</h3>
       <div className="mt-2 grid gap-3 sm:grid-cols-2">
-        {preferred.map((key) => (
-          <Field key={key} label={key}>
-            <Input value={obj.fields[key] ?? ""} onChange={(e) => setField(key, e.target.value)} />
-          </Field>
-        ))}
+        {preferred.map((key) => {
+          const inherited = inherit && !(obj.fields[key] ?? "").trim() ? inherit(key) : "";
+          return (
+            <Field key={key} label={key}>
+              <Input
+                value={obj.fields[key] ?? ""}
+                placeholder={inherited ? `from ${obj.fields.Ref || "template"}: ${inherited}` : undefined}
+                onChange={(e) => setField(key, e.target.value)}
+              />
+            </Field>
+          );
+        })}
       </div>
       {extra.length ? (
         <>
@@ -417,21 +670,13 @@ function ObjectDetail({
               <div key={`${row.name}-${index}`} className="grid grid-cols-[1fr_80px_auto] gap-2">
                 <Input
                   value={row.name}
-                  onChange={(e) =>
-                    setInputs(inputs.map((r, i) => (i === index ? { ...r, name: e.target.value } : r)))
-                  }
+                  onChange={(e) => setInputs(inputs.map((r, i) => (i === index ? { ...r, name: e.target.value } : r)))}
                 />
                 <Input
                   value={row.count}
-                  onChange={(e) =>
-                    setInputs(inputs.map((r, i) => (i === index ? { ...r, count: e.target.value } : r)))
-                  }
+                  onChange={(e) => setInputs(inputs.map((r, i) => (i === index ? { ...r, count: e.target.value } : r)))}
                 />
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setInputs(inputs.filter((_, i) => i !== index))}
-                >
+                <Button size="sm" variant="ghost" onClick={() => setInputs(inputs.filter((_, i) => i !== index))}>
                   Remove
                 </Button>
               </div>
@@ -442,10 +687,7 @@ function ObjectDetail({
                 placeholder="Ingredient name"
                 onChange={(e) => setNewInput((s) => ({ ...s, name: e.target.value }))}
               />
-              <Input
-                value={newInput.count}
-                onChange={(e) => setNewInput((s) => ({ ...s, count: e.target.value }))}
-              />
+              <Input value={newInput.count} onChange={(e) => setNewInput((s) => ({ ...s, count: e.target.value }))} />
               <Button
                 size="sm"
                 variant="secondary"
@@ -460,7 +702,118 @@ function ObjectDetail({
             </div>
           </div>
         </div>
-      ) : null}
+      ) : (
+        <ChildrenEditor obj={obj} onPatch={onPatch} />
+      )}
+    </div>
+  );
+}
+
+function ChildrenEditor({
+  obj,
+  onPatch,
+}: {
+  obj: EcfObject;
+  onPatch: (mut: (obj: EcfObject) => EcfObject) => void;
+}) {
+  const children = obj.children ?? [];
+  const setChildren = (next: EcfObject[]) => onPatch((cur) => ({ ...cur, children: next }));
+  const [newChild, setNewChild] = useState("Items");
+  return (
+    <div className="mt-6">
+      <h3 className="text-xs font-medium uppercase tracking-[0.14em] text-accent">Child blocks</h3>
+      <p className="mt-1 text-xs text-subtle">Loot rows, sensors, modify stats — nested {`{ Child … }`}</p>
+      <div className="mt-2 space-y-3">
+        {children.map((child, index) => (
+          <div key={`${child.name}-${index}`} className="rounded-sm border border-border p-3">
+            <div className="mb-2 flex items-center gap-2">
+              <Input
+                className="h-8 font-mono text-xs"
+                value={child.name}
+                onChange={(e) =>
+                  setChildren(children.map((c, i) => (i === index ? { ...c, name: e.target.value } : c)))
+                }
+              />
+              <Button size="sm" variant="ghost" onClick={() => setChildren(children.filter((_, i) => i !== index))}>
+                Remove
+              </Button>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {Object.entries(child.fields).map(([key, value]) => (
+                <Field key={key} label={key}>
+                  <Input
+                    value={value}
+                    onChange={(e) =>
+                      setChildren(
+                        children.map((c, i) =>
+                          i === index ? { ...c, fields: { ...c.fields, [key]: e.target.value } } : c,
+                        ),
+                      )
+                    }
+                  />
+                </Field>
+              ))}
+            </div>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="mt-2"
+              onClick={() => {
+                const key = `Field_${Object.keys(child.fields).length}`;
+                setChildren(
+                  children.map((c, i) => (i === index ? { ...c, fields: { ...c.fields, [key]: "" } } : c)),
+                );
+              }}
+            >
+              Add field
+            </Button>
+          </div>
+        ))}
+        <div className="flex gap-2">
+          <Input
+            className="h-8 w-40"
+            value={newChild}
+            placeholder="Child name"
+            onChange={(e) => setNewChild(e.target.value)}
+          />
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={!newChild.trim()}
+            onClick={() => {
+              setChildren([...children, { kind: "Child", plus: false, name: newChild.trim(), fields: {} }]);
+              setNewChild("Items");
+            }}
+          >
+            Add child
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function YamlEditor({ role, fileName, title }: { role: string; fileName: string; title: string }) {
+  const catalog = usePdaStore((s) => s.catalog);
+  const setCatalogText = usePdaStore((s) => s.setCatalogText);
+  const text = catalogText(catalog, role)?.text ?? "";
+  return (
+    <div className="mx-auto h-full max-w-4xl overflow-auto p-6">
+      <div className="mb-4 flex items-end justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-medium tracking-tight">{title}</h2>
+          <p className="mt-1 text-sm text-muted">{fileName} — YAML. Saved into this workshop on every keystroke.</p>
+        </div>
+        <Button size="sm" variant="secondary" disabled={!text.trim()} onClick={() => download(fileName, text, "text/yaml")}>
+          Export
+        </Button>
+      </div>
+      <Textarea
+        className="min-h-[60vh] font-mono text-xs leading-5"
+        value={text}
+        placeholder={"Sectors:\n  - Coordinates: [0, 0, 0]\n    Playfields:\n      - ['0, 0, 0', My Planet, Planet]"}
+        onChange={(e) => setCatalogText(role, e.target.value, catalogText(catalog, role)?.path || fileName)}
+      />
     </div>
   );
 }
@@ -582,7 +935,11 @@ function BlockCompare({ initial }: { initial: string | null }) {
                     <td className="py-1.5 font-mono text-xs">{row.right || "—"}</td>
                     <td
                       className={`py-1.5 font-mono text-xs ${
-                        row.delta == null || row.delta === 0 ? "text-subtle" : row.delta > 0 ? "text-accent" : "text-danger"
+                        row.delta == null || row.delta === 0
+                          ? "text-subtle"
+                          : row.delta > 0
+                            ? "text-accent"
+                            : "text-danger"
                       }`}
                     >
                       {row.delta == null || row.delta === 0 ? "—" : row.delta > 0 ? `+${row.delta}` : String(row.delta)}

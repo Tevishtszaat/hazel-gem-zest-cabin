@@ -7,39 +7,26 @@ import {
   type DialogueState,
 } from "./dialogues.ts";
 import { parseEcfObjects, type EcfObject } from "./ecf.ts";
+import { configMeta, type ConfigRole } from "./config-roles.ts";
 import type { ScenarioCatalog } from "./scenario-index.ts";
 import type { CsvTable } from "./types.ts";
+
+export type { ConfigRole } from "./config-roles.ts";
 
 export function catalogText(catalog: ScenarioCatalog, role: string) {
   return (catalog.texts ?? []).find((t) => t.role === role);
 }
 
-export type ConfigRole = "items" | "blocks" | "tokens" | "factions" | "templates" | "reputation" | "warfare" | "galaxy";
-
 export function objectsFor(catalog: ScenarioCatalog, role: ConfigRole): EcfObject[] {
   const text = catalogText(catalog, role)?.text;
   if (text) return parseEcfObjects(text);
-  const kind =
-    role === "items"
-      ? "item"
-      : role === "blocks"
-        ? "block"
-        : role === "tokens"
-          ? "token"
-          : role === "templates"
-            ? "template"
-            : role === "reputation"
-              ? "reputation"
-              : role === "warfare"
-                ? "element"
-                : role === "galaxy"
-                  ? "galaxyconfig"
-                  : "faction";
+  const meta = configMeta(role);
+  const kind = meta?.catalogKind || meta?.kind.toLowerCase() || "item";
   return catalog.entries
     .filter((e) => e.kind === kind)
     .map((e) => ({
-      kind,
-      plus: false,
+      kind: meta?.kind || kind,
+      plus: Boolean(meta?.plus),
       name: e.name,
       fields: e.label ? { Label: e.label } : ({} as Record<string, string>),
     }));

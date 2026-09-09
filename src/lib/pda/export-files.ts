@@ -1,4 +1,5 @@
 import { stringifyEcfObjects } from "./ecf.ts";
+import { CONFIG_METAS } from "./config-roles.ts";
 import {
   catalogText,
   dialogueCsvTable,
@@ -30,13 +31,6 @@ function fileName(catalog: ScenarioCatalog, role: string, fallback: string) {
 }
 
 export function exportSlots(project: PdaProject, catalog: ScenarioCatalog): ExportSlot[] {
-  const items = objectsFor(catalog, "items");
-  const blocks = objectsFor(catalog, "blocks");
-  const tokens = objectsFor(catalog, "tokens");
-  const templates = objectsFor(catalog, "templates");
-  const reputation = objectsFor(catalog, "reputation");
-  const warfare = objectsFor(catalog, "warfare");
-  const galaxy = objectsFor(catalog, "galaxy");
   const loca = localizationTable(catalog);
   const dialogues = dialogueDocFor(catalog);
   const dlgCsv = dialogueCsvTable(catalog, dialogues);
@@ -44,7 +38,7 @@ export function exportSlots(project: PdaProject, catalog: ScenarioCatalog): Expo
   const dlgCsvKeys = Object.keys(dlgCsv.rows).length;
   const loaded = catalogLoaded(catalog);
 
-  return [
+  const slots: ExportSlot[] = [
     {
       id: "pdaYaml",
       label: "PDA.yaml",
@@ -63,69 +57,39 @@ export function exportSlots(project: PdaProject, catalog: ScenarioCatalog): Expo
       detail: `${Object.keys(project.csv.rows).length} keys`,
       build: () => exportCsv(project),
     },
-    {
-      id: "items",
-      label: "Items",
-      filename: fileName(catalog, "items", "ItemsConfig.ecf"),
+  ];
+
+  for (const meta of CONFIG_METAS) {
+    if (meta.format === "yaml") {
+      const text = catalogText(catalog, meta.role)?.text ?? "";
+      slots.push({
+        id: meta.role,
+        label: meta.label,
+        filename: fileName(catalog, meta.role, meta.file),
+        mime: "text/yaml",
+        ready: text.trim().length > 0,
+        detail: text.trim() ? `${text.split(/\r?\n/).length} lines` : loaded ? `No ${meta.file} loaded` : `Import ${meta.file}`,
+        build: () => text,
+      });
+      continue;
+    }
+    const objects = objectsFor(catalog, meta.role);
+    slots.push({
+      id: meta.role,
+      label: meta.label,
+      filename: fileName(catalog, meta.role, meta.file),
       mime: "text/plain",
-      ready: items.length > 0,
-      detail: items.length ? `${items.length} items` : loaded ? "No ItemsConfig loaded" : "Import ItemsConfig.ecf",
-      build: () => stringifyEcfObjects(items),
-    },
-    {
-      id: "blocks",
-      label: "Blocks",
-      filename: fileName(catalog, "blocks", "BlocksConfig.ecf"),
-      mime: "text/plain",
-      ready: blocks.length > 0,
-      detail: blocks.length ? `${blocks.length} blocks` : loaded ? "No BlocksConfig loaded" : "Import BlocksConfig.ecf",
-      build: () => stringifyEcfObjects(blocks),
-    },
-    {
-      id: "templates",
-      label: "Templates",
-      filename: fileName(catalog, "templates", "Templates.ecf"),
-      mime: "text/plain",
-      ready: templates.length > 0,
-      detail: templates.length ? `${templates.length} recipes` : loaded ? "No Templates.ecf loaded" : "Import Templates.ecf",
-      build: () => stringifyEcfObjects(templates),
-    },
-    {
-      id: "tokens",
-      label: "Tokens",
-      filename: fileName(catalog, "tokens", "TokenConfig.ecf"),
-      mime: "text/plain",
-      ready: tokens.length > 0,
-      detail: tokens.length ? `${tokens.length} tokens` : loaded ? "No TokenConfig loaded" : "Import TokenConfig.ecf",
-      build: () => stringifyEcfObjects(tokens),
-    },
-    {
-      id: "reputation",
-      label: "DefReputation",
-      filename: fileName(catalog, "reputation", "DefReputation.ecf"),
-      mime: "text/plain",
-      ready: reputation.length > 0,
-      detail: reputation.length ? `${reputation.length} origins` : loaded ? "No DefReputation.ecf loaded" : "Import DefReputation.ecf",
-      build: () => stringifyEcfObjects(reputation),
-    },
-    {
-      id: "warfare",
-      label: "FactionWarfare",
-      filename: fileName(catalog, "warfare", "FactionWarfare.ecf"),
-      mime: "text/plain",
-      ready: warfare.length > 0,
-      detail: warfare.length ? `${warfare.length} elements` : loaded ? "No FactionWarfare.ecf loaded" : "Import FactionWarfare.ecf",
-      build: () => stringifyEcfObjects(warfare),
-    },
-    {
-      id: "galaxy",
-      label: "GalaxyConfig",
-      filename: fileName(catalog, "galaxy", "GalaxyConfig.ecf"),
-      mime: "text/plain",
-      ready: galaxy.length > 0,
-      detail: galaxy.length ? `${galaxy.length} entries` : loaded ? "No GalaxyConfig.ecf loaded" : "Import GalaxyConfig.ecf",
-      build: () => stringifyEcfObjects(galaxy),
-    },
+      ready: objects.length > 0,
+      detail: objects.length
+        ? `${objects.length} entries`
+        : loaded
+          ? `No ${meta.file} loaded`
+          : `Import ${meta.file}`,
+      build: () => stringifyEcfObjects(objects),
+    });
+  }
+
+  slots.push(
     {
       id: "localization",
       label: "Localization",
@@ -157,7 +121,9 @@ export function exportSlots(project: PdaProject, catalog: ScenarioCatalog): Expo
           : "Import Dialogues.csv",
       build: () => writeDialoguesCsv(catalog, dialogues),
     },
-  ];
+  );
+
+  return slots;
 }
 
 export function downloadText(name: string, text: string, type: string) {

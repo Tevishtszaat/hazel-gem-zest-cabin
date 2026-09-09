@@ -32,7 +32,7 @@ export const IMPORT_SLOTS: {
   {
     id: "configs",
     title: "Import config files",
-    hint: "ItemsConfig, BlocksConfig, Templates, DefReputation, FactionWarfare, GalaxyConfig, TokenConfig.",
+    hint: "Items, Blocks, Templates, Tokens, Factions, Entities, Containers, LootGroups, Traders, Materials, Status, GlobalDefs, and other .ecf files.",
     accept: ".ecf",
   },
   {
@@ -107,7 +107,29 @@ export const IMPORT_SLOTS: {
 ];
 
 const ROLE_FOR_KIND: Record<Exclude<ImportKind, "scenario">, string[]> = {
-  configs: ["items", "blocks", "templates", "eclass", "tokens", "egroups", "reputation", "warfare", "galaxy", "ecf"],
+  configs: [
+    "items",
+    "blocks",
+    "templates",
+    "eclass",
+    "tokens",
+    "egroups",
+    "reputation",
+    "warfare",
+    "galaxy",
+    "factions",
+    "containers",
+    "lootgroups",
+    "traders",
+    "materials",
+    "statuseffects",
+    "globaldefs",
+    "blockgroups",
+    "blockshapes",
+    "animations",
+    "baiconfig",
+    "ecf",
+  ],
   localization: ["localization"],
   itemImages: ["itemPicture"],
   pdaImages: ["picture"],
