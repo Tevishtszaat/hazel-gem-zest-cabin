@@ -1,0 +1,38 @@
+{
+  "url": "http://127.0.0.1:8080/library",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Axis 2026 Creator Particlewave",
+      "hasCanvas": false,
+      "bodyTextLen": 548,
+      "bodyTextHash": "87cc5b61e6ae71faa07117b40e93cb2f596de48f4a5966ac0357d31f58457c9b",
+      "bodyTextPrefix": "AX Axis 2026 Creator Particlewave PDA Language English PDA Dialo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/library-templates.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Axis 2026 Creator Particlewave",
+      "hasCanvas": false,
+      "bodyTextLen": 548,
+      "bodyTextHash": "87cc5b61e6ae71faa07117b40e93cb2f596de48f4a5966ac0357d31f58457c9b",
+      "bodyTextPrefix": "AX Axis 2026 Creator Particlewave PDA Language English PDA Dialo",
+      "horizontalOverflow": false,
+      "consoleErrors": [
+        "A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:\n\n- A server/client branch `if (typeof window !== 'undefined')`.\n- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.\n- Date formatting in a user's locale which doesn't match the server.\n- External changing data without sending a snapshot of it along with the HTML.\n- Invalid HTML tag nesting.\n\nIt can also happen if the client has a browser extension installed which messes with the HTML before React loaded.\n\n%s%s https://react.dev/link/hydration-mismatch \n\n  ...\n    <MatchView router={{...}} match={{id:\"/libra...\", ...}}>\n      <SafeFragment>\n        <SafeFragment fallback={null}>\n          <CatchBoundary getResetKey={function getResetKey} errorComponent={function AppErrorComponent} ...>\n            <SafeFragment fallback={function fallback}>\n              <MatchInnerImpl match={{id:\"/libra...\", ...}}>\n                <Lazy>\n                  <LibraryPage>\n                    <div className=\"flex h-dvh...\">\n                      <AppHeader>\n                      <div>\n                      <div>\n                      <div className=\"min-h-0 fl...\">\n                        <ObjectBrowser role=\"items\" title=\"Items\">\n                          <div className=\"grid h-ful...\">\n                            <aside className=\"flex min-h...\">\n                              <div className=\"border-b b...\">\n                                <input\n                                  value=\"\"\n                                  onChange={function onChange}\n                                  placeholder=\"Filter items…\"\n                                  className=\"h-8 w-full rounded-sm border border-border bg-surface px-2 text-sm outlin...\"\n-                                 style={{caret-color:\"transparent\"}}\n                                >\n                                ...\n                              ...\n                            ...\n                      ...\n"
+      ],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/library-templates-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/library-templates.json"
+}

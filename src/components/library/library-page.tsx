@@ -4,7 +4,8 @@ import { BbText } from "@/components/editor/bb-text.tsx";
 import { ItemIcon } from "@/components/editor/pda-image.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Input, Textarea } from "@/components/ui/input.tsx";
-import { compareObjects, similarBlocks, statsFor } from "@/lib/pda/config-stats.ts";
+import { GalaxyEditor, ReputationTable, WarfareEditor } from "@/components/library/config-tabs.tsx";
+import { compareObjects, numericIds, similarBlocks, statsFor, templateInputs, unusedNumericIds, withTemplateInputs } from "@/lib/pda/config-stats.ts";
 import { stringifyEcfObjects, type EcfObject } from "@/lib/pda/ecf.ts";
 import {
   catalogText,
@@ -18,7 +19,7 @@ import type { CsvTable } from "@/lib/pda/types.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
 import { warmImageCache } from "@/lib/pda/image-store.ts";
 
-type Tab = "items" | "blocks" | "tokens" | "compare" | "localization";
+type Tab = "items" | "blocks" | "templates" | "tokens" | "reputation" | "warfare" | "galaxy" | "compare" | "localization";
 
 function download(name: string, text: string, type: string) {
   const blob = new Blob([text], { type });
@@ -36,7 +37,11 @@ export function LibraryPage() {
   const tabs: { id: Tab; label: string }[] = [
     { id: "items", label: "Items" },
     { id: "blocks", label: "Blocks" },
+    { id: "templates", label: "Templates" },
     { id: "tokens", label: "Tokens" },
+    { id: "reputation", label: "Reputation" },
+    { id: "warfare", label: "Warfare" },
+    { id: "galaxy", label: "Galaxy" },
     { id: "compare", label: "Compare" },
     { id: "localization", label: "Localization" },
   ];
@@ -47,8 +52,8 @@ export function LibraryPage() {
         <div>
           <h1 className="text-xl font-medium tracking-tight">Library</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted">
-            Edit item and block stats from ItemsConfig / BlocksConfig, compare blocks in the same category, and patch
-            Localization.csv.
+            Edit items, blocks, templates, reputation, faction warfare, and galaxy config. Unused IDs show as empty
+            slots you can claim.
           </p>
         </div>
       </div>
@@ -77,6 +82,10 @@ export function LibraryPage() {
           />
         ) : null}
         {tab === "tokens" ? <ObjectBrowser role="tokens" title="Tokens" /> : null}
+        {tab === "templates" ? <ObjectBrowser role="templates" title="Templates" /> : null}
+        {tab === "reputation" ? <ReputationTable /> : null}
+        {tab === "warfare" ? <WarfareEditor /> : null}
+        {tab === "galaxy" ? <GalaxyEditor /> : null}
         {tab === "compare" ? <BlockCompare initial={compareLeft} /> : null}
         {tab === "localization" ? <LocaEditor /> : null}
       </div>
@@ -92,7 +101,7 @@ function ObjectBrowser({
   title,
   onCompare,
 }: {
-  role: "items" | "blocks" | "tokens";
+  role: "items" | "blocks" | "tokens" | "templates";
   title: string;
   onCompare?: (name: string) => void;
 }) {
@@ -103,6 +112,7 @@ function ObjectBrowser({
   const objects = useMemo(() => objectsFor(catalog, role), [catalog, role]);
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState<string | null>(null);
+  const [idFilter, setIdFilter] = useState<"all" | "missing">("all");
   useEffect(() => {
     void warmImageCache();
   }, []);
@@ -113,7 +123,11 @@ function ObjectBrowser({
   }, [objects]);
   const [cat, setCat] = useState("all");
   const q = query.trim().toLowerCase();
+  const missingIds = objects.filter((obj) => !obj.id);
+  const unused = useMemo(() => unusedNumericIds(numericIds(objects)), [objects]);
+  const usesIds = role === "items" || role === "blocks" || role === "tokens";
   const visible = objects.filter((obj) => {
+    if (idFilter === "missing" && obj.id) return false;
     if (cat !== "all" && obj.fields.Category !== cat) return false;
     if (!q) return true;
     const label = locaLabel(loca, obj.name, language);
@@ -121,14 +135,43 @@ function ObjectBrowser({
   });
   const selected = objects.find((o) => o.name === picked) ?? visible[0];
   const hasText = Boolean(catalogText(catalog, role));
-  const fileName = role === "items" ? "ItemsConfig.ecf" : role === "blocks" ? "BlocksConfig.ecf" : "TokenConfig.ecf";
+  const fileName =
+    role === "items"
+      ? "ItemsConfig.ecf"
+      : role === "blocks"
+        ? "BlocksConfig.ecf"
+        : role === "templates"
+          ? "Templates.ecf"
+          : "TokenConfig.ecf";
+  const kindName = role === "items" ? "Item" : role === "blocks" ? "Block" : role === "templates" ? "Template" : "Token";
 
   const persist = (next: EcfObject[]) => {
     setCatalogText(role, stringifyEcfObjects(next), catalogText(catalog, role)?.path || fileName);
   };
 
   const patch = (name: string, mut: (obj: EcfObject) => EcfObject) => {
-    persist(objects.map((obj) => (obj.name === name ? mut({ ...obj, fields: { ...obj.fields } }) : obj)));
+    persist(objects.map((obj) => (obj.name === name ? mut({ ...obj, fields: { ...obj.fields }, children: obj.children }) : obj)));
+  };
+
+  const claim = (id?: number) => {
+    const used = new Set(objects.map((o) => o.name.toLowerCase()));
+    let n = id ?? unused.next;
+    let name = role === "templates" ? "NewTemplate" : `New${kindName}${n}`;
+    let suffix = 2;
+    while (used.has(name.toLowerCase())) {
+      name = role === "templates" ? `NewTemplate${suffix}` : `New${kindName}${n}_${suffix}`;
+      suffix += 1;
+    }
+    const obj: EcfObject = {
+      kind: kindName,
+      plus: true,
+      name,
+      id: role === "templates" ? undefined : String(n),
+      fields: {},
+      children: role === "templates" ? [{ kind: "Child", plus: false, name: "Inputs", fields: {} }] : undefined,
+    };
+    persist([...objects, obj]);
+    setPicked(name);
   };
 
   return (
@@ -153,7 +196,10 @@ function ObjectBrowser({
               ))}
             </select>
           ) : null}
-          <div className="mt-2 flex gap-2">
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Button size="sm" onClick={() => claim()}>
+              New {kindName}
+            </Button>
             <Button
               size="sm"
               variant="secondary"
@@ -163,11 +209,62 @@ function ObjectBrowser({
               Export
             </Button>
           </div>
-          <p className="mt-2 text-xs text-subtle">{visible.length} / {objects.length}</p>
+          {usesIds ? (
+            <div className="mt-2 flex flex-wrap gap-2 text-xs">
+              <button
+                className={idFilter === "all" ? "text-fg" : "text-muted hover:text-fg"}
+                onClick={() => setIdFilter("all")}
+              >
+                All
+              </button>
+              <button
+                className={idFilter === "missing" ? "text-fg" : "text-muted hover:text-fg"}
+                onClick={() => setIdFilter("missing")}
+              >
+                No ID ({missingIds.length})
+              </button>
+            </div>
+          ) : null}
+          <p className="mt-2 text-xs text-subtle">
+            {visible.length} / {objects.length}
+            {usesIds ? ` · ${unused.total} unused IDs` : ""}
+          </p>
         </div>
+        {usesIds && unused.total ? (
+          <div className="border-b border-border p-2">
+            <p className="text-xs uppercase tracking-[0.14em] text-accent">Empty IDs</p>
+            <p className="mt-1 text-xs text-subtle">Claim a free Id to add a new {kindName.toLowerCase()}.</p>
+            <div className="mt-2 flex flex-wrap gap-1">
+              {unused.ranges.slice(0, 8).map((range) => (
+                <button
+                  key={`${range.from}-${range.to}`}
+                  className="rounded-sm border border-border px-1.5 py-0.5 font-mono text-[11px] text-muted hover:bg-elevated hover:text-fg"
+                  onClick={() => claim(range.from)}
+                  title={`${range.count} free · uses ${range.from}`}
+                >
+                  {range.from === range.to ? range.from : `${range.from}–${range.to}`}
+                </button>
+              ))}
+            </div>
+            <div className="mt-2 flex flex-wrap gap-1">
+              {unused.ids.slice(0, 24).map((id) => (
+                <button
+                  key={id}
+                  className="rounded-sm bg-elevated px-1.5 py-0.5 font-mono text-[11px] text-muted hover:text-fg"
+                  onClick={() => claim(id)}
+                >
+                  {id}
+                </button>
+              ))}
+              {unused.total > 24 ? <span className="px-1 text-[11px] text-subtle">+{unused.total - 24}</span> : null}
+            </div>
+          </div>
+        ) : null}
         <div className="min-h-0 flex-1 overflow-auto">
           {!objects.length ? (
-            <p className="p-4 text-sm text-muted">Import {title}Config.ecf from the Import page.</p>
+            <p className="p-4 text-sm text-muted">
+              Import {fileName} from the Import page, or create a new {kindName.toLowerCase()} here.
+            </p>
           ) : (
             visible.slice(0, 500).map((obj) => {
               const label = locaLabel(loca, obj.name, language);
@@ -181,7 +278,11 @@ function ObjectBrowser({
                 >
                   <ItemIcon name={obj.name} fields={obj.fields} className="size-6 rounded-sm" />
                   <span className="min-w-0 flex-1 truncate">{label || obj.name}</span>
-                  <span className="shrink-0 font-mono text-xs text-subtle">{obj.id || obj.name}</span>
+                  {role === "templates" ? null : (
+                    <span className={`shrink-0 font-mono text-xs ${obj.id ? "text-subtle" : "text-warn"}`}>
+                      {obj.id || "no id"}
+                    </span>
+                  )}
                 </button>
               );
             })
@@ -215,7 +316,7 @@ function ObjectDetail({
   onCompare,
 }: {
   obj: EcfObject;
-  role: "items" | "blocks" | "tokens";
+  role: "items" | "blocks" | "tokens" | "templates";
   label: string;
   thin: boolean;
   onPatch: (mut: (obj: EcfObject) => EcfObject) => void;
@@ -224,8 +325,12 @@ function ObjectDetail({
   const preferred = statsFor(role);
   const extra = Object.keys(obj.fields).filter((k) => k !== "Label" && !preferred.includes(k));
   const [newKey, setNewKey] = useState("");
+  const [newInput, setNewInput] = useState({ name: "", count: "1" });
+  const inputs = role === "templates" ? templateInputs(obj) : [];
   const setField = (key: string, value: string) =>
     onPatch((cur) => ({ ...cur, fields: { ...cur.fields, [key]: value } }));
+  const setInputs = (rows: { name: string; count: string }[]) =>
+    onPatch((cur) => withTemplateInputs(cur, rows));
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -236,7 +341,7 @@ function ObjectDetail({
           <h2 className="mt-1 text-2xl font-medium tracking-tight">{label || obj.name}</h2>
           <p className="mt-1 font-mono text-sm text-muted">
             {obj.name}
-            {obj.id ? ` · Id ${obj.id}` : ""}
+            {obj.id ? ` · Id ${obj.id}` : role === "templates" ? "" : " · no id"}
           </p>
         </div>
         {onCompare ? (
@@ -255,9 +360,15 @@ function ObjectDetail({
         <Field label="Name">
           <Input value={obj.name} onChange={(e) => onPatch((cur) => ({ ...cur, name: e.target.value }))} />
         </Field>
-        <Field label="Id">
-          <Input value={obj.id ?? ""} onChange={(e) => onPatch((cur) => ({ ...cur, id: e.target.value }))} />
-        </Field>
+        {role === "templates" ? null : (
+          <Field label="Id">
+            <Input
+              value={obj.id ?? ""}
+              placeholder="empty — assign an unused Id"
+              onChange={(e) => onPatch((cur) => ({ ...cur, id: e.target.value || undefined }))}
+            />
+          </Field>
+        )}
       </div>
       <h3 className="mt-6 text-xs font-medium uppercase tracking-[0.14em] text-accent">Stats</h3>
       <div className="mt-2 grid gap-3 sm:grid-cols-2">
@@ -298,6 +409,58 @@ function ObjectDetail({
           Add field
         </Button>
       </div>
+      {role === "templates" ? (
+        <div className="mt-6">
+          <h3 className="text-xs font-medium uppercase tracking-[0.14em] text-accent">Child Inputs</h3>
+          <div className="mt-2 space-y-2">
+            {inputs.map((row, index) => (
+              <div key={`${row.name}-${index}`} className="grid grid-cols-[1fr_80px_auto] gap-2">
+                <Input
+                  value={row.name}
+                  onChange={(e) =>
+                    setInputs(inputs.map((r, i) => (i === index ? { ...r, name: e.target.value } : r)))
+                  }
+                />
+                <Input
+                  value={row.count}
+                  onChange={(e) =>
+                    setInputs(inputs.map((r, i) => (i === index ? { ...r, count: e.target.value } : r)))
+                  }
+                />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setInputs(inputs.filter((_, i) => i !== index))}
+                >
+                  Remove
+                </Button>
+              </div>
+            ))}
+            <div className="grid grid-cols-[1fr_80px_auto] gap-2">
+              <Input
+                value={newInput.name}
+                placeholder="Ingredient name"
+                onChange={(e) => setNewInput((s) => ({ ...s, name: e.target.value }))}
+              />
+              <Input
+                value={newInput.count}
+                onChange={(e) => setNewInput((s) => ({ ...s, count: e.target.value }))}
+              />
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={!newInput.name.trim()}
+                onClick={() => {
+                  setInputs([...inputs, { name: newInput.name.trim(), count: newInput.count || "1" }]);
+                  setNewInput({ name: "", count: "1" });
+                }}
+              >
+                Add
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

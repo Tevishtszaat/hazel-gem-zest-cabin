@@ -9,6 +9,7 @@ export type ImportKind =
   | "pdaYaml"
   | "pdaCsv"
   | "dialogues"
+  | "dialoguesCsv"
   | "factions"
   | "sectors"
   | "playfields"
@@ -31,7 +32,7 @@ export const IMPORT_SLOTS: {
   {
     id: "configs",
     title: "Import config files",
-    hint: "ItemsConfig, BlocksConfig, EClassConfig, TokenConfig, EGroups.",
+    hint: "ItemsConfig, BlocksConfig, Templates, DefReputation, FactionWarfare, GalaxyConfig, TokenConfig.",
     accept: ".ecf",
   },
   {
@@ -67,9 +68,15 @@ export const IMPORT_SLOTS: {
   },
   {
     id: "dialogues",
-    title: "Import Dialogues",
-    hint: "Dialogues.ecf and Dialogues.csv — NPC states, options, and translated lines.",
-    accept: ".ecf,.csv",
+    title: "Import Dialogues.ecf",
+    hint: "NPC states, options, nexts, and functions.",
+    accept: ".ecf",
+  },
+  {
+    id: "dialoguesCsv",
+    title: "Import Dialogues.csv",
+    hint: "Translated dialogue lines (txt_ keys). Pair with Dialogues.ecf.",
+    accept: ".csv",
   },
   {
     id: "factions",
@@ -100,13 +107,14 @@ export const IMPORT_SLOTS: {
 ];
 
 const ROLE_FOR_KIND: Record<Exclude<ImportKind, "scenario">, string[]> = {
-  configs: ["items", "blocks", "eclass", "tokens", "egroups", "ecf"],
+  configs: ["items", "blocks", "templates", "eclass", "tokens", "egroups", "reputation", "warfare", "galaxy", "ecf"],
   localization: ["localization"],
   itemImages: ["itemPicture"],
   pdaImages: ["picture"],
   pdaYaml: ["pdaYaml"],
   pdaCsv: ["pdaCsv"],
-  dialogues: ["dialogues", "dialoguesCsv"],
+  dialogues: ["dialogues"],
+  dialoguesCsv: ["dialoguesCsv"],
   factions: ["factions"],
   sectors: ["sectors"],
   playfields: ["playfieldYaml"],

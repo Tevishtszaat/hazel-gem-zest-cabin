@@ -1,25 +1,11 @@
-import { Download } from "lucide-react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { APP_MARK, APP_SHORT, APP_SUBTITLE } from "@/lib/brand.ts";
-import { Button } from "@/components/ui/button.tsx";
-import { exportCsv, exportYaml } from "@/lib/pda/yaml-export.ts";
-import { counts } from "@/lib/pda/validate.ts";
 import { useProblems } from "@/lib/pda/use-problems.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
-
-function download(name: string, text: string, type: string) {
-  const blob = new Blob([text], { type });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = name;
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
 
 export function AppHeader() {
   const project = usePdaStore((s) => s.project);
   const setLanguage = usePdaStore((s) => s.setLanguage);
-  const n = counts(project);
   const languages = project.csv.languages;
 
   return (
@@ -47,35 +33,6 @@ export function AppHeader() {
             ))}
           </select>
         </label>
-
-        <div className="flex flex-wrap gap-2">
-          <Button
-            size="sm"
-            variant="secondary"
-            disabled={!n.chapters}
-            onClick={() => download("PDA.yaml", exportYaml(project), "text/yaml")}
-          >
-            Export YAML
-          </Button>
-          <Button
-            size="sm"
-            variant="secondary"
-            disabled={!n.chapters}
-            onClick={() => download("PDA.csv", exportCsv(project), "text/csv")}
-          >
-            Export CSV
-          </Button>
-          <Button
-            size="sm"
-            disabled={!n.chapters}
-            onClick={() => {
-              download("PDA.yaml", exportYaml(project), "text/yaml");
-              download("PDA.csv", exportCsv(project), "text/csv");
-            }}
-          >
-            <Download className="size-3.5" /> Both
-          </Button>
-        </div>
       </div>
       <AppNav />
     </header>
@@ -90,10 +47,11 @@ function AppNav() {
     { to: "/dialogues" as const, label: "Dialogues" },
     { to: "/import" as const, label: "Import" },
     { to: "/library" as const, label: "Library" },
+    { to: "/export" as const, label: "Export" },
     { to: "/debug" as const, label: "Debug" },
   ];
   return (
-    <nav className="grid grid-cols-5 border-t border-border">
+    <nav className="grid grid-cols-3 border-t border-border sm:grid-cols-6">
       {items.map((item) => {
         const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
         return (

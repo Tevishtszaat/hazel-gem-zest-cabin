@@ -1,0 +1,38 @@
+{
+  "url": "http://127.0.0.1:8081/export",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Axis 2026 Creator Particlewave",
+      "hasCanvas": false,
+      "bodyTextLen": 708,
+      "bodyTextHash": "d3ba9b7a8f35649d3fa900ba2c21e303f955fd37461c3a5d116f16d4ba5f1b3b",
+      "bodyTextPrefix": "AX Axis 2026 Creator Particlewave PDA Language English PDA Dialo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/export-dialogues-csv-built.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Axis 2026 Creator Particlewave",
+      "hasCanvas": false,
+      "bodyTextLen": 708,
+      "bodyTextHash": "d3ba9b7a8f35649d3fa900ba2c21e303f955fd37461c3a5d116f16d4ba5f1b3b",
+      "bodyTextPrefix": "AX Axis 2026 Creator Particlewave PDA Language English PDA Dialo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/export-dialogues-csv-built-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/export-dialogues-csv-built.json",
+  "divergesFromBaseline": false,
+  "baselineReasons": []
+}

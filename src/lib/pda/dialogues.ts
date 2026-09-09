@@ -238,6 +238,21 @@ export function looksLikeKey(value: string) {
   return /^(txt_|dlg|dialogue_|ch_|task_|opt_)/i.test(v) || /^[A-Za-z][A-Za-z0-9_]*$/.test(v);
 }
 
+export function collectDialogueKeys(doc: DialogueDoc): string[] {
+  const keys = new Set<string>();
+  const add = (value: string | undefined) => {
+    const v = value?.trim() ?? "";
+    if (/^(txt_|dlg_|dialogue_|opt_|ch_|task_)/i.test(v) && !/\s/.test(v)) keys.add(v);
+  };
+  for (const state of doc.states) {
+    add(state.output);
+    add(state.npcName);
+    add(state.comment);
+    for (const opt of state.options) add(opt.text);
+  }
+  return [...keys];
+}
+
 export function resolveDialogueText(value: string, loca?: CsvTable, pda?: CsvTable, language = "English") {
   if (!value) return "";
   if (!looksLikeKey(value)) return value;

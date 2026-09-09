@@ -1,5 +1,11 @@
 import { parseCsv, stringifyCsv } from "./csv.ts";
-import { parseDialogueDoc, serializeDialogueDoc, type DialogueDoc, type DialogueState } from "./dialogues.ts";
+import {
+  collectDialogueKeys,
+  parseDialogueDoc,
+  serializeDialogueDoc,
+  type DialogueDoc,
+  type DialogueState,
+} from "./dialogues.ts";
 import { parseEcfObjects, type EcfObject } from "./ecf.ts";
 import type { ScenarioCatalog } from "./scenario-index.ts";
 import type { CsvTable } from "./types.ts";
@@ -8,10 +14,27 @@ export function catalogText(catalog: ScenarioCatalog, role: string) {
   return (catalog.texts ?? []).find((t) => t.role === role);
 }
 
-export function objectsFor(catalog: ScenarioCatalog, role: "items" | "blocks" | "tokens" | "factions"): EcfObject[] {
+export type ConfigRole = "items" | "blocks" | "tokens" | "factions" | "templates" | "reputation" | "warfare" | "galaxy";
+
+export function objectsFor(catalog: ScenarioCatalog, role: ConfigRole): EcfObject[] {
   const text = catalogText(catalog, role)?.text;
   if (text) return parseEcfObjects(text);
-  const kind = role === "items" ? "item" : role === "blocks" ? "block" : role === "tokens" ? "token" : "faction";
+  const kind =
+    role === "items"
+      ? "item"
+      : role === "blocks"
+        ? "block"
+        : role === "tokens"
+          ? "token"
+          : role === "templates"
+            ? "template"
+            : role === "reputation"
+              ? "reputation"
+              : role === "warfare"
+                ? "element"
+                : role === "galaxy"
+                  ? "galaxyconfig"
+                  : "faction";
   return catalog.entries
     .filter((e) => e.kind === kind)
     .map((e) => ({
@@ -29,14 +52,30 @@ export function localizationTable(catalog: ScenarioCatalog): CsvTable {
 }
 
 export function dialogueStrings(catalog: ScenarioCatalog): CsvTable {
+  return dialogueCsvTable(catalog);
+}
+
+export function dialogueCsvTable(catalog: ScenarioCatalog, doc?: DialogueDoc): CsvTable {
+  const storedText = catalogText(catalog, "dialoguesCsv")?.text;
+  const stored = storedText ? parseCsv(storedText) : { languages: [] as string[], rows: {} as CsvTable["rows"] };
   const loca = localizationTable(catalog);
-  const extraText = catalogText(catalog, "dialoguesCsv")?.text;
-  if (!extraText) return loca;
-  const extra = parseCsv(extraText);
-  return {
-    languages: [...new Set([...loca.languages, ...extra.languages])],
-    rows: { ...loca.rows, ...extra.rows },
-  };
+  const keys = collectDialogueKeys(doc ?? dialogueDocFor(catalog));
+  const languages = [...new Set([...stored.languages, ...loca.languages, "English"])].filter(Boolean);
+  const rows: CsvTable["rows"] = { ...stored.rows };
+  for (const key of keys) {
+    if (rows[key]) continue;
+    if (loca.rows[key]) rows[key] = { ...loca.rows[key]! };
+    else {
+      const rec: Record<string, string> = {};
+      for (const lang of languages) rec[lang] = "";
+      rows[key] = rec;
+    }
+  }
+  return { languages: languages.length ? languages : ["English"], rows };
+}
+
+export function writeDialoguesCsv(catalog: ScenarioCatalog, doc?: DialogueDoc) {
+  return stringifyCsv(dialogueCsvTable(catalog, doc));
 }
 
 export function dialogueDocFor(catalog: ScenarioCatalog): DialogueDoc {

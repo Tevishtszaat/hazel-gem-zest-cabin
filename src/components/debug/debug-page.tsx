@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { AppHeader } from "@/components/app-header.tsx";
 import { Button } from "@/components/ui/button.tsx";
+import { problemIgnoreKey } from "@/lib/pda/problems.ts";
 import { useProblems } from "@/lib/pda/use-problems.ts";
 import type { Problem, ProblemFix } from "@/lib/pda/validate.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
@@ -12,18 +13,29 @@ const FILTERS = [
   { id: "warning", label: "Warnings" },
   { id: "delete", label: "Suggested delete" },
   { id: "fix", label: "Suggested fix" },
+  { id: "ignored", label: "Ignored" },
 ] as const;
 
 export function DebugPage() {
   const applyBulk = usePdaStore((s) => s.applyBulk);
   const jumpTo = usePdaStore((s) => s.jumpTo);
+  const ignoreProblems = usePdaStore((s) => s.ignoreProblems);
+  const unignoreProblems = usePdaStore((s) => s.unignoreProblems);
+  const ignoredProblems = usePdaStore((s) => s.ignoredProblems);
   const navigate = useNavigate();
-  const { issues, stats, busy } = useProblems();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["id"]>("all");
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState<Record<string, boolean>>({});
+  const [showLength, setShowLength] = useState(false);
+  const { issues, stats, busy, raw, ignoredCount } = useProblems({
+    includeLength: showLength || filter === "ignored",
+    includeIgnored: filter === "ignored",
+  });
 
   const visible = issues.filter((issue) => {
+    const ignored = ignoredProblems.includes(problemIgnoreKey(issue));
+    if (filter === "ignored") return ignored;
+    if (ignored) return false;
     if (filter === "error" && issue.level !== "error") return false;
     if (filter === "warning" && issue.level !== "warning") return false;
     if (filter === "delete" && issue.recommend !== "delete") return false;
@@ -35,8 +47,9 @@ export function DebugPage() {
     return true;
   });
 
-  const selectedIds = visible.filter((issue) => issue.id && picked[issue.key]).map((issue) => issue.id!) ;
+  const selectedIds = visible.filter((issue) => issue.id && picked[issue.key]).map((issue) => issue.id!);
   const uniqueSelected = [...new Set(selectedIds)];
+  const selectedKeys = visible.filter((issue) => picked[issue.key]).map((issue) => problemIgnoreKey(issue));
 
   const apply = (issue: Problem, fix: ProblemFix) => {
     if (!issue.id) return;
@@ -73,6 +86,12 @@ export function DebugPage() {
     void navigate({ to: "/" });
   };
 
+  const ignoreVisibleSelected = () => {
+    if (!selectedKeys.length) return;
+    ignoreProblems(selectedKeys);
+    setPicked({});
+  };
+
   return (
     <div className="flex min-h-dvh flex-col bg-bg text-fg">
       <AppHeader />
@@ -80,8 +99,8 @@ export function DebugPage() {
         <div className="mb-5">
           <h1 className="text-2xl font-medium tracking-tight">Debug</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted">
-            Catch empty rows, unknown names, missing pictures, and HUD wrap. Apply a suggested correction or delete the
-            entry. Jump opens it in the editor.
+            Catch empty rows, unknown names, and missing pictures. Wrap and character-count warnings stay hidden unless
+            you turn them on. Ignore parks an issue so it stops counting.
             {busy ? " Rechecking in the background…" : ""}
           </p>
         </div>
@@ -90,7 +109,7 @@ export function DebugPage() {
           <Stat label="Issues" value={String(stats.total)} />
           <Stat label="Errors" value={String(stats.errors)} tone={stats.errors ? "danger" : undefined} />
           <Stat label="Warnings" value={String(stats.warnings)} tone={stats.warnings ? "warn" : undefined} />
-          <Stat label="Suggested deletes" value={String(stats.deletable)} />
+          <Stat label="Ignored" value={String(ignoredCount)} />
         </div>
 
         <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -105,6 +124,10 @@ export function DebugPage() {
               {item.label}
             </button>
           ))}
+          <label className="flex h-8 items-center gap-2 px-2 text-xs text-muted">
+            <input type="checkbox" checked={showLength} onChange={(e) => setShowLength(e.target.checked)} />
+            Show wrap / length
+          </label>
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -132,13 +155,26 @@ export function DebugPage() {
           <Button size="sm" disabled={!selectedFixable.length} onClick={() => acceptIssues(selectedFixable)}>
             Accept selected ({selectedFixable.length})
           </Button>
-          <Button
-            size="sm"
-            disabled={!suggestedFixes.length}
-            onClick={() => acceptIssues(suggestedFixes)}
-          >
+          <Button size="sm" disabled={!suggestedFixes.length} onClick={() => acceptIssues(suggestedFixes)}>
             Accept all suggested ({suggestedFixes.length})
           </Button>
+          {filter === "ignored" ? (
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={!selectedKeys.length && !visible.length}
+              onClick={() => {
+                unignoreProblems(selectedKeys.length ? selectedKeys : visible.map(problemIgnoreKey));
+                setPicked({});
+              }}
+            >
+              Restore selected
+            </Button>
+          ) : (
+            <Button size="sm" variant="secondary" disabled={!selectedKeys.length} onClick={ignoreVisibleSelected}>
+              Ignore selected ({selectedKeys.length})
+            </Button>
+          )}
           <Button
             size="sm"
             variant="danger"
@@ -165,68 +201,88 @@ export function DebugPage() {
 
         {!visible.length ? (
           <p className="rounded-md border border-border bg-surface px-4 py-8 text-center text-sm text-ok">
-            {issues.length ? "Nothing matches this filter." : "No issues. Structure looks exportable."}
+            {raw.length ? "Nothing matches this filter." : "No issues. Structure looks exportable."}
           </p>
         ) : (
           <ul className="space-y-2">
-            {visible.slice(0, 400).map((issue) => (
-              <li key={issue.key} className="rounded-md border border-border bg-surface p-3">
-                <div className="flex items-start gap-3">
-                  {issue.id ? (
-                    <input
-                      type="checkbox"
-                      className="mt-1"
-                      checked={Boolean(picked[issue.key])}
-                      onChange={(e) => setPicked((p) => ({ ...p, [issue.key]: e.target.checked }))}
-                    />
-                  ) : (
-                    <span className="mt-1 size-4" />
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span
-                        className={`text-xs uppercase tracking-[0.14em] ${
-                          issue.level === "error" ? "text-danger" : "text-warn"
-                        }`}
-                      >
-                        {issue.level === "error" ? "Error" : "Watch"}
-                      </span>
-                      <span className="text-xs text-subtle">{issue.kind}</span>
-                      {issue.recommend === "delete" ? (
-                        <span className="text-xs text-danger">suggest delete</span>
-                      ) : issue.recommend === "fix" ? (
-                        <span className="text-xs text-ok">suggest fix</span>
-                      ) : null}
-                    </div>
-                    <p className="mt-1 text-sm">{issue.message}</p>
-                    <p className="mt-0.5 text-xs text-subtle">{issue.path}</p>
-                    {issue.suggestions.length ? (
-                      <p className="mt-1 text-xs text-muted">Close matches: {issue.suggestions.join(" · ")}</p>
-                    ) : null}
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {issue.fixes.map((fix) => (
-                        <button
-                          key={fix.label}
-                          className={`h-7 rounded-sm px-2 text-xs ${
-                            fix.type === "delete"
-                              ? "border border-danger/40 text-danger hover:bg-danger/10"
-                              : "bg-elevated text-fg hover:bg-surface"
+            {visible.slice(0, 400).map((issue) => {
+              const key = problemIgnoreKey(issue);
+              const ignored = ignoredProblems.includes(key);
+              return (
+                <li key={issue.key} className="rounded-md border border-border bg-surface p-3">
+                  <div className="flex items-start gap-3">
+                    {issue.id ? (
+                      <input
+                        type="checkbox"
+                        className="mt-1"
+                        checked={Boolean(picked[issue.key])}
+                        onChange={(e) => setPicked((p) => ({ ...p, [issue.key]: e.target.checked }))}
+                      />
+                    ) : (
+                      <span className="mt-1 size-4" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={`text-xs uppercase tracking-[0.14em] ${
+                            issue.level === "error" ? "text-danger" : "text-warn"
                           }`}
-                          onClick={() => apply(issue, fix)}
                         >
-                          {fix.label}
-                        </button>
-                      ))}
-                      {issue.id ? (
-                        <button className="h-7 rounded-sm px-2 text-xs text-muted hover:text-fg" onClick={() => open(issue)}>
-                          Jump
-                        </button>
+                          {issue.level === "error" ? "Error" : "Watch"}
+                        </span>
+                        <span className="text-xs text-subtle">{issue.kind}</span>
+                        {issue.recommend === "delete" ? (
+                          <span className="text-xs text-danger">suggest delete</span>
+                        ) : issue.recommend === "fix" ? (
+                          <span className="text-xs text-ok">suggest fix</span>
+                        ) : null}
+                        {ignored ? <span className="text-xs text-subtle">ignored</span> : null}
+                      </div>
+                      <p className="mt-1 text-sm">{issue.message}</p>
+                      <p className="mt-0.5 text-xs text-subtle">{issue.path}</p>
+                      {issue.suggestions.length ? (
+                        <p className="mt-1 text-xs text-muted">Close matches: {issue.suggestions.join(" · ")}</p>
                       ) : null}
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {issue.fixes.map((fix) => (
+                          <button
+                            key={fix.label}
+                            className={`h-7 rounded-sm px-2 text-xs ${
+                              fix.type === "delete"
+                                ? "border border-danger/40 text-danger hover:bg-danger/10"
+                                : "bg-elevated text-fg hover:bg-surface"
+                            }`}
+                            onClick={() => apply(issue, fix)}
+                          >
+                            {fix.label}
+                          </button>
+                        ))}
+                        {ignored ? (
+                          <button
+                            className="h-7 rounded-sm px-2 text-xs text-muted hover:text-fg"
+                            onClick={() => unignoreProblems([key])}
+                          >
+                            Restore
+                          </button>
+                        ) : (
+                          <button
+                            className="h-7 rounded-sm border border-border px-2 text-xs text-muted hover:text-fg"
+                            onClick={() => ignoreProblems([key])}
+                          >
+                            Ignore
+                          </button>
+                        )}
+                        {issue.id ? (
+                          <button className="h-7 rounded-sm px-2 text-xs text-muted hover:text-fg" onClick={() => open(issue)}>
+                            Jump
+                          </button>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         )}
         {visible.length > 400 ? (

@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/export",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Axis 2026 Creator Particlewave",
+      "hasCanvas": false,
+      "bodyTextLen": 908,
+      "bodyTextHash": "b157a8408c6a19dc7df6fda015f97d6da9903ce91ad958adb26d260a062432a5",
+      "bodyTextPrefix": "AX Axis 2026 Creator Particlewave PDA Language English PDA Dialo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/export-galaxy.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Axis 2026 Creator Particlewave",
+      "hasCanvas": false,
+      "bodyTextLen": 908,
+      "bodyTextHash": "b157a8408c6a19dc7df6fda015f97d6da9903ce91ad958adb26d260a062432a5",
+      "bodyTextPrefix": "AX Axis 2026 Creator Particlewave PDA Language English PDA Dialo",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/export-galaxy-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/export-galaxy.json"
+}

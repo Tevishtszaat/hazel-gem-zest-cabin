@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import { emptyCatalog, type ScenarioCatalog } from "./scenario-index.ts";
 import { blankProject, newAction, newChapter, newTask } from "./yaml-import.ts";
 import { validateProject } from "./validate.ts";
+import { problemIgnoreKey, visibleProblems } from "./problems.ts";
 
 function catalog(names: { kind: ScenarioCatalog["entries"][number]["kind"]; name: string }[]): ScenarioCatalog {
   return {
@@ -73,5 +74,37 @@ describe("validateProject debug diagnostics", () => {
     assert.equal(hit?.level, "warning");
     assert.equal(hit?.recommend, "review");
     assert.ok(hit?.fixes.some((f) => f.type === "delete"));
+  });
+});
+
+describe("debug ignore filters", () => {
+  it("hides wrap/length issues unless asked", () => {
+    const project = blankProject();
+    const ch = newChapter();
+    ch.chapterTitle = "Intro";
+    const tk = newTask();
+    tk.taskTitle = "This title is definitely longer than twenty six";
+    tk.actions = [newAction()];
+    ch.tasks = [tk];
+    project.chapters = [ch];
+    const issues = validateProject(project);
+    assert.ok(issues.some((i) => i.code === "hud-wrap"));
+    assert.equal(visibleProblems(issues, []).filter((i) => i.code === "hud-wrap").length, 0);
+    assert.ok(visibleProblems(issues, [], { includeLength: true }).some((i) => i.code === "hud-wrap"));
+  });
+
+  it("parks ignored errors until restored", () => {
+    const project = blankProject();
+    const ch = newChapter();
+    ch.chapterTitle = "";
+    ch.tasks = [newTask()];
+    project.chapters = [ch];
+    const issues = validateProject(project);
+    const empty = issues.find((i) => i.code === "empty-title");
+    assert.ok(empty);
+    const key = problemIgnoreKey(empty);
+    const hidden = visibleProblems(issues, [key]);
+    assert.equal(hidden.some((i) => i.code === "empty-title"), false);
+    assert.ok(visibleProblems(issues, [key], { includeIgnored: true }).some((i) => i.code === "empty-title"));
   });
 });

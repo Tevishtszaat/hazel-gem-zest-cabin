@@ -103,6 +103,7 @@ export function classifyScenarioPath(path: string, hint?: string): string | null
   if (hint === "pdaYaml" && /\.ya?ml$/.test(base) && !/sectors|playfield/.test(base)) return "pdaYaml";
   if (hint === "pdaCsv" && /\.csv$/.test(base) && base !== "localization.csv") return "pdaCsv";
   if (hint === "dialogues" && /\.ecf$/.test(base)) return "dialogues";
+  if (hint === "dialoguesCsv" && /\.csv$/.test(base) && base !== "localization.csv" && base !== "pda.csv") return "dialoguesCsv";
   if (hint === "factions" && /\.ecf$/.test(base)) return "factions";
   if (hint === "sectors" && /\.ya?ml$/.test(base) && !/playfield/.test(base)) return "sectors";
   if (hint === "localization" && /\.csv$/.test(base)) return "localization";
@@ -119,6 +120,10 @@ export function classifyScenarioPath(path: string, hint?: string): string | null
   if (base === "dialogues.csv") return "dialoguesCsv";
   if (hint === "dialogues" && /\.csv$/.test(base)) return "dialoguesCsv";
   if (base === "tokenconfig.ecf") return "tokens";
+  if (base === "templates.ecf") return "templates";
+  if (base === "defreputation.ecf") return "reputation";
+  if (base === "factionwarfare.ecf") return "warfare";
+  if (base === "galaxyconfig.ecf") return "galaxy";
   if (base === "egroupsconfig.ecf") return "egroups";
   if (base.endsWith(".ecf")) return hint === "configs" || hint === "scenario" ? "ecf" : "ecf";
   if (base.endsWith(".epb")) return "poi";
@@ -273,7 +278,7 @@ export function indexScenario(files: ScenarioSource[], hint?: string): IndexedSc
       }
     }
 
-    if (file.text && ["localization", "items", "blocks", "tokens", "dialogues", "dialoguesCsv", "factions", "eclass", "egroups"].includes(role)) {
+    if (file.text && ["localization", "items", "blocks", "tokens", "templates", "dialogues", "dialoguesCsv", "factions", "eclass", "egroups", "reputation", "warfare", "galaxy"].includes(role)) {
       texts.push({ role, path: normalizePath(file.path), text: file.text });
     }
 

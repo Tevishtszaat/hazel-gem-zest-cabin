@@ -1,15 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { validateOffthread } from "./offload.ts";
+import { problemIgnoreKey, visibleProblems } from "./problems.ts";
 import { problemStats, type Problem } from "./validate.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
 
 const emptyStats = problemStats([]);
 
-export function useProblems() {
+export function useProblems(opts?: { includeLength?: boolean; includeIgnored?: boolean }) {
   const project = usePdaStore((s) => s.project);
   const catalog = usePdaStore((s) => s.catalog);
-  const [issues, setIssues] = useState<Problem[]>([]);
-  const [stats, setStats] = useState(emptyStats);
+  const ignoredProblems = usePdaStore((s) => s.ignoredProblems);
+  const [raw, setRaw] = useState<Problem[]>([]);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -19,8 +20,7 @@ export function useProblems() {
       void validateOffthread(project, catalog)
         .then((result) => {
           if (cancelled) return;
-          setIssues(result.issues);
-          setStats(result.stats);
+          setRaw(result.issues);
         })
         .finally(() => {
           if (!cancelled) setBusy(false);
@@ -32,5 +32,15 @@ export function useProblems() {
     };
   }, [project, catalog]);
 
-  return { issues, stats, busy };
+  const issues = useMemo(
+    () => visibleProblems(raw, ignoredProblems, opts),
+    [raw, ignoredProblems, opts?.includeLength, opts?.includeIgnored],
+  );
+  const stats = useMemo(() => problemStats(issues), [issues]);
+  const ignoredCount = useMemo(
+    () => raw.filter((issue) => ignoredProblems.includes(problemIgnoreKey(issue))).length,
+    [raw, ignoredProblems],
+  );
+
+  return { issues, stats, busy, raw, ignoredCount };
 }

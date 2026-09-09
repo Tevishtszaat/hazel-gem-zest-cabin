@@ -40,7 +40,7 @@ import {
   type DialogueState,
   type DialogueVariable,
 } from "@/lib/pda/dialogues.ts";
-import { catalogText, dialogueDocFor, dialogueStrings, writeDialogues, writeLocalization } from "@/lib/pda/library.ts";
+import { catalogText, dialogueCsvTable, dialogueDocFor, dialogueStrings, writeDialogues, writeDialoguesCsv, writeLocalization } from "@/lib/pda/library.ts";
 import { suggestionsFor, type ScenarioCatalog } from "@/lib/pda/scenario-index.ts";
 import type { CsvTable } from "@/lib/pda/types.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
@@ -164,7 +164,8 @@ export function DialogueEditor() {
       if (mod && e.key.toLowerCase() === "s") {
         e.preventDefault();
         download("Dialogues.ecf", writeDialogues(docRef.current), "text/plain");
-        toast("Exported Dialogues.ecf");
+        download("Dialogues.csv", writeDialoguesCsv(catalog, docRef.current), "text/csv");
+        toast("Exported Dialogues.ecf + Dialogues.csv");
       }
       if (mod && e.key.toLowerCase() === "c" && !inField && selected) {
         e.preventDefault();
@@ -187,9 +188,9 @@ export function DialogueEditor() {
 
   const saveLoca = (table: CsvTable) =>
     setCatalogText(
-      catalogText(catalog, "dialoguesCsv") ? "dialoguesCsv" : "localization",
+      "dialoguesCsv",
       writeLocalization(table),
-      catalogText(catalog, "dialoguesCsv")?.path || catalogText(catalog, "localization")?.path || "Dialogues.csv",
+      catalogText(catalog, "dialoguesCsv")?.path || "Dialogues.csv",
     );
 
   return (
@@ -265,10 +266,20 @@ export function DialogueEditor() {
             <Button
               size="sm"
               variant="secondary"
-              disabled={!Object.keys(loca.rows).length}
-              onClick={() => download("Dialogues.csv", writeLocalization(loca), "text/csv")}
+              disabled={!states.length && !Object.keys(dialogueCsvTable(catalog, doc).rows).length}
+              onClick={() => download("Dialogues.csv", writeDialoguesCsv(catalog, doc), "text/csv")}
             >
               Export CSV
+            </Button>
+            <Button
+              size="sm"
+              disabled={!states.length}
+              onClick={() => {
+                download("Dialogues.ecf", writeDialogues(doc), "text/plain");
+                download("Dialogues.csv", writeDialoguesCsv(catalog, doc), "text/csv");
+              }}
+            >
+              Both
             </Button>
           </div>
           <p className="mt-2 text-xs text-subtle">

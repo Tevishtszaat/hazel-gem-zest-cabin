@@ -1,0 +1,24 @@
+{ Element Name: GlobalSettings
+  EnableSpaceDefense: True
+}
+{ Element Name: FactionSettings
+  Faction: Zirax
+  ScenarioGroup: Zirax
+  Lvl1MinPrice: 25
+  Lvl1MaxPrice: 40
+  Lvl10MinPrice: 200
+  Lvl10MaxPrice: 232
+  SDScenarioGroup: ZiraxSpaceDefense
+  SDProbabilityMin: 0.20
+  SDProbabilityMax: 0.80
+  SDPriceMin: 30
+  SDPriceMax: 300
+}
+{ Element Name: FactionSettings
+  Faction: Talon
+  ScenarioGroup: Talon
+  Lvl1MinPrice: 40
+  Lvl1MaxPrice: 50
+  Lvl10MinPrice: 110
+  Lvl10MaxPrice: 140
+}

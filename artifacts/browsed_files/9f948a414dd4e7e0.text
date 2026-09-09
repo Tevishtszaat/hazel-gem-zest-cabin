@@ -1,0 +1,9 @@
+# Allow to override the default reputation for all Origin based factions to NPC factions
+{ Reputation Name: "Human:1"
+  Zirax: 8500
+  Talon: 16500
+  Polaris: 16500
+  Pirates: 12020
+  Kriel: 12500
+  Trader: 16500
+}

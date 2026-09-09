@@ -23,7 +23,13 @@ function readAll(dir: string, prefix = ""): { path: string; text: string }[] {
 describe("scenario folder index", () => {
   it("classifies Empyrion scenario paths", () => {
     assert.equal(classifyScenarioPath("Reforged Eden/Extras/PDA/PDA.yaml"), "pdaYaml");
-    assert.equal(classifyScenarioPath("Content/Configuration/ItemsConfig.ecf"), "items");
+    assert.equal(classifyScenarioPath("Content/Configuration/Dialogues.ecf"), "dialogues");
+    assert.equal(classifyScenarioPath("Content/Configuration/Dialogues.csv"), "dialoguesCsv");
+    assert.equal(classifyScenarioPath("lines.csv", "dialoguesCsv"), "dialoguesCsv");
+    assert.equal(classifyScenarioPath("Content/Configuration/Templates.ecf"), "templates");
+    assert.equal(classifyScenarioPath("Content/Configuration/DefReputation.ecf"), "reputation");
+    assert.equal(classifyScenarioPath("Content/Configuration/FactionWarfare.ecf"), "warfare");
+    assert.equal(classifyScenarioPath("Content/Configuration/GalaxyConfig.ecf"), "galaxy");
     assert.equal(classifyScenarioPath("Prefabs/DroneBaseT1.epb"), "poi");
     assert.equal(classifyScenarioPath("Playfields/Akua/playfield.yaml"), "playfieldYaml");
     assert.equal(classifyScenarioPath("Extras/PDA/readfirst.jpg"), "picture");

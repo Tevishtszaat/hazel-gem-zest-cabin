@@ -30,6 +30,7 @@ const ICONS: Record<ImportKind, ReactNode> = {
   pdaYaml: <FileJson className="size-5" />,
   pdaCsv: <FileSpreadsheet className="size-5" />,
   dialogues: <MessageSquare className="size-5" />,
+  dialoguesCsv: <FileSpreadsheet className="size-5" />,
   factions: <Landmark className="size-5" />,
   sectors: <Map className="size-5" />,
   playfields: <Map className="size-5" />,
@@ -42,7 +43,7 @@ function slotCount(kind: ImportKind, files: { role: string; count: number }[], p
     case "scenario":
       return files.length;
     case "configs":
-      return sum("items", "blocks", "eclass", "tokens", "egroups", "ecf");
+      return sum("items", "blocks", "templates", "eclass", "tokens", "egroups", "reputation", "warfare", "galaxy", "ecf");
     case "localization":
       return sum("localization");
     case "itemImages":
@@ -55,6 +56,8 @@ function slotCount(kind: ImportKind, files: { role: string; count: number }[], p
       return sum("pdaCsv");
     case "dialogues":
       return sum("dialogues");
+    case "dialoguesCsv":
+      return sum("dialoguesCsv");
     case "factions":
       return sum("factions");
     case "sectors":

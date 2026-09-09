@@ -43,6 +43,9 @@ type PdaState = {
   deleteNodes: (ids: string[]) => void;
   patchNode: (id: string, patch: Record<string, unknown>) => void;
   applyBulk: (patches: { id: string; patch: Record<string, unknown> }[], deleteIds?: string[]) => void;
+  ignoredProblems: string[];
+  ignoreProblems: (keys: string[]) => void;
+  unignoreProblems: (keys: string[]) => void;
   jumpTo: (id: string) => void;
   moveSelected: (dir: -1 | 1) => void;
   reset: () => void;
@@ -90,6 +93,7 @@ export const usePdaStore = create<PdaState>()(
       category: "all",
       collapsed: [],
       importOpen: false,
+      ignoredProblems: [],
       setQuery: (query: string) => set({ query }),
       setLanguage: (language) =>
         set((s) => {
@@ -356,6 +360,15 @@ export const usePdaStore = create<PdaState>()(
             selected: still ? s.selected : null,
           };
         }),
+      ignoreProblems: (keys) =>
+        set((s) => ({
+          ignoredProblems: [...new Set([...s.ignoredProblems, ...keys.filter(Boolean)])],
+        })),
+      unignoreProblems: (keys) =>
+        set((s) => {
+          const drop = new Set(keys);
+          return { ignoredProblems: s.ignoredProblems.filter((k) => !drop.has(k)) };
+        }),
       jumpTo: (id) =>
         set((s) => {
           const ctx = findContext(s.project, id);
@@ -402,7 +415,14 @@ export const usePdaStore = create<PdaState>()(
           }
           return { project: { ...s.project, chapters } };
         }),
-      reset: () => set({ project: blankProject(), catalog: emptyCatalog(), selected: null, collapsed: [] }),
+      reset: () =>
+        set({
+          project: blankProject(),
+          catalog: emptyCatalog(),
+          selected: null,
+          collapsed: [],
+          ignoredProblems: [],
+        }),
     }),
     {
       name: "pulsepda.project.v3",
@@ -413,6 +433,7 @@ export const usePdaStore = create<PdaState>()(
         selected: s.selected,
         collapsed: s.collapsed,
         category: s.category,
+        ignoredProblems: s.ignoredProblems,
       }),
       merge: (persisted, current) => {
         const saved = (persisted ?? {}) as Partial<PdaState>;

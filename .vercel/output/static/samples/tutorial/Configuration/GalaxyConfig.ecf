@@ -1,0 +1,26 @@
+{ GalaxyConfig Name: General
+  StarCount: "80, 120"
+  Radius: "0, 50"
+  StarterSystemLYCoord: "10, 0, 10"
+  StarterSystemName: Ellyon
+  StarterSystemStarClass: G
+  GalaxyMode: Regions
+  SectorsPerLY: 100000
+  { Child StarRegion_1
+    Name: "The Center"
+    Shape: Sphere
+    RadiusMinMax: "0, 2"
+    TotalSpawnCount: 1
+  }
+  { Child Territory_1
+    Faction: Zirax
+    Center: "20, 0, 20"
+    Radius: 15
+    Other_1: Talon, param1: "0, 0.01"
+  }
+}
+{ GalaxyConfig Name: G Type Star
+  StarClass: G
+  Model: SunYellow
+  Probability: 0.2
+}

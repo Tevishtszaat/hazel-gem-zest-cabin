@@ -41,10 +41,96 @@ export const BLOCK_STATS = [
 
 export const TOKEN_STATS = ["MarketPrice", "DropOnDeath", "CustomIcon"];
 
-export function statsFor(role: "items" | "blocks" | "tokens") {
+export const TEMPLATE_STATS = ["CraftTime", "OutputCount", "Target", "BaseItem"];
+
+export const WARFARE_STATS = [
+  "Faction",
+  "ScenarioGroup",
+  "Lvl1MinPrice",
+  "Lvl1MaxPrice",
+  "Lvl5MinPrice",
+  "Lvl5MaxPrice",
+  "Lvl10MinPrice",
+  "Lvl10MaxPrice",
+  "SDScenarioGroup",
+  "SDProbabilityMin",
+  "SDProbabilityMax",
+  "SDPriceMin",
+  "SDPriceMax",
+];
+
+export const GALAXY_GENERAL_STATS = [
+  "StarCount",
+  "Radius",
+  "NebulaCount",
+  "StarterSystemLYCoord",
+  "StarterSystemName",
+  "StarterSystemStarClass",
+  "GalaxyMode",
+  "SectorsPerLY",
+];
+
+export const TERRITORY_STATS = ["Faction", "Center", "Radius"];
+
+export function statsFor(role: "items" | "blocks" | "tokens" | "templates") {
   if (role === "items") return ITEM_STATS;
   if (role === "tokens") return TOKEN_STATS;
+  if (role === "templates") return TEMPLATE_STATS;
   return BLOCK_STATS;
+}
+
+export function numericIds(objects: EcfObject[]): number[] {
+  return objects
+    .map((obj) => Number(obj.id))
+    .filter((n) => Number.isInteger(n) && n > 0)
+    .sort((a, b) => a - b);
+}
+
+export function unusedNumericIds(
+  used: number[],
+  opts?: { pad?: number; limit?: number },
+): { ids: number[]; ranges: { from: number; to: number; count: number }[]; total: number; next: number } {
+  const pad = opts?.pad ?? 16;
+  const limit = opts?.limit ?? 60;
+  const set = new Set(used.filter((n) => Number.isInteger(n) && n > 0));
+  const max = set.size ? Math.max(...set) : 0;
+  const end = Math.max(max + pad, pad);
+  const ids: number[] = [];
+  const ranges: { from: number; to: number; count: number }[] = [];
+  let run: number | null = null;
+  let total = 0;
+  for (let i = 1; i <= end; i++) {
+    if (set.has(i)) {
+      if (run != null) {
+        ranges.push({ from: run, to: i - 1, count: i - run });
+        run = null;
+      }
+      continue;
+    }
+    total += 1;
+    if (ids.length < limit) ids.push(i);
+    if (run == null) run = i;
+  }
+  if (run != null) ranges.push({ from: run, to: end, count: end - run + 1 });
+  return { ids, ranges, total, next: max + 1 || 1 };
+}
+
+export function templateInputs(obj: EcfObject): { name: string; count: string }[] {
+  const child = obj.children?.find((c) => /input/i.test(c.name)) ?? obj.children?.[0];
+  if (!child) return [];
+  return Object.entries(child.fields).map(([name, count]) => ({ name, count }));
+}
+
+export function withTemplateInputs(obj: EcfObject, rows: { name: string; count: string }[]): EcfObject {
+  const fields: Record<string, string> = {};
+  for (const row of rows) {
+    const name = row.name.trim();
+    if (!name) continue;
+    fields[name] = row.count.trim() || "1";
+  }
+  const inputs: EcfObject = { kind: "Child", plus: false, name: "Inputs", fields };
+  const rest = (obj.children ?? []).filter((c) => !/input/i.test(c.name));
+  return { ...obj, children: [inputs, ...rest] };
 }
 
 export function numericValue(value: string | undefined) {

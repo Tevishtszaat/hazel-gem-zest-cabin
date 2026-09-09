@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DebugRouteImport } from './routes/debug'
 import { Route as DialoguesRouteImport } from './routes/dialogues'
+import { Route as ExportRouteImport } from './routes/export'
 import { Route as ImportRouteImport } from './routes/import'
 import { Route as LibraryRouteImport } from './routes/library'
 
@@ -30,6 +31,11 @@ const DialoguesRoute = DialoguesRouteImport.update({
   path: '/dialogues',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExportRoute = ExportRouteImport.update({
+  id: '/export',
+  path: '/export',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ImportRoute = ImportRouteImport.update({
   id: '/import',
   path: '/import',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/debug': typeof DebugRoute
   '/dialogues': typeof DialoguesRoute
+  '/export': typeof ExportRoute
   '/import': typeof ImportRoute
   '/library': typeof LibraryRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/debug': typeof DebugRoute
   '/dialogues': typeof DialoguesRoute
+  '/export': typeof ExportRoute
   '/import': typeof ImportRoute
   '/library': typeof LibraryRoute
 }
@@ -60,21 +68,30 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/debug': typeof DebugRoute
   '/dialogues': typeof DialoguesRoute
+  '/export': typeof ExportRoute
   '/import': typeof ImportRoute
   '/library': typeof LibraryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/debug' | '/dialogues' | '/import' | '/library'
+  fullPaths: '/' | '/debug' | '/dialogues' | '/export' | '/import' | '/library'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/debug' | '/dialogues' | '/import' | '/library'
-  id: '__root__' | '/' | '/debug' | '/dialogues' | '/import' | '/library'
+  to: '/' | '/debug' | '/dialogues' | '/export' | '/import' | '/library'
+  id:
+    | '__root__'
+    | '/'
+    | '/debug'
+    | '/dialogues'
+    | '/export'
+    | '/import'
+    | '/library'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DebugRoute: typeof DebugRoute
   DialoguesRoute: typeof DialoguesRoute
+  ExportRoute: typeof ExportRoute
   ImportRoute: typeof ImportRoute
   LibraryRoute: typeof LibraryRoute
 }
@@ -102,6 +119,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DialoguesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/export': {
+      id: '/export'
+      path: '/export'
+      fullPath: '/export'
+      preLoaderRoute: typeof ExportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/import': {
       id: '/import'
       path: '/import'
@@ -123,6 +147,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DebugRoute: DebugRoute,
   DialoguesRoute: DialoguesRoute,
+  ExportRoute: ExportRoute,
   ImportRoute: ImportRoute,
   LibraryRoute: LibraryRoute,
 }

@@ -1,6 +1,10 @@
 { +Dialogue Name: Trader_DialogueSwitch_Start
   NPCName: Trader
+  Output: txt_trader_switch
+  Option_1: txt_trader_opt_trade
+  OptionNext_1: End
 }
 { +Dialogue Name: TC_Start
   NPCName: "Talon Chief"
+  Output: txt_tc_start
 }
