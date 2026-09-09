@@ -1,10 +1,12 @@
 Axis 2026 Creator Particlewave
 ================================
 
-Double-click START.bat. Your browser opens the workshop.
+Windows: double-click START.bat
+Linux:   chmod +x START.sh runtime/node
+         ./START.sh
 
-Nothing to install. Everything stays on this PC (IndexedDB in the browser).
-Close the black window to stop.
+Nothing to install. Everything stays on this machine (browser storage).
+Close the window / terminal to stop.
 
 If Windows SmartScreen warns on a first run: More info → Run anyway.
 If port 8787 is already in use, close the other app and try again.

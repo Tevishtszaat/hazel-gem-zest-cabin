@@ -129,6 +129,11 @@ export function ImportPage() {
                 Download for Windows
               </a>
             </Button>
+            <Button asChild size="sm" variant="secondary">
+              <a href="/Axis-2026-Creator-Particlewave-Linux.zip" download>
+                Download for Linux
+              </a>
+            </Button>
             <Button
               disabled={busy !== null}
               onClick={() =>
