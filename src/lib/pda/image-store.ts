@@ -73,7 +73,10 @@ export function peekImageUrl(name: string): string | undefined {
   return urls.get(basename(name)) || urls.get(name);
 }
 
-export async function putImages(files: { path: string; blob: Blob; set: ImageSet }[]): Promise<string[]> {
+export async function putImages(
+  files: { path: string; blob: Blob; set: ImageSet }[],
+  onProgress?: (done: number, total: number) => void,
+): Promise<string[]> {
   if (typeof indexedDB === "undefined" || !files.length) return [];
   const wallpapers: typeof files = [];
   const others: typeof files = [];
@@ -82,7 +85,7 @@ export async function putImages(files: { path: string; blob: Blob; set: ImageSet
     else others.push(file);
   }
   const names: string[] = [];
-  if (others.length) names.push(...(await writeImageSlice(others, false)));
+  if (others.length) names.push(...(await writeImageSlice(others, false, onProgress)));
   if (wallpapers.length) {
     const scaled: typeof files = [];
     for (const file of wallpapers.slice(0, WP_CAP)) {
@@ -98,11 +101,15 @@ export async function putImages(files: { path: string; blob: Blob; set: ImageSet
   return names;
 }
 
-async function writeImageSlice(files: { path: string; blob: Blob; set: ImageSet }[], wallpaper: boolean): Promise<string[]> {
+async function writeImageSlice(
+  files: { path: string; blob: Blob; set: ImageSet }[],
+  wallpaper: boolean,
+  onProgress?: (done: number, total: number) => void,
+): Promise<string[]> {
   if (!files.length) return [];
   const db = await openPdaDb();
   const names: string[] = [];
-  const chunk = wallpaper ? 2 : 80;
+  const chunk = wallpaper ? 2 : 40;
   for (let i = 0; i < files.length; i += chunk) {
     const slice = files.slice(i, i + chunk);
     await new Promise<void>((resolve, reject) => {
@@ -114,14 +121,10 @@ async function writeImageSlice(files: { path: string; blob: Blob; set: ImageSet 
         const name = wallpaper ? `wp:${basename(file.path)}` : basename(file.path);
         names.push(name);
         store.put({ name, set: file.set, path: file.path, blob: file.blob }, name);
-        if (!wallpaper) {
-          const prev = urls.get(name);
-          if (prev) URL.revokeObjectURL(prev);
-          urls.set(name, URL.createObjectURL(file.blob));
-          remember(name);
-        }
+        remember(name);
       }
     });
+    onProgress?.(Math.min(i + chunk, files.length), files.length);
     if (i + chunk < files.length) await new Promise((r) => setTimeout(r, 0));
   }
   return names;

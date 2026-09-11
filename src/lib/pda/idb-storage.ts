@@ -92,22 +92,26 @@ function catalogTextKey(text: CatalogText) {
   return text.role === "playfieldYaml" ? `playfieldYaml:${text.path}` : text.role;
 }
 
-export async function putCatalogTexts(texts: CatalogText[]): Promise<void> {
+export async function putCatalogTexts(
+  texts: CatalogText[],
+  onProgress?: (done: number, total: number) => void,
+): Promise<void> {
   if (typeof indexedDB === "undefined" || !texts.length) return;
   const db = await openPdaDb();
   if (!db.objectStoreNames.contains(TEXT_STORE)) return;
-  for (const text of texts) {
-    if (!text.text) continue;
-    try {
-      await new Promise<void>((resolve, reject) => {
-        const tx = db.transaction(TEXT_STORE, "readwrite");
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
-        tx.objectStore(TEXT_STORE).put(text, catalogTextKey(text));
-      });
-    } catch (err) {
-      console.warn(`Could not persist ${text.role} (${text.text.length} bytes)`, err);
-    }
+  const rows = texts.filter((t) => t.text);
+  const chunk = 20;
+  for (let i = 0; i < rows.length; i += chunk) {
+    const slice = rows.slice(i, i + chunk);
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(TEXT_STORE, "readwrite");
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      const store = tx.objectStore(TEXT_STORE);
+      for (const text of slice) store.put(text, catalogTextKey(text));
+    });
+    onProgress?.(Math.min(i + chunk, rows.length), rows.length);
+    if (i + chunk < rows.length) await new Promise((r) => setTimeout(r, 0));
   }
 }
 

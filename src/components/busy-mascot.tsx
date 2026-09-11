@@ -7,6 +7,8 @@ export function BusyMascot() {
   const load = useBusyStore((s) => s.load);
   const save = useBusyStore((s) => s.save);
   const think = useBusyStore((s) => s.think);
+  const detail = useBusyStore((s) => s.detail);
+  const pct = useBusyStore((s) => s.pct);
   const label = busyLabel({ load, save, think });
   const [show, setShow] = useState(false);
 
@@ -29,7 +31,12 @@ export function BusyMascot() {
       <img src="/loader.gif" alt="" className="aspect-square w-full object-cover" />
       <div className="border-t border-border px-2 py-1.5">
         <p className="text-[10px] uppercase tracking-[0.16em] text-accent">{label}</p>
-        <p className="text-xs text-muted">Cramming letters into the box…</p>
+        <p className="text-xs text-muted">{detail || "Cramming letters into the box…"}</p>
+        {pct != null ? (
+          <div className="mt-1 h-1 overflow-hidden rounded-sm bg-elevated">
+            <div className="h-full bg-accent" style={{ width: `${Math.max(4, Math.min(100, pct))}%` }} />
+          </div>
+        ) : null}
       </div>
     </aside>
   );

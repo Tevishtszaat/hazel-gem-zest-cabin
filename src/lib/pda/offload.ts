@@ -51,7 +51,15 @@ function call<T>(op: HeavyOp, payload: HeavyPayload): Promise<T> {
 }
 
 export function indexScenarioOffthread(files: ScenarioSource[], kind?: ImportKind) {
-  const light = files.map((file) => ({ path: file.path, text: file.text }));
+  const light = files.map((file) => {
+    const text = file.text;
+    if (!text) return { path: file.path, meta: file.meta };
+    if (text.length > 6_000_000) return { path: file.path };
+    if (/\bPlayfields?\b/i.test(file.path) && /playfield.*\.ya?ml$/i.test(file.path)) {
+      return { path: file.path };
+    }
+    return { path: file.path, text, meta: file.meta };
+  });
   return call<IndexedScenario>("index", { files: light, kind }).then((indexed) => ({
     ...indexed,
     catalog: {

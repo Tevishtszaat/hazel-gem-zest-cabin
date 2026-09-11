@@ -5,7 +5,7 @@ import { stringifyCsv, csvLookup } from "@/lib/pda/csv.ts";
 import { blankProject, applyCsvText, newAction, newChapter, newTask, type ImportFiles } from "@/lib/pda/yaml-import.ts";
 import { classifyScenarioPath, dropCatalogGroup, emptyCatalog, mergeCatalog, catalogLoadSummary, type ScenarioCatalog, type ScenarioSource } from "@/lib/pda/scenario-index.ts";
 import { importPdaOffthread, indexScenarioOffthread } from "@/lib/pda/offload.ts";
-import { beginBusy, endBusy } from "@/store/busy-store.ts";
+import { beginBusy, endBusy, setBusyDetail } from "@/store/busy-store.ts";
 import { clearImages, putImages, warmImageCache, type ImageSet } from "@/lib/pda/image-store.ts";
 import type { ImportKind } from "@/lib/pda/import-kinds.ts";
 import { catalogText } from "@/lib/pda/library.ts";
@@ -155,21 +155,45 @@ export const usePdaStore = create<PdaState>()(
         void get().ingestSources("scenario", files);
       },
       ingestSources: async (kind, files) => {
-        beginBusy("load");
+        beginBusy("load", "Indexing scenario…");
         try {
           if (!files.length) throw new Error("No matching files in that drop.");
+          setBusyDetail(`Indexing ${files.length} files…`, 8);
           const indexed = await indexScenarioOffthread(files, kind);
           const catalog = mergeCatalog(get().catalog, indexed.catalog);
-          try {
-            await putCatalogTexts(catalog.texts ?? []);
-          } catch (err) {
-            console.warn("Could not persist catalog texts", err);
+          const texts = catalog.texts ?? [];
+          if (texts.length) {
+            setBusyDetail(`Saving ${texts.length} configs…`, 30);
+            try {
+              await putCatalogTexts(texts, (done, total) => {
+                setBusyDetail(`Saving configs ${done}/${total}`, 30 + Math.round((done / Math.max(1, total)) * 25));
+              });
+            } catch (err) {
+              console.warn("Could not persist catalog texts", err);
+            }
           }
 
           const imageFiles = files.filter((file) => {
             const role = classifyScenarioPath(file.path, kind);
-            return (role === "picture" || role === "itemPicture" || role === "wallpaper") && file.blob;
+            return (role === "picture" || role === "itemPicture") && file.blob;
           });
+          const wallpaperFiles = files.filter(
+            (file) => classifyScenarioPath(file.path, kind) === "wallpaper" && file.blob,
+          );
+
+          const storeIcons = async () => {
+            if (!imageFiles.length) return;
+            setBusyDetail(`Storing ${imageFiles.length} icons…`, 60);
+            await putImages(
+              imageFiles.map((file) => ({
+                path: file.path,
+                blob: file.blob!,
+                set: imageSetFor(file.path, kind),
+              })),
+              (done, total) =>
+                setBusyDetail(`Storing icons ${done}/${total}`, 60 + Math.round((done / Math.max(1, total)) * 25)),
+            );
+          };
 
           const csvOnly =
             kind === "pdaCsv" ||
@@ -181,15 +205,18 @@ export const usePdaStore = create<PdaState>()(
             const project = structuredClone(get().project);
             applyCsvText(project, csvText, indexed.pda?.csvName);
             set({ project, catalog });
-            if (imageFiles.length) void putImages(imageFiles.map((file) => ({
-              path: file.path,
-              blob: file.blob!,
-              set: imageSetFor(file.path, kind),
-            })));
+            await storeIcons();
+            if (wallpaperFiles.length) {
+              void putImages(
+                wallpaperFiles.map((file) => ({ path: file.path, blob: file.blob!, set: "wallpaper" as const })),
+              );
+            }
+            setBusyDetail("Import finished", 100);
             return importReport(catalog, `Merged ${Object.keys(project.csv.rows).length} CSV keys.`);
           }
 
           if (indexed.pda?.yamlText) {
+            setBusyDetail("Parsing PDA.yaml…", 55);
             const existingCsv =
               !indexed.pda.csvText && Object.keys(get().project.csv.rows).length
                 ? stringifyCsv(get().project.csv)
@@ -205,29 +232,27 @@ export const usePdaStore = create<PdaState>()(
             }
             get().replaceProject(project);
             set({ catalog });
-            if (imageFiles.length)
+            await storeIcons();
+            if (wallpaperFiles.length) {
               void putImages(
-                imageFiles.map((file) => ({
-                  path: file.path,
-                  blob: file.blob!,
-                  set: imageSetFor(file.path, kind),
-                })),
+                wallpaperFiles.map((file) => ({ path: file.path, blob: file.blob!, set: "wallpaper" as const })),
               );
+            }
+            setBusyDetail("Import finished", 100);
             return importReport(catalog, `Loaded ${project.chapters.length} chapters from ${indexed.pda.yamlName || "PDA.yaml"}.`);
           }
 
           if (kind === "pdaYaml") throw new Error("No PDA.yaml found.");
           set({ catalog });
-          if (imageFiles.length)
+          await storeIcons();
+          if (wallpaperFiles.length) {
             void putImages(
-              imageFiles.map((file) => ({
-                path: file.path,
-                blob: file.blob!,
-                set: imageSetFor(file.path, kind),
-              })),
+              wallpaperFiles.map((file) => ({ path: file.path, blob: file.blob!, set: "wallpaper" as const })),
             );
+          }
           const added = indexed.catalog.files.length;
           const pics = imageFiles.length;
+          setBusyDetail("Import finished", 100);
           return importReport(
             catalog,
             `Indexed ${added} file${added === 1 ? "" : "s"}${pics ? ` · ${pics} images stored` : ""}.`,

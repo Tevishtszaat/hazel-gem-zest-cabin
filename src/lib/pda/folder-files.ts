@@ -117,6 +117,7 @@ export async function sourcesFromFiles(
     }
     done += 1;
     onProgress?.(done, picked.length, path);
+    if (done % 40 === 0) await new Promise((r) => setTimeout(r, 0));
     return source;
   });
   return sources;

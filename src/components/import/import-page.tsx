@@ -18,9 +18,11 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { AppHeader } from "@/components/app-header.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { filesFromDataTransfer, loadTutorialSources, sourcesFromFiles } from "@/lib/pda/folder-files.ts";
-import { IMPORT_SLOTS, type ImportKind } from "@/lib/pda/import-kinds.ts";
-import { catalogCounts, catalogLoaded } from "@/lib/pda/scenario-index.ts";
+import { areaForRole, fileMatchesKind, IMPORT_SLOTS, type ImportKind } from "@/lib/pda/import-kinds.ts";
+import { classifyScenarioPath, catalogCounts, catalogLoaded } from "@/lib/pda/scenario-index.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
+import { beginBusy, endBusy, setBusyDetail, useBusyStore } from "@/store/busy-store.ts";
+import { useImportProgress, type AreaSnap } from "@/store/import-progress.ts";
 
 const ICONS: Record<ImportKind, ReactNode> = {
   scenario: <FolderOpen className="size-5" />,
@@ -38,6 +40,43 @@ const ICONS: Record<ImportKind, ReactNode> = {
   playfields: <Map className="size-5" />,
   blueprints: <Box className="size-5" />,
 };
+
+function tallyAreas(files: File[], kind: ImportKind) {
+  const totals: Partial<Record<ImportKind, number>> = {};
+  for (const file of files) {
+    const path = (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name;
+    if (!fileMatchesKind(path, kind)) continue;
+    if (kind === "scenario") {
+      totals.scenario = (totals.scenario || 0) + 1;
+      const area = areaForRole(classifyScenarioPath(path, kind));
+      if (area) totals[area] = (totals[area] || 0) + 1;
+    } else {
+      totals[kind] = (totals[kind] || 0) + 1;
+    }
+  }
+  return totals;
+}
+
+function AreaBar({ snap }: { snap?: AreaSnap }) {
+  if (!snap) return null;
+  const pct = snap.total ? Math.round((snap.done / snap.total) * 100) : snap.phase === "done" ? 100 : 0;
+  const fill =
+    snap.phase === "done" ? "area-bar-fill is-done" : snap.phase === "queued" ? "area-bar-fill is-queued" : "area-bar-fill";
+  const label =
+    snap.phase === "done"
+      ? "Done"
+      : snap.phase === "queued"
+        ? `Queued ${snap.total}`
+        : `${snap.done}/${snap.total}`;
+  return (
+    <div className="mt-2">
+      <div className="h-2 overflow-hidden rounded-full bg-elevated">
+        <div className={`h-full rounded-full ${fill}`} style={{ width: `${Math.max(snap.phase === "queued" ? 12 : 4, pct)}%` }} />
+      </div>
+      <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-muted">{label}</p>
+    </div>
+  );
+}
 
 function slotCount(kind: ImportKind, files: { role: string; count: number }[], pictures: { pda: number; item: number }) {
   const sum = (...roles: string[]) => files.filter((f) => roles.includes(f.role)).reduce((n, f) => n + (f.count || 1), 0);
@@ -111,21 +150,33 @@ export function ImportPage() {
     () => catalog.entries.filter((e) => e.kind === "picture" && e.group === "item").length,
     [catalog.entries],
   );
+  const resetAreas = useImportProgress((s) => s.reset);
+  const tickArea = useImportProgress((s) => s.tick);
+  const areas = useImportProgress((s) => s.areas);
   const [busy, setBusy] = useState<ImportKind | "tutorial" | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [doneAt, setDoneAt] = useState<string | null>(null);
+  const detail = useBusyStore((s) => s.detail);
+  const pct = useBusyStore((s) => s.pct);
+  const loading = useBusyStore((s) => s.load);
 
   const run = useCallback(
     async (kind: ImportKind | "tutorial", work: () => Promise<string>) => {
       setBusy(kind);
       setError(null);
       setStatus(null);
+      setDoneAt(null);
+      beginBusy("load", "Starting import…");
       try {
         const message = await work();
+        useImportProgress.getState().finish();
         setStatus(message);
+        setDoneAt(new Date().toLocaleTimeString());
       } catch (err) {
         setError(err instanceof Error ? err.message : "Import failed.");
       } finally {
+        endBusy("load");
         setBusy(null);
       }
     },
@@ -134,15 +185,31 @@ export function ImportPage() {
 
   const ingestFiles = useCallback(
     async (kind: ImportKind, files: File[]) => {
+      resetAreas(tallyAreas(files, kind));
+      setBusyDetail(`Reading 0/${files.length} files…`, 2);
       const sources = await sourcesFromFiles(
         files,
-        (done, total, path) => setStatus(`Reading ${done}/${total} · ${path.split("/").pop()}`),
+        (done, total, path) => {
+          setStatus(`Reading ${done}/${total} · ${path.split("/").pop()}`);
+          setBusyDetail(
+            `Reading ${done}/${total} · ${path.split("/").pop() || ""}`,
+            Math.round((done / Math.max(1, total)) * 20),
+          );
+          if (kind === "scenario") {
+            tickArea("scenario");
+            const area = areaForRole(classifyScenarioPath(path, kind));
+            if (area) tickArea(area);
+          } else {
+            tickArea(kind);
+          }
+        },
         kind,
       );
       if (!sources.length) throw new Error("Nothing in that drop matched this slot.");
+      setBusyDetail("Indexing scenario…", 22);
       return ingest(kind, sources);
     },
-    [ingest],
+    [ingest, resetAreas, tickArea],
   );
 
   return (
@@ -208,14 +275,28 @@ export function ImportPage() {
               accept={slot.accept}
               directory={slot.directory}
               loaded={slotCount(slot.id, catalog.files, { pda: pdaPics, item: itemPics })}
-              busy={busy === slot.id}
+              busy={busy === slot.id || (busy === "scenario" && Boolean(areas[slot.id]))}
               disabled={busy !== null}
+              progress={areas[slot.id]}
               onFiles={(files) => void run(slot.id, () => ingestFiles(slot.id, files))}
             />
           ))}
         </div>
 
-        {status ? <p className="mt-4 text-sm text-ok">{status}</p> : null}
+        {busy || loading ? (
+          <div className="mt-4 rounded-md border border-accent/40 bg-surface px-4 py-3">
+            <p className="text-sm text-fg">{detail || status || "Working…"}</p>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-sm bg-elevated">
+              <div className="h-full bg-accent transition-[width] duration-200" style={{ width: `${Math.max(4, Math.min(100, pct ?? 8))}%` }} />
+            </div>
+            <p className="mt-2 text-xs text-muted">Stay on this page. A full scenario can take a few minutes — this bar is the live step.</p>
+          </div>
+        ) : null}
+        {!busy && !loading && status ? (
+          <p className="mt-4 rounded-md border border-ok/30 bg-ok/10 px-4 py-3 text-sm text-ok">
+            Done{doneAt ? ` at ${doneAt}` : ""}. {status}
+          </p>
+        ) : null}
         {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
 
         <div className="mt-8 flex flex-wrap gap-2 border-t border-border pt-4">
@@ -276,6 +357,7 @@ function SlotCard(props: {
   loaded: number;
   busy: boolean;
   disabled: boolean;
+  progress?: AreaSnap;
   onFiles: (files: File[]) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -303,15 +385,18 @@ function SlotCard(props: {
       }}
       className={`flex min-h-24 cursor-pointer items-center gap-4 rounded-md border px-4 py-3 text-left transition-[box-shadow,background-color] duration-150 ${
         drag ? "border-accent bg-elevated" : "border-border bg-surface hover:bg-elevated/70"
-      } ${props.disabled ? "pointer-events-none opacity-40" : ""}`}
+      } ${props.disabled && !props.progress ? "pointer-events-none opacity-40" : props.disabled ? "pointer-events-none" : ""}`}
     >
       <span className="text-accent">{ICONS[props.kind]}</span>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium">{props.title}</p>
         <p className="mt-0.5 text-xs leading-relaxed text-muted">{props.hint}</p>
+        <AreaBar snap={props.progress} />
       </div>
-      {props.busy ? (
+      {props.busy && !props.progress ? (
         <LoaderCircle className="size-4 shrink-0 animate-spin text-muted" />
+      ) : props.progress?.phase === "done" ? (
+        <span className="shrink-0 rounded-sm bg-ok/15 px-1.5 py-0.5 text-xs text-ok">Done</span>
       ) : props.loaded ? (
         <span className="shrink-0 rounded-sm bg-ok/15 px-1.5 py-0.5 text-xs text-ok">{props.loaded} loaded</span>
       ) : (

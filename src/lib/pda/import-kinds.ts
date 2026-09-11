@@ -157,3 +157,27 @@ export function fileMatchesKind(path: string, kind: ImportKind): boolean {
   if (kind === "scenario") return true;
   return ROLE_FOR_KIND[kind].includes(role);
 }
+
+export function areaForRole(role: string | null): Exclude<ImportKind, "scenario"> | null {
+  if (!role || role === "wallpaper") return null;
+  if (role === "ecf") return "configs";
+  const dedicated: Exclude<ImportKind, "scenario">[] = [
+    "localization",
+    "itemImages",
+    "pdaImages",
+    "pdaYaml",
+    "pdaCsv",
+    "dialogues",
+    "dialoguesCsv",
+    "factions",
+    "galaxy",
+    "sectors",
+    "playfields",
+    "blueprints",
+  ];
+  for (const kind of dedicated) {
+    if (ROLE_FOR_KIND[kind].includes(role)) return kind;
+  }
+  if (ROLE_FOR_KIND.configs.includes(role)) return "configs";
+  return null;
+}

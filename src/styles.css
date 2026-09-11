@@ -106,6 +106,35 @@
     background: transparent;
   }
 
+  .area-bar-fill {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      var(--color-accent) 0 8px,
+      color-mix(in srgb, var(--color-accent) 65%, white) 8px 16px
+    );
+    background-size: 22px 22px;
+    animation: area-bar-move 0.7s linear infinite;
+  }
+
+  .area-bar-fill.is-done {
+    animation: none;
+    background: var(--color-ok);
+  }
+
+  .area-bar-fill.is-queued {
+    animation: none;
+    background: color-mix(in srgb, var(--color-accent) 35%, transparent);
+  }
+
+  @keyframes area-bar-move {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 22px 0;
+    }
+  }
+
   h1,
   h2,
   h3 {
