@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input.tsx";
 import { GALAXY_GENERAL_STATS, TERRITORY_STATS } from "@/lib/pda/config-stats.ts";
 import { stringifyEcfObjects, type EcfObject } from "@/lib/pda/ecf.ts";
 import { catalogText, objectsFor } from "@/lib/pda/library.ts";
-import { parseSectorBodies, STAR_REGION_STATS, STAR_STATS, isStarType } from "@/lib/pda/galaxy.ts";
+import { parseSectorBodies, STAR_MODELS, STAR_REGION_STATS, STAR_STATS, fieldToHex, hexToField, isStarType, parseStarMix, writeStarMix, type StarMix } from "@/lib/pda/galaxy.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
 
 function download(name: string, text: string) {
@@ -164,7 +164,17 @@ export function GalaxyEditor() {
         </p>
       ) : null}
 
-      {star ? <GalaxyStarChart star={star} bodies={bodies} /> : null}
+      {star ? (
+        <GalaxyStarChart
+          star={star}
+          bodies={bodies}
+          onPatchStar={(fields) =>
+            persist(
+              objects.map((obj) => (obj.name === star.name ? { ...obj, fields: { ...obj.fields, ...fields } } : obj)),
+            )
+          }
+        />
+      ) : null}
 
       <h2 className="mt-8 text-xs font-medium uppercase tracking-[0.14em] text-accent">Star types</h2>
       <div className="mt-2 max-w-xl">
@@ -196,6 +206,52 @@ export function GalaxyEditor() {
                     )
                   }
                 />
+              ) : key === "Model" ? (
+                <select
+                  className="h-10 w-full rounded-sm border border-border bg-bg px-2 text-sm"
+                  value={star.fields.Model || ""}
+                  onChange={(e) =>
+                    persist(
+                      objects.map((obj) =>
+                        obj.name === star.name ? { ...obj, fields: { ...obj.fields, Model: e.target.value } } : obj,
+                      ),
+                    )
+                  }
+                >
+                  {star.fields.Model && !STAR_MODELS.includes(star.fields.Model as (typeof STAR_MODELS)[number]) ? (
+                    <option value={star.fields.Model}>{star.fields.Model}</option>
+                  ) : null}
+                  {STAR_MODELS.map((model) => (
+                    <option key={model} value={model}>
+                      {model}
+                    </option>
+                  ))}
+                </select>
+              ) : key === "Color" || key === "LightColor" ? (
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    className="h-10 w-12 cursor-pointer rounded-sm border border-border bg-bg"
+                    value={fieldToHex(star.fields[key])}
+                    onChange={(e) =>
+                      persist(
+                        objects.map((obj) =>
+                          obj.name === star.name ? { ...obj, fields: { ...obj.fields, [key]: hexToField(e.target.value) } } : obj,
+                        ),
+                      )
+                    }
+                  />
+                  <Input
+                    value={star.fields[key] ?? ""}
+                    onChange={(e) =>
+                      persist(
+                        objects.map((obj) =>
+                          obj.name === star.name ? { ...obj, fields: { ...obj.fields, [key]: e.target.value } } : obj,
+                        ),
+                      )
+                    }
+                  />
+                </div>
               ) : (
                 <Input
                   value={star.fields[key] ?? ""}
@@ -228,11 +284,13 @@ export function GalaxyEditor() {
       </div>
 
       <h2 className="mt-8 text-xs font-medium uppercase tracking-[0.14em] text-accent">Star regions</h2>
-      <p className="mt-1 text-xs text-subtle">Where this class of star actually spawns in the galaxy (LY).</p>
-      <ChildTable
+      <p className="mt-1 text-xs text-subtle">
+        Where stars spawn (LY). Mix rows are StarClass_n + Prob — that is the actual fill, not the default star list.
+      </p>
+      <RegionTable
         rows={regions}
-        columns={STAR_REGION_STATS}
         onChange={(name, col, value) => patchChild(name, (cur) => ({ ...cur, fields: { ...cur.fields, [col]: value } }))}
+        onMix={(name, mix) => patchChild(name, (cur) => ({ ...cur, fields: writeStarMix(cur.fields, mix) }))}
         onRemove={(name) =>
           patchGeneral((cur) => ({ ...cur, children: (cur.children ?? []).filter((c) => c.name !== name) }))
         }
@@ -315,50 +373,151 @@ export function GalaxyEditor() {
   );
 }
 
-function ChildTable({
+function RegionTable({
   rows,
-  columns,
   onChange,
+  onMix,
   onRemove,
 }: {
   rows: EcfObject[];
-  columns: string[];
   onChange: (name: string, col: string, value: string) => void;
+  onMix: (name: string, mix: StarMix[]) => void;
   onRemove: (name: string) => void;
 }) {
-  if (!rows.length) return <p className="mt-2 text-sm text-muted">None yet.</p>;
+  if (!rows.length) return <p className="mt-2 text-sm text-muted">None yet. Add a star region to place classes in LY.</p>;
   return (
-    <div className="mt-2 overflow-auto">
-      <table className="w-full min-w-[720px] text-sm">
-        <thead className="text-left text-xs uppercase tracking-[0.12em] text-subtle">
-          <tr>
-            <th className="px-2 py-2">Id</th>
-            {columns.map((col) => (
-              <th key={col} className="px-2 py-2">
-                {col}
-              </th>
-            ))}
-            <th className="px-2 py-2" />
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border">
-          {rows.map((row) => (
-            <tr key={row.name}>
-              <td className="px-2 py-1.5 font-mono text-xs text-subtle">{row.name}</td>
-              {columns.map((col) => (
-                <td key={col} className="px-2 py-1.5">
+    <div className="mt-2 space-y-4">
+      {rows.map((row) => {
+        const mix = parseStarMix(row.fields);
+        return (
+          <div key={row.name} className="rounded-md border border-border">
+            <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2">
+              <span className="font-mono text-xs text-subtle">{row.name}</span>
+              <span className="text-sm">{row.fields.Name || "Unnamed region"}</span>
+              <span className="ml-auto text-xs text-subtle">
+                {mix.length ? `${mix.length} classes` : "default mix"}
+              </span>
+              <Button size="sm" variant="ghost" onClick={() => onRemove(row.name)}>
+                Remove
+              </Button>
+            </div>
+            <div className="grid gap-2 p-3 sm:grid-cols-2 lg:grid-cols-4">
+              {STAR_REGION_STATS.map((col) => (
+                <Field key={col} label={col}>
                   <Input className="h-8" value={row.fields[col] ?? ""} onChange={(e) => onChange(row.name, col, e.target.value)} />
-                </td>
+                </Field>
               ))}
-              <td className="px-2 py-1.5">
-                <Button size="sm" variant="ghost" onClick={() => onRemove(row.name)}>
-                  Remove
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            </div>
+            <div className="overflow-auto px-3 pb-3">
+              <p className="mb-2 text-xs uppercase tracking-[0.12em] text-subtle">Star mix</p>
+              <table className="w-full min-w-[560px] text-sm">
+                <thead className="text-left text-xs uppercase tracking-[0.12em] text-subtle">
+                  <tr>
+                    <th className="py-1 pr-2">Class</th>
+                    <th className="py-1 pr-2">Prob</th>
+                    <th className="py-1 pr-2">Cluster</th>
+                    <th className="py-1 pr-2">Cluster range</th>
+                    <th className="py-1 pr-2">Spawn amount</th>
+                    <th className="py-1" />
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {mix.map((entry, i) => (
+                    <tr key={`${row.name}-${entry.index}`}>
+                      <td className="py-1 pr-2">
+                        <Input
+                          className="h-8 w-24"
+                          value={entry.starClass}
+                          onChange={(e) =>
+                            onMix(
+                              row.name,
+                              mix.map((item, j) => (j === i ? { ...item, starClass: e.target.value } : item)),
+                            )
+                          }
+                        />
+                      </td>
+                      <td className="py-1 pr-2">
+                        <Input
+                          className="h-8 w-20"
+                          value={entry.prob}
+                          onChange={(e) =>
+                            onMix(
+                              row.name,
+                              mix.map((item, j) => (j === i ? { ...item, prob: e.target.value } : item)),
+                            )
+                          }
+                        />
+                      </td>
+                      <td className="py-1 pr-2">
+                        <Input
+                          className="h-8 w-20"
+                          value={entry.clusterProb}
+                          onChange={(e) =>
+                            onMix(
+                              row.name,
+                              mix.map((item, j) => (j === i ? { ...item, clusterProb: e.target.value } : item)),
+                            )
+                          }
+                        />
+                      </td>
+                      <td className="py-1 pr-2">
+                        <Input
+                          className="h-8 w-28"
+                          value={entry.clusterRange}
+                          onChange={(e) =>
+                            onMix(
+                              row.name,
+                              mix.map((item, j) => (j === i ? { ...item, clusterRange: e.target.value } : item)),
+                            )
+                          }
+                        />
+                      </td>
+                      <td className="py-1 pr-2">
+                        <Input
+                          className="h-8 w-24"
+                          value={entry.spawnAmount}
+                          onChange={(e) =>
+                            onMix(
+                              row.name,
+                              mix.map((item, j) => (j === i ? { ...item, spawnAmount: e.target.value } : item)),
+                            )
+                          }
+                        />
+                      </td>
+                      <td className="py-1">
+                        <Button size="sm" variant="ghost" onClick={() => onMix(row.name, mix.filter((_, j) => j !== i))}>
+                          Remove
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <Button
+                className="mt-2"
+                size="sm"
+                variant="secondary"
+                onClick={() =>
+                  onMix(row.name, [
+                    ...mix,
+                    {
+                      index: mix.length + 1,
+                      starClass: "G",
+                      spawnAmount: "",
+                      prob: "0.2",
+                      clusterProb: "0",
+                      clusterRange: "0-0",
+                    },
+                  ])
+                }
+              >
+                Add class
+              </Button>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
+

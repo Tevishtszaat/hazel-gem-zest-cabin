@@ -109,6 +109,7 @@ export function classifyScenarioPath(path: string, hint?: string): string | null
   if (hint === "dialogues" && /\.ecf$/.test(base)) return "dialogues";
   if (hint === "dialoguesCsv" && /\.csv$/.test(base) && base !== "localization.csv" && base !== "pda.csv") return "dialoguesCsv";
   if (hint === "factions" && /\.ecf$/.test(base)) return "factions";
+  if (hint === "galaxy" && /\.ecf$/.test(base) && /galaxy/.test(base)) return "galaxy";
   if (hint === "sectors" && /\.ya?ml$/.test(base) && !/playfield/.test(base)) return "sectors";
   if (hint === "localization" && /\.csv$/.test(base)) return "localization";
   if (base === "pda.yaml" || base === "pda.yml") return "pdaYaml";

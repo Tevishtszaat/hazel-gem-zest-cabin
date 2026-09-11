@@ -11,6 +11,7 @@ import {
   MessageSquare,
   Package,
   ScrollText,
+  Sun,
   Trash2,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
@@ -32,6 +33,7 @@ const ICONS: Record<ImportKind, ReactNode> = {
   dialogues: <MessageSquare className="size-5" />,
   dialoguesCsv: <FileSpreadsheet className="size-5" />,
   factions: <Landmark className="size-5" />,
+  galaxy: <Sun className="size-5" />,
   sectors: <Map className="size-5" />,
   playfields: <Map className="size-5" />,
   blueprints: <Box className="size-5" />,
@@ -82,6 +84,8 @@ function slotCount(kind: ImportKind, files: { role: string; count: number }[], p
       return sum("dialoguesCsv");
     case "factions":
       return sum("factions");
+    case "galaxy":
+      return sum("galaxy");
     case "sectors":
       return sum("sectors");
     case "playfields":
@@ -145,7 +149,8 @@ export function ImportPage() {
             <h1 className="font-medium text-2xl tracking-tight">Import page</h1>
             <p className="mt-1 max-w-2xl text-sm text-muted">
               Drop a whole scenario, or fill slots one at a time. Configs, localization, images, dialogues, factions,
-              sectors, playfields, and blueprints merge in — they do not wipe the PDA you already have open.
+              GalaxyConfig, sectors, playfields, and blueprints merge in — they do not wipe the PDA you already have
+              open.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">

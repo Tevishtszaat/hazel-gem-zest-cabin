@@ -49,6 +49,131 @@ export const STAR_STATS = [
 
 export const STAR_REGION_STATS = ["Name", "Shape", "RadiusMinMax", "TotalSpawnCount", "UseDefaultStarDef", "Position", "FlattenFac"];
 
+export const STAR_MODELS = [
+  "SunBlueGiant",
+  "SunWhiteDwarf",
+  "SunYellowWhite",
+  "SunYellow",
+  "SunRedGiant",
+  "SunRedDwarf",
+  "SunNeutron",
+  "BlackHole",
+] as const;
+
+export function fieldToHex(value?: string): string {
+  if (!value) return "#fbbf24";
+  if (/^#([0-9a-f]{6})$/i.test(value.trim())) return value.trim();
+  const nums = value.split(",").map((p) => Number(p.trim())).filter((n) => Number.isFinite(n));
+  if (nums.length < 3) return "#fbbf24";
+  const to = (n: number) => Math.round(Math.max(0, Math.min(1, n > 1 ? n / 255 : n)) * 255);
+  return `#${[nums[0]!, nums[1]!, nums[2]!].map((n) => to(n).toString(16).padStart(2, "0")).join("")}`;
+}
+
+export function hexToField(hex: string): string {
+  const m = hex.trim().match(/^#?([0-9a-f]{6})$/i);
+  if (!m) return hex;
+  const n = parseInt(m[1]!, 16);
+  const r = ((n >> 16) & 255) / 255;
+  const g = ((n >> 8) & 255) / 255;
+  const b = (n & 255) / 255;
+  const f = (x: number) => (Math.round(x * 1000) / 1000).toString();
+  return `${f(r)},${f(g)},${f(b)}`;
+}
+
+export type StarMix = {
+  index: number;
+  starClass: string;
+  spawnAmount: string;
+  prob: string;
+  clusterProb: string;
+  clusterRange: string;
+};
+
+export function parseStarMix(fields: Record<string, string>): StarMix[] {
+  return Object.entries(fields)
+    .filter(([key]) => /^StarClass_\d+$/i.test(key))
+    .map(([key, value]) => {
+      const index = Number(key.split("_")[1]) || 0;
+      const match = value.match(/^([^,]+)(?:\s*,\s*param1:\s*"?([^"]*)"?)?/);
+      const param = match?.[2] ?? "";
+      const grab = (name: string) => param.match(new RegExp(`${name}=([^,]+)`, "i"))?.[1]?.trim() ?? "";
+      return {
+        index,
+        starClass: (match?.[1] || value).trim(),
+        spawnAmount: grab("SpawnAmount"),
+        prob: grab("Prob"),
+        clusterProb: grab("ClusterProb"),
+        clusterRange: grab("ClusterRange"),
+      };
+    })
+    .sort((a, b) => a.index - b.index);
+}
+
+export function writeStarMix(fields: Record<string, string>, mix: StarMix[]): Record<string, string> {
+  const next: Record<string, string> = {};
+  for (const [key, value] of Object.entries(fields)) {
+    if (!/^StarClass_\d+$/i.test(key)) next[key] = value;
+  }
+  mix.forEach((row, i) => {
+    const parts: string[] = [];
+    if (row.spawnAmount.trim()) parts.push(`SpawnAmount=${row.spawnAmount.trim()}`);
+    if (row.prob.trim()) parts.push(`Prob=${row.prob.trim()}`);
+    if (row.clusterProb.trim()) parts.push(`ClusterProb=${row.clusterProb.trim()}`);
+    if (row.clusterRange.trim()) parts.push(`ClusterRange=${row.clusterRange.trim()}`);
+    const klass = row.starClass.trim() || "G";
+    next[`StarClass_${i + 1}`] = parts.length ? `${klass}, param1: "${parts.join(", ")}"` : klass;
+  });
+  return next;
+}
+
+export type ZoneHandle = {
+  id: string;
+  kind: "start" | "join" | "end";
+  index: number;
+  sectors: number;
+};
+
+export function zoneHandleList(spans: ZoneSpan[]): ZoneHandle[] {
+  if (!spans.length) return [];
+  const list: ZoneHandle[] = [{ id: "start", kind: "start", index: 0, sectors: spans[0]!.min }];
+  for (let i = 0; i < spans.length - 1; i++) {
+    list.push({ id: `join-${i}`, kind: "join", index: i, sectors: spans[i]!.max });
+  }
+  list.push({ id: "end", kind: "end", index: spans.length - 1, sectors: spans[spans.length - 1]!.max });
+  return list;
+}
+
+export function applyZoneDrag(spans: ZoneSpan[], handle: ZoneHandle, sectors: number): ZoneSpan[] {
+  const next = spans.map((span) => ({ ...span }));
+  const v = Math.max(0, Math.round(sectors));
+  if (handle.kind === "start") {
+    const span = next[0];
+    if (span) span.min = Math.min(v, span.max - 1);
+    return next;
+  }
+  if (handle.kind === "end") {
+    const span = next[next.length - 1];
+    if (span) span.max = Math.max(v, span.min + 1);
+    return next;
+  }
+  const left = next[handle.index];
+  const right = next[handle.index + 1];
+  if (!left || !right) return next;
+  const lo = left.min + 1;
+  const hi = Math.max(lo, right.max - 2);
+  const c = Math.min(Math.max(v, lo), hi);
+  left.max = c;
+  right.min = c + 1;
+  return next;
+}
+
+export function spansToZoneFields(spans: ZoneSpan[]): Record<string, string> {
+  const fields: Record<string, string> = {};
+  for (const span of spans) fields[span.key] = formatRange({ min: span.min, max: span.max });
+  return fields;
+}
+
+
 export type NumRange = { min: number; max: number };
 
 export function parseRange(value?: string | null): NumRange | null {

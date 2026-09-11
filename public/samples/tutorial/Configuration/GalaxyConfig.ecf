@@ -11,6 +11,18 @@
     Shape: Sphere
     RadiusMinMax: "0, 2"
     TotalSpawnCount: 1
+    UseDefaultStarDef: false
+    StarClass_1: G, param1: "Prob=1, ClusterProb=0"
+  }
+  { Child StarRegion_2
+    Name: "Inner Sphere"
+    Shape: Sphere
+    RadiusMinMax: "2, 20"
+    TotalSpawnCount: 40
+    UseDefaultStarDef: false
+    StarClass_1: G, param1: "Prob=0.4, ClusterProb=0"
+    StarClass_2: K, param1: "Prob=0.4, ClusterProb=0"
+    StarClass_3: M, param1: "Prob=0.2, ClusterProb=0"
   }
   { Child Territory_1
     Faction: Zirax

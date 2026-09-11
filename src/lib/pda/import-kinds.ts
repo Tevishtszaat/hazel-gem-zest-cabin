@@ -11,6 +11,7 @@ export type ImportKind =
   | "dialogues"
   | "dialoguesCsv"
   | "factions"
+  | "galaxy"
   | "sectors"
   | "playfields"
   | "blueprints";
@@ -85,6 +86,12 @@ export const IMPORT_SLOTS: {
     accept: ".ecf",
   },
   {
+    id: "galaxy",
+    title: "Import GalaxyConfig.ecf",
+    hint: "Star types, habitable zones, luminosity, star regions, and territories.",
+    accept: ".ecf",
+  },
+  {
     id: "sectors",
     title: "Import Sectors.yaml",
     hint: "Playfield names for PlayfieldEntered and similar checks.",
@@ -138,6 +145,7 @@ const ROLE_FOR_KIND: Record<Exclude<ImportKind, "scenario">, string[]> = {
   dialogues: ["dialogues"],
   dialoguesCsv: ["dialoguesCsv"],
   factions: ["factions"],
+  galaxy: ["galaxy"],
   sectors: ["sectors"],
   playfields: ["playfieldYaml"],
   blueprints: ["poi"],

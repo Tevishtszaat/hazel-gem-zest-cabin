@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import type { EcfObject } from "@/lib/pda/ecf.ts";
 import {
+  applyZoneDrag,
   axisMax,
   auToSectors,
   bodiesForStar,
@@ -11,23 +12,39 @@ import {
   sectorsToAu,
   solarAdvice,
   solarFlux,
+  spansToZoneFields,
   starZoneSpans,
   zoneAtDistance,
+  zoneHandleList,
   zoneWarnings,
   type SystemBody,
+  type ZoneHandle,
 } from "@/lib/pda/galaxy.ts";
 
-export function GalaxyStarChart({ star, bodies }: { star: EcfObject; bodies: SystemBody[] }) {
+export function GalaxyStarChart({
+  star,
+  bodies,
+  onPatchStar,
+}: {
+  star: EcfObject;
+  bodies: SystemBody[];
+  onPatchStar?: (fields: Record<string, string>) => void;
+}) {
   const L = luminosityOf(star);
   const spans = starZoneSpans(star);
   const related = bodiesForStar(star, bodies);
-  const max = axisMax(star, related);
+  const max = Math.max(axisMax(star, related), 8);
   const physics = physicsHabitableAU(L);
   const warnings = zoneWarnings(star);
-  const [probe, setProbe] = useState(() => {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [probe, setProbe] = useState(0);
+  const [drag, setDrag] = useState<ZoneHandle | "probe" | null>(null);
+
+  useEffect(() => {
     const temp = spans.find((s) => s.key === "HabitableTemperate");
-    return temp ? Math.round((temp.min + temp.max) / 2) : Math.round(max * 0.4);
-  });
+    setProbe(temp ? Math.round((temp.min + temp.max) / 2) : Math.round(max * 0.4));
+  }, [star.name]);
+
   const flux = solarFlux(L, probe);
   const zone = zoneAtDistance(star, probe);
   const color = rgbFromField(star.fields.Color || star.fields.LightColor);
@@ -37,6 +54,30 @@ export function GalaxyStarChart({ star, bodies }: { star: EcfObject; bodies: Sys
   const pad = { l: 44, r: 16, t: 18, b: 28 };
   const innerW = w - pad.l - pad.r;
   const x = (sectors: number) => pad.l + (Math.max(0, Math.min(sectors, max)) / max) * innerW;
+  const handles = zoneHandleList(spans);
+
+  const sectorsFromEvent = (event: PointerEvent) => {
+    const svg = svgRef.current;
+    if (!svg) return 0;
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return 0;
+    const pt = svg.createSVGPoint();
+    pt.x = event.clientX;
+    pt.y = event.clientY;
+    const loc = pt.matrixTransform(ctm.inverse());
+    return Math.round(((loc.x - pad.l) / innerW) * max);
+  };
+
+  const onPointerMove = (event: PointerEvent<SVGSVGElement>) => {
+    if (!drag) return;
+    const sectors = Math.max(0, sectorsFromEvent(event));
+    if (drag === "probe") {
+      setProbe(sectors);
+      return;
+    }
+    if (!onPatchStar) return;
+    onPatchStar(spansToZoneFields(applyZoneDrag(spans, drag, sectors)));
+  };
 
   const fluxPts = useMemo(() => {
     const pts: { x: number; y: number }[] = [];
@@ -65,7 +106,8 @@ export function GalaxyStarChart({ star, bodies }: { star: EcfObject; bodies: Sys
             <span className="ml-2 font-mono text-sm text-muted">L = {L} Sol</span>
           </h3>
           <p className="mt-1 text-xs text-subtle">
-            Game ranges are in sectors (10 sectors = 1 AU). Dashed band is physics HZ from luminosity, √L × 0.95–1.67 AU.
+            Drag the dots to resize generation bands. Game ranges are sectors (10 = 1 AU). Dashed bar is physics HZ from
+            luminosity.
           </p>
         </div>
         <label className="text-xs text-muted">
@@ -79,7 +121,14 @@ export function GalaxyStarChart({ star, bodies }: { star: EcfObject; bodies: Sys
         </label>
       </div>
 
-      <svg viewBox={`0 0 ${w} ${pad.t + bandH + 36 + pad.t + fluxH + pad.b}`} className="mt-3 w-full">
+      <svg
+        ref={svgRef}
+        viewBox={`0 0 ${w} ${pad.t + bandH + 36 + pad.t + fluxH + pad.b}`}
+        className="mt-3 w-full touch-none"
+        onPointerMove={onPointerMove}
+        onPointerUp={() => setDrag(null)}
+        onPointerCancel={() => setDrag(null)}
+      >
         <circle cx={22} cy={pad.t + bandH / 2} r={10} fill={color} />
         {spans.map((span) => (
           <g key={span.key}>
@@ -91,10 +140,10 @@ export function GalaxyStarChart({ star, bodies }: { star: EcfObject; bodies: Sys
               fill={span.color}
               opacity={0.35}
             />
-            <text x={x((span.min + span.max) / 2)} y={pad.t + 16} textAnchor="middle" fill="#9aa3b2" fontSize="10">
+            <text x={x((span.min + span.max) / 2)} y={pad.t + 16} textAnchor="middle" fill="currentColor" className="fill-muted" fontSize="10">
               {span.label}
             </text>
-            <text x={x((span.min + span.max) / 2)} y={pad.t + 30} textAnchor="middle" fill="#6b7280" fontSize="9">
+            <text x={x((span.min + span.max) / 2)} y={pad.t + 30} textAnchor="middle" fill="currentColor" className="fill-subtle" fontSize="9">
               {span.min}–{span.max}
             </text>
           </g>
@@ -105,51 +154,79 @@ export function GalaxyStarChart({ star, bodies }: { star: EcfObject; bodies: Sys
           width={Math.max(2, x(auToSectors(physics.outer)) - x(auToSectors(physics.inner)))}
           height={8}
           fill="none"
-          stroke="#f8fafc"
+          stroke="currentColor"
+          className="stroke-fg"
           strokeDasharray="4 3"
           opacity={0.85}
         />
         {related.map((body) => (
           <g key={`${body.system}-${body.name}`}>
-            <line x1={x(body.distance)} x2={x(body.distance)} y1={pad.t} y2={pad.t + bandH} stroke="#e2e8f0" strokeWidth={1.5} />
-            <text
-              x={x(body.distance)}
-              y={pad.t + bandH + 14}
-              textAnchor="middle"
-              fill="#e2e8f0"
-              fontSize="10"
-            >
+            <line x1={x(body.distance)} x2={x(body.distance)} y1={pad.t} y2={pad.t + bandH} stroke="currentColor" className="stroke-fg" strokeWidth={1.5} />
+            <text x={x(body.distance)} y={pad.t + bandH + 14} textAnchor="middle" fill="currentColor" className="fill-fg" fontSize="10">
               {body.name}
             </text>
           </g>
         ))}
-        <line x1={x(probe)} x2={x(probe)} y1={pad.t} y2={pad.t + bandH} stroke="#fbbf24" strokeWidth={2} />
-        <text x={pad.l} y={pad.t + bandH + 32} fill="#6b7280" fontSize="10">
+        <line
+          x1={x(probe)}
+          x2={x(probe)}
+          y1={pad.t}
+          y2={pad.t + bandH}
+          stroke="currentColor"
+          className="stroke-accent"
+          strokeWidth={2}
+          onPointerDown={(e) => {
+            svgRef.current?.setPointerCapture(e.pointerId);
+            setDrag("probe");
+          }}
+        />
+        {onPatchStar
+          ? handles.map((handle) => (
+              <circle
+                key={handle.id}
+                cx={x(handle.sectors)}
+                cy={pad.t + bandH / 2}
+                r={7}
+                fill="currentColor"
+                className="fill-fg cursor-ew-resize"
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                  svgRef.current?.setPointerCapture(e.pointerId);
+                  setDrag(handle);
+                }}
+              />
+            ))
+          : null}
+        <text x={pad.l} y={pad.t + bandH + 32} fill="currentColor" className="fill-subtle" fontSize="10">
           0 sec / 0 AU
         </text>
-        <text x={w - pad.r} y={pad.t + bandH + 32} textAnchor="end" fill="#6b7280" fontSize="10">
+        <text x={w - pad.r} y={pad.t + bandH + 32} textAnchor="end" fill="currentColor" className="fill-subtle" fontSize="10">
           {max.toFixed(0)} sec · {sectorsToAu(max).toFixed(1)} AU
         </text>
 
         <g transform={`translate(0, ${pad.t + bandH + 40})`}>
-          <text x={8} y={pad.t} fill="#6b7280" fontSize="10">
+          <text x={8} y={pad.t} fill="currentColor" className="fill-subtle" fontSize="10">
             flux
           </text>
-          <line x1={pad.l} x2={w - pad.r} y1={earthY} y2={earthY} stroke="#4ade80" strokeDasharray="3 3" opacity={0.6} />
-          <text x={w - pad.r} y={earthY - 4} textAnchor="end" fill="#4ade80" fontSize="9">
+          <line x1={pad.l} x2={w - pad.r} y1={earthY} y2={earthY} stroke="currentColor" className="stroke-ok" strokeDasharray="3 3" opacity={0.6} />
+          <text x={w - pad.r} y={earthY - 4} textAnchor="end" fill="currentColor" className="fill-ok" fontSize="9">
             1× Earth
           </text>
-          <polyline
-            fill="none"
-            stroke="#fbbf24"
-            strokeWidth={2}
-            points={fluxPts.map((p) => `${p.x},${p.y}`).join(" ")}
-          />
+          <polyline fill="none" stroke="currentColor" className="stroke-accent" strokeWidth={2} points={fluxPts.map((p) => `${p.x},${p.y}`).join(" ")} />
           {related.map((body) => {
             const f = solarFlux(L, body.distance);
             const log = Math.log10(Math.max(f, 0.001));
             const y = pad.t + fluxH - ((log - Math.log10(0.001)) / (Math.log10(20) - Math.log10(0.001))) * fluxH;
-            return <circle key={`f-${body.name}`} cx={x(body.distance)} cy={Math.max(pad.t, Math.min(pad.t + fluxH, y))} r={3} fill="#e2e8f0" />;
+            return (
+              <circle
+                key={`f-${body.name}`}
+                cx={x(body.distance)}
+                cy={Math.max(pad.t, Math.min(pad.t + fluxH, y))}
+                r={3}
+                fill="currentColor"
+                className="fill-fg"
+              />
+            );
           })}
         </g>
       </svg>
@@ -161,8 +238,8 @@ export function GalaxyStarChart({ star, bodies }: { star: EcfObject; bodies: Sys
       </div>
       {warnings.length ? (
         <ul className="mt-3 space-y-1 text-xs text-warn">
-          {warnings.map((w) => (
-            <li key={w}>{w}</li>
+          {warnings.map((item) => (
+            <li key={item}>{item}</li>
           ))}
         </ul>
       ) : (
