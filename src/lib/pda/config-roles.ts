@@ -46,7 +46,7 @@ export const CONFIG_METAS: ConfigMeta[] = [
     label: "Items",
     kind: "Item",
     plus: true,
-    idMode: "required",
+    idMode: "optional",
     format: "ecf",
     group: "catalog",
     catalogKind: "item",

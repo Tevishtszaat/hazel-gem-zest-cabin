@@ -98,8 +98,9 @@ export function LibraryPage() {
         <div>
           <h1 className="text-xl font-medium tracking-tight">Library</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted">
-            Edit scenario configs. Items and tokens need numeric Ids. Blocks can use a number or a floating{" "}
-            <span className="font-mono text-fg/80">+Block Name</span>.
+            Edit scenario configs. Items and blocks can use a number or a floating{" "}
+            <span className="font-mono text-fg/80">+Name</span> / <span className="font-mono text-fg/80">Name</span>.
+            Tokens need numeric Ids.
           </p>
         </div>
       </div>
@@ -167,6 +168,38 @@ export function LibraryPage() {
   );
 }
 
+function CatalogRow({
+  obj,
+  index,
+  label,
+  selected,
+  selectedIndex,
+  onPick,
+  trailing,
+}: {
+  obj: EcfObject;
+  index: number;
+  label: string;
+  selected: EcfObject | undefined;
+  selectedIndex: number;
+  onPick: (key: string) => void;
+  trailing: ReactNode;
+}) {
+  const key = objectKey(obj, index);
+  return (
+    <button
+      onClick={() => onPick(key)}
+      className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm ${
+        selected && objectKey(selected, selectedIndex) === key ? "bg-elevated" : "hover:bg-elevated/50"
+      }`}
+    >
+      <ItemIcon name={obj.name} fields={obj.fields} className="size-6 rounded-sm" />
+      <span className="min-w-0 flex-1 truncate">{label}</span>
+      {trailing}
+    </button>
+  );
+}
+
 function ObjectBrowser({
   role,
   title,
@@ -214,11 +247,11 @@ function ObjectBrowser({
   const missingIds = objects.filter((obj) => !obj.id);
   const unused = useMemo(() => unusedNumericIds(numericIds(objects)), [objects]);
   const floats = useMemo(() => floatingBlocks(objects), [objects]);
+  const usesFloatingIds = role === "blocks" || role === "items";
   const usesNumericIds = meta.idMode === "required";
-  const usesBlockIds = role === "blocks";
-  const usesIds = usesNumericIds || usesBlockIds;
+  const usesIds = usesNumericIds || usesFloatingIds;
   const visible = objects.filter((obj, index) => {
-    const ident = usesBlockIds ? blockIdentity(obj) : null;
+    const ident = usesFloatingIds ? blockIdentity(obj) : null;
     if (idFilter === "missing" && obj.id) return false;
     if (idFilter === "numeric" && ident?.kind !== "numeric") return false;
     if (idFilter === "floating" && ident?.kind !== "floating") return false;
@@ -252,7 +285,7 @@ function ObjectBrowser({
 
   const claim = (id?: number) => {
     const used = new Set(objects.map((o) => o.name.toLowerCase()).filter(Boolean));
-    const floating = role === "blocks" && id == null;
+    const floating = usesFloatingIds && id == null;
     const skipId = meta.idMode === "none" || floating;
     const n = id ?? unused.next;
     let name = kindName === "Container" ? "" : skipId ? `New${kindName}` : `New${kindName}${n}`;
@@ -341,7 +374,7 @@ function ObjectBrowser({
               >
                 All
               </button>
-              {usesBlockIds ? (
+              {usesFloatingIds ? (
                 <>
                   <button
                     className={idFilter === "numeric" ? "text-fg" : "text-muted hover:text-fg"}
@@ -353,7 +386,7 @@ function ObjectBrowser({
                     className={idFilter === "floating" ? "text-fg" : "text-muted hover:text-fg"}
                     onClick={() => setIdFilter("floating")}
                   >
-                    Floating ({floats.length})
+                    Custom ({floats.length})
                   </button>
                 </>
               ) : (
@@ -369,15 +402,15 @@ function ObjectBrowser({
           <p className="mt-2 text-xs text-subtle">
             {visible.length} / {objects.length}
             {usesNumericIds ? ` · ${unused.total} unused IDs` : ""}
-            {usesBlockIds ? ` · ${floats.length} floating · ${unused.total} free numbers` : ""}
+            {usesFloatingIds ? ` · ${floats.length} custom · ${unused.total} free numbers` : ""}
           </p>
         </div>
-        {usesBlockIds && floats.length ? (
+        {usesFloatingIds && floats.length ? (
           <div className="border-b border-border p-2">
-            <p className="text-xs uppercase tracking-[0.14em] text-accent">Floating IDs</p>
+            <p className="text-xs uppercase tracking-[0.14em] text-accent">Custom (name ID)</p>
             <p className="mt-1 text-xs text-subtle">
-              No number — the game treats <span className="font-mono">+Block Name</span> /{" "}
-              <span className="font-mono">Block Name</span> as the ID.
+              Scenario-added {kindName.toLowerCase()}s with no number. The game uses{" "}
+              <span className="font-mono">+{kindName} Name</span> / <span className="font-mono">{kindName} Name</span>.
             </p>
             <div className="mt-2 flex flex-wrap gap-1">
               {floats.slice(0, 24).map((obj) => {
@@ -390,7 +423,7 @@ function ObjectBrowser({
                       setIdFilter("floating");
                       setPicked(objectKey(obj, objects.indexOf(obj)));
                     }}
-                    title={obj.plus ? `{ +Block Name: ${obj.name} }` : `{ Block Name: ${obj.name} }`}
+                    title={obj.plus ? `{ +${kindName} Name: ${obj.name} }` : `{ ${kindName} Name: ${obj.name} }`}
                   >
                     {ident.label}
                   </button>
@@ -404,8 +437,8 @@ function ObjectBrowser({
           <div className="border-b border-border p-2">
             <p className="text-xs uppercase tracking-[0.14em] text-accent">Empty numeric IDs</p>
             <p className="mt-1 text-xs text-subtle">
-              {usesBlockIds
-                ? "Optional. Claim a number, or New Block to add a floating +Block Name."
+              {usesFloatingIds
+                ? `Optional. Claim a number, or New ${kindName} to add a custom +${kindName} Name.`
                 : `Claim a free Id to add a new ${kindName.toLowerCase()}.`}
             </p>
             <div className="mt-2 flex flex-wrap gap-1">
@@ -469,39 +502,83 @@ function ObjectBrowser({
                 })}
               </div>
             ))
+          ) : usesFloatingIds && idFilter === "all" && floats.length ? (
+            <>
+              <p className="sticky top-0 z-10 bg-surface px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-accent">
+                Custom
+                <span className="ml-2 text-subtle">{visible.filter((o) => blockIdentity(o).kind === "floating").length}</span>
+              </p>
+              {visible
+                .filter((o) => blockIdentity(o).kind === "floating")
+                .slice(0, 400)
+                .map((obj) => (
+                  <CatalogRow
+                    key={objectKey(obj, objects.indexOf(obj))}
+                    obj={obj}
+                    index={objects.indexOf(obj)}
+                    label={locaLabel(loca, obj.name, language) || objectLabel(obj)}
+                    selected={selected}
+                    selectedIndex={selectedIndex}
+                    onPick={setPicked}
+                    trailing={
+                      <span className="shrink-0 font-mono text-xs text-accent">{blockIdentity(obj).label}</span>
+                    }
+                  />
+                ))}
+              <p className="sticky top-0 z-10 bg-surface px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-accent">
+                Numbered
+                <span className="ml-2 text-subtle">{visible.filter((o) => blockIdentity(o).kind === "numeric").length}</span>
+              </p>
+              {visible
+                .filter((o) => blockIdentity(o).kind === "numeric")
+                .slice(0, 400)
+                .map((obj) => (
+                  <CatalogRow
+                    key={objectKey(obj, objects.indexOf(obj))}
+                    obj={obj}
+                    index={objects.indexOf(obj)}
+                    label={locaLabel(loca, obj.name, language) || objectLabel(obj)}
+                    selected={selected}
+                    selectedIndex={selectedIndex}
+                    onPick={setPicked}
+                    trailing={
+                      <span className="shrink-0 font-mono text-xs text-subtle">{blockIdentity(obj).label}</span>
+                    }
+                  />
+                ))}
+            </>
           ) : (
             visible.slice(0, 500).map((obj) => {
               const index = objects.indexOf(obj);
               const label = locaLabel(loca, obj.name, language) || objectLabel(obj);
-              const key = objectKey(obj, index);
+              const ident = usesFloatingIds ? blockIdentity(obj) : null;
               return (
-                <button
-                  key={key}
-                  onClick={() => setPicked(key)}
-                  className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm ${
-                    selected && objectKey(selected, selectedIndex) === key ? "bg-elevated" : "hover:bg-elevated/50"
-                  }`}
-                >
-                  <ItemIcon name={obj.name} fields={obj.fields} className="size-6 rounded-sm" />
-                  <span className="min-w-0 flex-1 truncate">{label}</span>
-                  {meta.idMode === "none" && role !== "blocks" ? (
-                    obj.plus ? (
-                      <span className="shrink-0 font-mono text-[11px] text-subtle">+{obj.kind}</span>
-                    ) : null
-                  ) : usesBlockIds ? (
-                    <span
-                      className={`shrink-0 font-mono text-xs ${
-                        blockIdentity(obj).kind === "floating" ? "text-accent" : "text-subtle"
-                      }`}
-                    >
-                      {blockIdentity(obj).label}
-                    </span>
-                  ) : (
-                    <span className={`shrink-0 font-mono text-xs ${obj.id ? "text-subtle" : "text-warn"}`}>
-                      {obj.id || "no id"}
-                    </span>
-                  )}
-                </button>
+                <CatalogRow
+                  key={objectKey(obj, index)}
+                  obj={obj}
+                  index={index}
+                  label={label}
+                  selected={selected}
+                  selectedIndex={selectedIndex}
+                  onPick={setPicked}
+                  trailing={
+                    meta.idMode === "none" && !usesFloatingIds ? (
+                      obj.plus ? (
+                        <span className="shrink-0 font-mono text-[11px] text-subtle">+{obj.kind}</span>
+                      ) : null
+                    ) : ident ? (
+                      <span
+                        className={`shrink-0 font-mono text-xs ${ident.kind === "floating" ? "text-accent" : "text-subtle"}`}
+                      >
+                        {ident.label}
+                      </span>
+                    ) : (
+                      <span className={`shrink-0 font-mono text-xs ${obj.id ? "text-subtle" : "text-warn"}`}>
+                        {obj.id || "no id"}
+                      </span>
+                    )
+                  }
+                />
               );
             })
           )}
@@ -562,7 +639,13 @@ function ObjectDetail({
           <h2 className="mt-1 text-2xl font-medium tracking-tight">{label || objectLabel(obj)}</h2>
           <p className="mt-1 font-mono text-sm text-muted">
             {objectLabel(obj)}
-            {obj.id ? ` · Id ${obj.id}` : meta?.idMode === "required" ? " · no id" : ""}
+            {obj.id
+              ? ` · Id ${obj.id}`
+              : meta?.idMode === "required"
+                ? " · no id"
+                : obj.name
+                  ? ` · custom ${obj.plus ? "+" : ""}${obj.name}`
+                  : ""}
           </p>
           {role === "eclass" ? (
             <p className="mt-2 flex flex-wrap gap-1 text-[11px]">
@@ -599,11 +682,15 @@ function ObjectDetail({
         <Field label="Name">
           <Input value={obj.name} onChange={(e) => onPatch((cur) => ({ ...cur, name: e.target.value }))} />
         </Field>
-        {meta?.idMode === "none" && role !== "blocks" ? null : (
-          <Field label={role === "blocks" ? "Numeric Id (optional)" : "Id"}>
+        {meta?.idMode === "none" && role !== "blocks" && role !== "items" ? null : (
+          <Field label={role === "blocks" || role === "items" ? "Numeric Id (optional)" : "Id"}>
             <Input
               value={obj.id ?? ""}
-              placeholder={role === "blocks" ? "empty — Name is the floating ID" : "empty — assign an unused Id"}
+              placeholder={
+                role === "blocks" || role === "items"
+                  ? `empty — Name is the floating ID`
+                  : "empty — assign an unused Id"
+              }
               onChange={(e) => onPatch((cur) => ({ ...cur, id: e.target.value || undefined }))}
             />
           </Field>

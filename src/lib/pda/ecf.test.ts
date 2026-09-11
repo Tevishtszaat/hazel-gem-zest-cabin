@@ -80,6 +80,27 @@ describe("templates and unused ids", () => {
     assert.doesNotMatch(back, /Id:/);
   });
 
+  it("treats +Item Name and Item Name as floating ids", () => {
+    const items = parseEcfObjects(`{ Item Id: 100, Name: GoldCoins }
+{ +Item Name: TutorialFloatItem
+  Category: Components
+}
+{ Item Name: TutorialNamedLoot
+  Category: Components
+}
+`);
+    assert.equal(blockIdentity(items[0]!).kind, "numeric");
+    assert.equal(items[1]?.plus, true);
+    assert.equal(items[1]?.id, undefined);
+    assert.equal(blockIdentity(items[1]!).label, "+TutorialFloatItem");
+    assert.equal(items[2]?.plus, false);
+    assert.equal(blockIdentity(items[2]!).label, "TutorialNamedLoot");
+    const back = stringifyEcfObjects(items.slice(1));
+    assert.match(back, /\{\s*\+Item Name: TutorialFloatItem/);
+    assert.match(back, /\{\s*Item Name: TutorialNamedLoot/);
+    assert.doesNotMatch(back, /Id:/);
+  });
+
   it("keeps GalaxyConfig nested territories and DefReputation rows", () => {
     const galaxy = parseEcfObjects(`{ GalaxyConfig, Name: General
   StarCount: "15000, 20000"

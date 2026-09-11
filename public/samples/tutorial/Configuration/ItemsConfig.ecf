@@ -14,3 +14,12 @@
 { Item Id: 201, Name: DrillT1
   Category: Weapons/Items
 }
+{ +Item Name: TutorialFloatItem
+  Category: Components
+  StackSize: 50
+}
+{ Item Name: TutorialNamedLoot
+  Category: Components
+  StackSize: 1
+}
+

@@ -138,6 +138,27 @@ describe("library parsers", () => {
     assert.doesNotMatch(back, /Id:/);
   });
 
+  it("treats +Item Name and Item Name as floating ids", () => {
+    const text = fs.readFileSync(path.join(sampleDir, "Configuration/ItemsConfig.ecf"), "utf8");
+    const items = parseEcfObjects(text);
+    const numeric = items.find((i) => i.name === "GoldCoins");
+    const plusFloat = items.find((i) => i.name === "TutorialFloatItem");
+    const named = items.find((i) => i.name === "TutorialNamedLoot");
+    assert.equal(numeric?.id, "100");
+    assert.equal(blockIdentity(numeric!).kind, "numeric");
+    assert.equal(plusFloat?.id, undefined);
+    assert.equal(plusFloat?.plus, true);
+    assert.equal(blockIdentity(plusFloat!).kind, "floating");
+    assert.equal(blockIdentity(plusFloat!).label, "+TutorialFloatItem");
+    assert.equal(named?.plus, false);
+    assert.equal(blockIdentity(named!).label, "TutorialNamedLoot");
+    assert.equal(floatingBlocks(items).length, 2);
+    const back = stringifyEcfObjects([plusFloat!, named!]);
+    assert.match(back, /\{\s*\+Item Name: TutorialFloatItem/);
+    assert.match(back, /\{\s*Item Name: TutorialNamedLoot/);
+    assert.doesNotMatch(back, /Id:/);
+  });
+
   it("prefers CustomIcon over the item name for icon lookup", () => {
     const keys = iconCandidates("LaserPistolT2", { CustomIcon: "Pistol" });
     assert.ok(keys[0] && keys[0].toLowerCase().startsWith("pistol"));

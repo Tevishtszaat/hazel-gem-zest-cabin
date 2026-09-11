@@ -188,8 +188,8 @@ export function numericIds(objects: EcfObject[]): number[] {
     .sort((a, b) => a - b);
 }
 
-/** Empyrion treats a block Name (with or without +) as a floating ID when Id is omitted. */
-export function blockIdentity(obj: EcfObject): { kind: "numeric" | "floating"; label: string } {
+/** Empyrion treats Item/Block Name (with or without +) as a floating ID when Id is omitted. */
+export function entryIdentity(obj: EcfObject): { kind: "numeric" | "floating"; label: string } {
   if (obj.id && /^\d+$/.test(obj.id.trim())) {
     return { kind: "numeric", label: obj.id.trim() };
   }
@@ -197,9 +197,14 @@ export function blockIdentity(obj: EcfObject): { kind: "numeric" | "floating"; l
   return { kind: "floating", label: `${obj.plus ? "+" : ""}${name}` };
 }
 
-export function floatingBlocks(objects: EcfObject[]): EcfObject[] {
-  return objects.filter((obj) => blockIdentity(obj).kind === "floating" && obj.name);
+export const blockIdentity = entryIdentity;
+
+export function floatingEntries(objects: EcfObject[]): EcfObject[] {
+  return objects.filter((obj) => entryIdentity(obj).kind === "floating" && obj.name);
 }
+
+export const floatingBlocks = floatingEntries;
+
 
 export function unusedNumericIds(
   used: number[],
