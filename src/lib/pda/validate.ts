@@ -12,18 +12,22 @@ import {
 } from "./scenario-index.ts";
 import { CHECKS, type ActionNode, type ChapterNode, type PdaProject, type TaskNode } from "./types.ts";
 
-export type NodeKind = "chapter" | "task" | "action" | "project";
+export type NodeKind = "chapter" | "task" | "action" | "project" | "file";
 
 export type ProblemFix =
   | { type: "set"; field: string; value: string; label: string }
   | { type: "clear"; field: string; label: string }
   | { type: "rewards"; rewards: ChapterNode["rewards"]; label: string }
-  | { type: "delete"; label: string };
+  | { type: "delete"; label: string }
+  | { type: "ecf-set"; role: string; name: string; field: string; value: string; label: string }
+  | { type: "yaml-replace"; role: string; path: string; from: string; to: string; label: string };
 
 export type Problem = {
   key: string;
   id: string | null;
   kind: NodeKind;
+  source: string;
+  href?: string;
   level: "error" | "warning";
   code: string;
   message: string;
@@ -119,9 +123,9 @@ export function validateProject(project: PdaProject, catalog?: ScenarioCatalog):
   const issues: Problem[] = [];
   const suggestCache = new Map<string, string[]>();
   let n = 0;
-  const push = (problem: Omit<Problem, "key">) => {
+  const push = (problem: Omit<Problem, "key" | "source"> & { source?: string }) => {
     n += 1;
-    issues.push({ key: `${problem.code}:${problem.id ?? "root"}:${n}`, ...problem });
+    issues.push({ source: "pda", key: `${problem.code}:${problem.id ?? "root"}:${n}`, ...problem });
   };
 
   if (!project.chapters.length) {

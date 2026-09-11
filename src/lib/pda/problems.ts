@@ -3,8 +3,8 @@ import type { Problem } from "./validate.ts";
 /** HUD wrap / visible character-count warnings. Hidden unless Debug asks to show them. */
 export const LENGTH_CODES = new Set(["hud-wrap"]);
 
-export function problemIgnoreKey(problem: Pick<Problem, "code" | "id" | "field" | "value">) {
-  return `${problem.code}|${problem.id ?? "root"}|${problem.field ?? ""}|${problem.value ?? ""}`;
+export function problemIgnoreKey(problem: Pick<Problem, "code" | "id" | "field" | "value" | "source">) {
+  return `${problem.source ?? "pda"}|${problem.code}|${problem.id ?? "root"}|${problem.field ?? ""}|${problem.value ?? ""}`;
 }
 
 export function visibleProblems(

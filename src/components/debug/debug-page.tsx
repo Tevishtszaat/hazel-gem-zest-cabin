@@ -4,6 +4,7 @@ import { AppHeader } from "@/components/app-header.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { problemIgnoreKey } from "@/lib/pda/problems.ts";
 import { useProblems } from "@/lib/pda/use-problems.ts";
+import { FILE_DEBUG_TABS } from "@/lib/pda/validate-files.ts";
 import type { Problem, ProblemFix } from "@/lib/pda/validate.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
 
@@ -19,11 +20,13 @@ const FILTERS = [
 
 export function DebugPage() {
   const applyBulk = usePdaStore((s) => s.applyBulk);
+  const applyFileFix = usePdaStore((s) => s.applyFileFix);
   const jumpTo = usePdaStore((s) => s.jumpTo);
   const ignoreProblems = usePdaStore((s) => s.ignoreProblems);
   const unignoreProblems = usePdaStore((s) => s.unignoreProblems);
   const ignoredProblems = usePdaStore((s) => s.ignoredProblems);
   const navigate = useNavigate();
+  const [file, setFile] = useState<(typeof FILE_DEBUG_TABS)[number]["id"]>("all");
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["id"]>("all");
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState<Record<string, boolean>>({});
@@ -35,6 +38,8 @@ export function DebugPage() {
 
   const visible = issues.filter((issue) => {
     const ignored = ignoredProblems.includes(problemIgnoreKey(issue));
+    const source = issue.source ?? "pda";
+    if (file !== "all" && source !== file) return false;
     if (filter === "ignored") return ignored;
     if (ignored) return false;
     if (filter === "error" && issue.level !== "error") return false;
@@ -54,9 +59,12 @@ export function DebugPage() {
   const selectedKeys = visible.filter((issue) => picked[issue.key]).map((issue) => problemIgnoreKey(issue));
 
   const apply = (issue: Problem, fix: ProblemFix) => {
-    if (!issue.id) return;
-    if (fix.type === "delete") applyBulk([], [issue.id]);
-    else applyBulk([{ id: issue.id, patch: fixToPatch(fix) }]);
+    if (fix.type === "ecf-set" || fix.type === "yaml-replace") {
+      applyFileFix(fix);
+    } else if (issue.id) {
+      if (fix.type === "delete") applyBulk([], [issue.id]);
+      else applyBulk([{ id: issue.id, patch: fixToPatch(fix) }]);
+    }
     setPicked((p) => {
       const next = { ...p };
       delete next[issue.key];
@@ -67,18 +75,17 @@ export function DebugPage() {
   const acceptIssues = (list: Problem[]) => {
     const patches: { id: string; patch: Record<string, unknown> }[] = [];
     for (const issue of list) {
-      if (!issue.id) continue;
       const fix = preferredFix(issue);
       if (!fix) continue;
-      patches.push({ id: issue.id, patch: fixToPatch(fix) });
+      if (fix.type === "ecf-set" || fix.type === "yaml-replace") applyFileFix(fix);
+      else if (issue.id) patches.push({ id: issue.id, patch: fixToPatch(fix) });
     }
-    if (!patches.length) return;
-    applyBulk(patches);
+    if (patches.length) applyBulk(patches);
     setPicked({});
   };
 
-  const selectable = visible.filter((issue) => issue.id);
-  const suggestedFixes = visible.filter((issue) => issue.recommend === "fix" && issue.id && preferredFix(issue));
+  const selectable = visible.filter((issue) => issue.id || issue.fixes.length);
+  const suggestedFixes = visible.filter((issue) => issue.recommend === "fix" && preferredFix(issue));
   const selectedFixable = selectable.filter((issue) => picked[issue.key] && preferredFix(issue));
   const recommendedDeletes = visible.filter((i) => i.recommend === "delete" && i.id).map((i) => i.id!);
   const dupCount = issues.filter(
@@ -86,6 +93,10 @@ export function DebugPage() {
   ).length;
 
   const open = (issue: Problem) => {
+    if (issue.href) {
+      void navigate({ to: issue.href as "/" });
+      return;
+    }
     if (!issue.id) return;
     jumpTo(issue.id);
     void navigate({ to: "/" });
@@ -104,10 +115,33 @@ export function DebugPage() {
         <div className="mb-5">
           <h1 className="text-2xl font-medium tracking-tight">Debug</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted">
-            Catch empty rows, unknown names, and missing pictures. Wrap and character-count warnings stay hidden unless
-            you turn them on. Ignore parks an issue so it stops counting.
+            One debugger per file kind — PDA plus Items, Blocks, Dialogues, Playfields, Galaxy, and the rest. Ignore parks
+            an issue so it stops counting.
             {busy ? " Rechecking in the background…" : ""}
           </p>
+        </div>
+
+        <div className="mb-3 flex flex-wrap gap-1.5">
+          {FILE_DEBUG_TABS.map((tab) => {
+            const count = issues.filter((i) => {
+              const source = i.source ?? "pda";
+              const ignored = ignoredProblems.includes(problemIgnoreKey(i));
+              if (ignored && filter !== "ignored") return false;
+              return tab.id === "all" || source === tab.id;
+            }).length;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setFile(tab.id)}
+                className={`h-8 rounded-sm px-3 text-xs ${
+                  file === tab.id ? "bg-elevated text-fg" : "text-muted hover:text-fg"
+                }`}
+              >
+                {tab.label}
+                {count ? <span className="ml-1 text-subtle">{count}</span> : null}
+              </button>
+            );
+          })}
         </div>
 
         <div className="mb-4 grid gap-2 sm:grid-cols-4">
@@ -222,7 +256,7 @@ export function DebugPage() {
               return (
                 <li key={issue.key} className="rounded-md border border-border bg-surface p-3">
                   <div className="flex items-start gap-3">
-                    {issue.id ? (
+                    {issue.id || issue.fixes.length ? (
                       <input
                         type="checkbox"
                         className="mt-1"
@@ -241,7 +275,7 @@ export function DebugPage() {
                         >
                           {issue.level === "error" ? "Error" : "Watch"}
                         </span>
-                        <span className="text-xs text-subtle">{issue.kind}</span>
+                        <span className="text-xs text-subtle">{issue.source ?? issue.kind}</span>
                         {issue.recommend === "delete" ? (
                           <span className="text-xs text-danger">suggest delete</span>
                         ) : issue.recommend === "fix" ? (
@@ -283,7 +317,7 @@ export function DebugPage() {
                             Ignore
                           </button>
                         )}
-                        {issue.id ? (
+                        {issue.id || issue.href ? (
                           <button className="h-7 rounded-sm px-2 text-xs text-muted hover:text-fg" onClick={() => open(issue)}>
                             Jump
                           </button>

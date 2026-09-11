@@ -8,6 +8,9 @@ import { importPdaOffthread, indexScenarioOffthread } from "@/lib/pda/offload.ts
 import { beginBusy, endBusy } from "@/store/busy-store.ts";
 import { clearImages, putImages, warmImageCache, type ImageSet } from "@/lib/pda/image-store.ts";
 import type { ImportKind } from "@/lib/pda/import-kinds.ts";
+import { catalogText } from "@/lib/pda/library.ts";
+import { applyEcfFix, applyYamlReplace } from "@/lib/pda/validate-files.ts";
+import type { ProblemFix } from "@/lib/pda/validate.ts";
 import type { ChapterNode, PdaProject } from "@/lib/pda/types.ts";
 
 function imageSetFor(path: string, kind: ImportKind): ImageSet {
@@ -50,6 +53,7 @@ type PdaState = {
   deleteNodes: (ids: string[]) => void;
   patchNode: (id: string, patch: Record<string, unknown>) => void;
   applyBulk: (patches: { id: string; patch: Record<string, unknown> }[], deleteIds?: string[]) => void;
+  applyFileFix: (fix: ProblemFix) => void;
   ignoredProblems: string[];
   ignoreProblems: (keys: string[]) => void;
   unignoreProblems: (keys: string[]) => void;
@@ -412,6 +416,21 @@ export const usePdaStore = create<PdaState>()(
             selected: still ? s.selected : null,
           };
         }),
+      applyFileFix: (fix) => {
+        if (fix.type === "ecf-set") {
+          const current = catalogText(get().catalog, fix.role);
+          if (!current?.text) return;
+          get().setCatalogText(fix.role, applyEcfFix(current.text, fix.name, fix.field, fix.value), current.path);
+          return;
+        }
+        if (fix.type === "yaml-replace") {
+          const texts = get().catalog.texts ?? [];
+          const current =
+            texts.find((t) => t.role === fix.role && t.path === fix.path) ?? texts.find((t) => t.role === fix.role);
+          if (!current?.text) return;
+          get().setCatalogText(fix.role, applyYamlReplace(current.text, fix.from, fix.to), current.path);
+        }
+      },
       ignoreProblems: (keys) =>
         set((s) => ({
           ignoredProblems: [...new Set([...s.ignoredProblems, ...keys.filter(Boolean)])],

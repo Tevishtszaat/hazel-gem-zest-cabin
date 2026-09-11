@@ -12,6 +12,8 @@ export type PlayfieldIssue = {
   code: string;
   message: string;
   path: string;
+  fixFrom?: string;
+  fixTo?: string;
 };
 
 export const PLANET_TYPES = [
@@ -348,6 +350,8 @@ export function preflightPlayfield(
           code: "poi-group",
           message: `“${name}” is the .epb file. Random POIs use GroupName ${hit.entry.poiGroup}.`,
           path: `POIs.Random[${i}].GroupName`,
+          fixFrom: name,
+          fixTo: hit.entry.poiGroup,
         });
       } else if (hit?.via === "label" && hit.entry.poiGroup) {
         issues.push({
@@ -355,6 +359,8 @@ export function preflightPlayfield(
           code: "loca-name",
           message: `“${name}” is the spawn/display name. GroupName is ${hit.entry.poiGroup}.`,
           path: `POIs.Random[${i}].GroupName`,
+          fixFrom: name,
+          fixTo: hit.entry.poiGroup,
         });
       } else if (hit && hit.via === "label") {
         issues.push({
@@ -362,6 +368,8 @@ export function preflightPlayfield(
           code: "loca-name",
           message: `“${name}” is the Localization.csv name. Prefab/group id is ${hit.entry.name}.`,
           path: `POIs.Random[${i}].GroupName`,
+          fixFrom: name,
+          fixTo: hit.entry.name,
         });
       }
     }
@@ -395,6 +403,8 @@ export function preflightPlayfield(
           code: "poi-file",
           message: `“${prefab}” is the GroupName. Fixed POIs use Prefab file ${hit.entry.poiFile}.`,
           path: `POIs.Fixed[${i}].Prefab`,
+          fixFrom: prefab,
+          fixTo: hit.entry.poiFile,
         });
       }
     }

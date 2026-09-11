@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { validateOffthread } from "./offload.ts";
 import { problemIgnoreKey, visibleProblems } from "./problems.ts";
 import { problemStats, type Problem } from "./validate.ts";
+import { validateCatalog } from "./validate-files.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
 import { useBusyStore } from "@/store/busy-store.ts";
 
@@ -20,10 +21,19 @@ export function useProblems(opts?: { includeLength?: boolean; includeIgnored?: b
     let cancelled = false;
     setBusy(true);
     const timer = window.setTimeout(() => {
-      void validateOffthread(project, catalog)
-        .then((result) => {
+      void Promise.all([
+        validateOffthread(project, catalog),
+        Promise.resolve().then(() => {
+          try {
+            return validateCatalog(catalog);
+          } catch {
+            return [] as Problem[];
+          }
+        }),
+      ])
+        .then(([result, fileIssues]) => {
           if (cancelled) return;
-          setRaw(result.issues);
+          setRaw([...(result.issues || []), ...fileIssues]);
         })
         .finally(() => {
           if (!cancelled) setBusy(false);
