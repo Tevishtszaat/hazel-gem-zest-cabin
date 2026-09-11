@@ -34,7 +34,8 @@ export function GalaxyEditor() {
     setCatalogText("galaxy", stringifyEcfObjects(next), catalogText(catalog, "galaxy")?.path || "GalaxyConfig.ecf");
   };
   const fileName = catalogText(catalog, "galaxy")?.path.split(/[\\/]/).pop() || "GalaxyConfig.ecf";
-  const bodies = useMemo(() => parseSectorBodies(catalogText(catalog, "sectors")?.text || ""), [catalog]);
+  const sectorText = catalogText(catalog, "sectors");
+  const bodies = useMemo(() => parseSectorBodies(sectorText?.text || ""), [sectorText?.text]);
 
   const general =
     objects.find((o) => /galaxyconfig/i.test(o.kind) && /^general$/i.test(o.name)) ??
@@ -161,6 +162,13 @@ export function GalaxyEditor() {
         <p className="text-sm text-muted">
           Import GalaxyConfig.ecf. Star types carry Inner / Hot / Temperate / Cold / Outer ranges in sectors (10 sec = 1
           AU) plus Luminosity for solar flux.
+        </p>
+      ) : null}
+
+      {objects.length && !sectorText?.text ? (
+        <p className="mt-3 text-sm text-warn">
+          GalaxyConfig is loaded, but Sectors.yaml was not kept as text — planet distances stay empty until that file is
+          in the scenario drop (Content/Sectors.yaml) or imported on the Sectors slot.
         </p>
       ) : null}
 

@@ -12,6 +12,7 @@ const FILTERS = [
   { id: "error", label: "Errors" },
   { id: "warning", label: "Warnings" },
   { id: "delete", label: "Suggested delete" },
+  { id: "titles", label: "Duplicate titles" },
   { id: "fix", label: "Suggested fix" },
   { id: "ignored", label: "Ignored" },
 ] as const;
@@ -38,7 +39,8 @@ export function DebugPage() {
     if (ignored) return false;
     if (filter === "error" && issue.level !== "error") return false;
     if (filter === "warning" && issue.level !== "warning") return false;
-    if (filter === "delete" && issue.recommend !== "delete") return false;
+    if (filter === "delete" && (issue.recommend !== "delete" || issue.code === "duplicate-title")) return false;
+    if (filter === "titles" && issue.code !== "duplicate-title") return false;
     if (filter === "fix" && issue.recommend !== "fix") return false;
     if (query) {
       const hay = `${issue.message} ${issue.path} ${issue.code} ${issue.value ?? ""}`.toLowerCase();
@@ -79,6 +81,9 @@ export function DebugPage() {
   const suggestedFixes = visible.filter((issue) => issue.recommend === "fix" && issue.id && preferredFix(issue));
   const selectedFixable = selectable.filter((issue) => picked[issue.key] && preferredFix(issue));
   const recommendedDeletes = visible.filter((i) => i.recommend === "delete" && i.id).map((i) => i.id!);
+  const dupCount = issues.filter(
+    (i) => i.code === "duplicate-title" && !ignoredProblems.includes(problemIgnoreKey(i)),
+  ).length;
 
   const open = (issue: Problem) => {
     if (!issue.id) return;
@@ -121,7 +126,8 @@ export function DebugPage() {
                 filter === item.id ? "bg-elevated text-fg" : "text-muted hover:text-fg"
               }`}
             >
-              {item.label}
+              {item.id === "titles" && dupCount ? ` (${dupCount})` : ""}
+              {item.id === "delete" && stats.deletable ? ` (${stats.deletable})` : ""}
             </button>
           ))}
           <label className="flex h-8 items-center gap-2 px-2 text-xs text-muted">
@@ -197,6 +203,11 @@ export function DebugPage() {
           >
             Delete all suggested ({[...new Set(recommendedDeletes)].length})
           </Button>
+          {filter === "titles" ? (
+            <Button size="sm" disabled={!suggestedFixes.length} onClick={() => acceptIssues(suggestedFixes)}>
+              Rename all copies ({suggestedFixes.length})
+            </Button>
+          ) : null}
         </div>
 
         {!visible.length ? (

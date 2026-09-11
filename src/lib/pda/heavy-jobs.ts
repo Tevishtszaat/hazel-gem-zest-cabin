@@ -31,7 +31,11 @@ export function slimCatalog(catalog: ScenarioCatalog): ScenarioCatalog {
 
 export function runHeavy(op: HeavyOp, payload: HeavyPayload) {
   if (op === "index") {
-    return indexScenario(payload.files || [], payload.kind);
+    const indexed = indexScenario(payload.files || [], payload.kind);
+    return {
+      ...indexed,
+      catalog: { ...indexed.catalog, texts: [] },
+    };
   }
   if (op === "importPda") {
     if (!payload.importFiles?.yamlText) throw new Error("No PDA.yaml to parse.");

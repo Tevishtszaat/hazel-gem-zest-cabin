@@ -3,7 +3,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { durableStorage, putCatalogTexts, loadCatalogTexts, clearCatalogTexts } from "@/lib/pda/idb-storage.ts";
 import { stringifyCsv, csvLookup } from "@/lib/pda/csv.ts";
 import { blankProject, applyCsvText, newAction, newChapter, newTask, type ImportFiles } from "@/lib/pda/yaml-import.ts";
-import { classifyScenarioPath, dropCatalogGroup, emptyCatalog, mergeCatalog, type ScenarioCatalog, type ScenarioSource } from "@/lib/pda/scenario-index.ts";
+import { classifyScenarioPath, dropCatalogGroup, emptyCatalog, mergeCatalog, catalogLoadSummary, type ScenarioCatalog, type ScenarioSource } from "@/lib/pda/scenario-index.ts";
 import { importPdaOffthread, indexScenarioOffthread } from "@/lib/pda/offload.ts";
 import { beginBusy, endBusy } from "@/store/busy-store.ts";
 import { clearImages, putImages, warmImageCache, type ImageSet } from "@/lib/pda/image-store.ts";
@@ -50,6 +50,14 @@ type PdaState = {
   moveSelected: (dir: -1 | 1) => void;
   reset: () => void;
 };
+
+function importReport(catalog: ScenarioCatalog, prefix: string) {
+  const { missing, loaded } = catalogLoadSummary(catalog);
+  const bits = [prefix];
+  if (loaded.length) bits.push(`${loaded.length} config bodies stored`);
+  if (missing.length) bits.push(`still need ${missing.join(", ")}`);
+  return bits.join(" · ");
+}
 
 function findContext(project: PdaProject, id: string | undefined | null) {
   if (!id) return null;
@@ -141,7 +149,11 @@ export const usePdaStore = create<PdaState>()(
           if (!files.length) throw new Error("No matching files in that drop.");
           const indexed = await indexScenarioOffthread(files, kind);
           const catalog = mergeCatalog(get().catalog, indexed.catalog);
-          void putCatalogTexts(catalog.texts ?? []);
+          try {
+            await putCatalogTexts(catalog.texts ?? []);
+          } catch (err) {
+            console.warn("Could not persist catalog texts", err);
+          }
 
           const imageFiles = files.filter((file) => {
             const role = classifyScenarioPath(file.path, kind);
@@ -163,7 +175,7 @@ export const usePdaStore = create<PdaState>()(
               blob: file.blob!,
               set: classifyScenarioPath(file.path, kind) === "itemPicture" ? "item" : "pda",
             })));
-            return `Merged ${Object.keys(project.csv.rows).length} CSV keys.`;
+            return importReport(catalog, `Merged ${Object.keys(project.csv.rows).length} CSV keys.`);
           }
 
           if (indexed.pda?.yamlText) {
@@ -190,7 +202,7 @@ export const usePdaStore = create<PdaState>()(
                   set: classifyScenarioPath(file.path, kind) === "itemPicture" ? "item" : "pda",
                 })),
               );
-            return `Loaded ${project.chapters.length} chapters from ${indexed.pda.yamlName || "PDA.yaml"}.`;
+            return importReport(catalog, `Loaded ${project.chapters.length} chapters from ${indexed.pda.yamlName || "PDA.yaml"}.`);
           }
 
           if (kind === "pdaYaml") throw new Error("No PDA.yaml found.");
@@ -205,7 +217,10 @@ export const usePdaStore = create<PdaState>()(
             );
           const added = indexed.catalog.files.length;
           const pics = imageFiles.length;
-          return `Indexed ${added} file${added === 1 ? "" : "s"}${pics ? ` · ${pics} images stored` : ""}.`;
+          return importReport(
+            catalog,
+            `Indexed ${added} file${added === 1 ? "" : "s"}${pics ? ` · ${pics} images stored` : ""}.`,
+          );
         } finally {
           endBusy("load");
         }

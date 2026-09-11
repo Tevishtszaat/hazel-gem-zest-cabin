@@ -110,12 +110,22 @@ export function classifyScenarioPath(path: string, hint?: string): string | null
   if (hint === "dialoguesCsv" && /\.csv$/.test(base) && base !== "localization.csv" && base !== "pda.csv") return "dialoguesCsv";
   if (hint === "factions" && /\.ecf$/.test(base)) return "factions";
   if (hint === "galaxy" && /\.ecf$/.test(base) && /galaxy/.test(base)) return "galaxy";
-  if (hint === "sectors" && /\.ya?ml$/.test(base) && !/playfield/.test(base)) return "sectors";
+  if (hint === "sectors" && /\.ya?ml$/.test(base) && base !== "playfield.yaml" && base !== "playfield.yml") return "sectors";
   if (hint === "localization" && /\.csv$/.test(base)) return "localization";
   if (base === "pda.yaml" || base === "pda.yml") return "pdaYaml";
   if (base === "pda.csv") return "pdaCsv";
   if (base === "localization.csv") return "localization";
-  if (base === "sectors.yaml" || base === "sectors.yml") return "sectors";
+  if (base === "sectors.yaml" || base === "sectors.yml" || base === "sector.yaml" || base === "sector.yml") return "sectors";
+  if (
+    /\.ya?ml$/.test(base) &&
+    base !== "playfield.yaml" &&
+    base !== "playfield.yml" &&
+    /(?:^|\/)(?:content\/)?sectors?\//.test(p) &&
+    !/\/playfields?\//.test(p)
+  ) {
+    return "sectors";
+  }
+  if (/\.ya?ml$/.test(base) && /^sectors?[-_.]/i.test(base)) return "sectors";
   if (base === "playfield.yaml" || base === "playfield.yml") return "playfieldYaml";
   if (base === "config.ecf" || base === "config_example.ecf") return null;
   const meta = configMetaByFile(base);
@@ -132,6 +142,60 @@ export function classifyScenarioPath(path: string, hint?: string): string | null
     if (hint === "scenario") return null;
   }
   return null;
+}
+
+export function looksLikeSectorsYaml(text: string) {
+  return (
+    /^\s*GalaxyMode\s*:/m.test(text) ||
+    /^\s*SolarSystems\s*:/m.test(text) ||
+    /^\s*Sectors\s*:/m.test(text) ||
+    /\n\s*Playfields\s*:/m.test(text)
+  );
+}
+
+export function collectCatalogTexts(files: ScenarioSource[], hint?: string): CatalogText[] {
+  const byRole = new Map<string, CatalogText>();
+  const consider = (role: string, file: ScenarioSource) => {
+    if (!file.text) return;
+    const next: CatalogText = { role, path: normalizePath(file.path), text: file.text };
+    const prev = byRole.get(role);
+    if (!prev) {
+      byRole.set(role, next);
+      return;
+    }
+    const prevSectors = role === "sectors" ? looksLikeSectorsYaml(prev.text) : true;
+    const nextSectors = role === "sectors" ? looksLikeSectorsYaml(next.text) : true;
+    if (role === "sectors" && nextSectors && !prevSectors) byRole.set(role, next);
+    else if (role === "sectors" && prevSectors && !nextSectors) return;
+    else if (next.text.length >= prev.text.length) byRole.set(role, next);
+  };
+  for (const file of files) {
+    const role = classifyScenarioPath(file.path, hint);
+    if (file.text && role === "sectors" && !looksLikeSectorsYaml(file.text) && !/sectors\.ya?ml$/i.test(file.path)) {
+      continue;
+    }
+    if (role && (CONFIG_TEXT_ROLES.has(role) || role === "ecf" || role === "pdaYaml" || role === "pdaCsv")) {
+      consider(role, file);
+    } else if (file.text && looksLikeSectorsYaml(file.text) && /\.ya?ml$/i.test(file.path) && !/playfield/i.test(file.path)) {
+      consider("sectors", file);
+    }
+  }
+  return [...byRole.values()];
+}
+
+export function catalogLoadSummary(catalog: ScenarioCatalog) {
+  const roles = (catalog.texts ?? []).map((t) => t.role);
+  const has = (role: string) => roles.includes(role) || catalog.files.some((f) => f.role === role);
+  const missing: string[] = [];
+  if (!has("galaxy")) missing.push("GalaxyConfig.ecf");
+  if (!catalog.texts?.some((t) => t.role === "sectors" && t.text)) missing.push("Sectors.yaml");
+  if (!has("items")) missing.push("ItemsConfig.ecf");
+  if (!has("blocks")) missing.push("BlocksConfig.ecf");
+  if (!has("localization")) missing.push("Localization.csv");
+  const loaded = (catalog.texts ?? [])
+    .filter((t) => t.text)
+    .map((t) => `${t.path.split("/").pop()} (${Math.max(1, Math.round(t.text.length / 1024))} KB)`);
+  return { missing, loaded };
 }
 
 function isIconPath(p: string) {
@@ -282,7 +346,7 @@ export function indexScenario(files: ScenarioSource[], hint?: string): IndexedSc
       }
     }
 
-    if (file.text && (CONFIG_TEXT_ROLES.has(role) || role === "ecf")) {
+    if (file.text && (CONFIG_TEXT_ROLES.has(role) || role === "ecf" || role === "pdaYaml" || role === "pdaCsv")) {
       texts.push({ role, path: normalizePath(file.path), text: file.text });
     }
 
@@ -405,9 +469,12 @@ export function mergeCatalog(base: ScenarioCatalog, extra: ScenarioCatalog): Sce
   }
   const texts = [...(base.texts ?? [])];
   for (const text of extra.texts ?? []) {
-    const i = texts.findIndex((t) => t.path === text.path && t.role === text.role);
-    if (i >= 0) texts[i] = text;
-    else texts.push(text);
+    if (!text.text) continue;
+    const i = texts.findIndex((t) => t.role === text.role);
+    if (i >= 0) {
+      const cur = texts[i]!;
+      texts[i] = text.text.length >= cur.text.length || text.path === cur.path ? text : cur;
+    } else texts.push(text);
   }
   return {
     folderName: extra.folderName || base.folderName,

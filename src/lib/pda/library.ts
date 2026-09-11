@@ -14,7 +14,9 @@ import type { CsvTable } from "./types.ts";
 export type { ConfigRole } from "./config-roles.ts";
 
 export function catalogText(catalog: ScenarioCatalog, role: string) {
-  return (catalog.texts ?? []).find((t) => t.role === role);
+  const hits = (catalog.texts ?? []).filter((t) => t.role === role && t.text);
+  if (!hits.length) return undefined;
+  return hits.reduce((best, cur) => (cur.text.length >= best.text.length ? cur : best));
 }
 
 const parsedByRole = new Map<string, { text: string; objects: EcfObject[] }>();

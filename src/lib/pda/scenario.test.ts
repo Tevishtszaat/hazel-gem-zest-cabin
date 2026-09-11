@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, it } from "node:test";
 import { extractEcfRecords } from "./ecf.ts";
-import { classifyScenarioPath, indexScenario, lookupCatalog, mergeCatalog, suggestionsFor } from "./scenario-index.ts";
+import { classifyScenarioPath, collectCatalogTexts, indexScenario, lookupCatalog, mergeCatalog, suggestionsFor } from "./scenario-index.ts";
 import { importPda } from "./yaml-import.ts";
 import { validateProject } from "./validate.ts";
 
@@ -45,6 +45,10 @@ describe("scenario folder index", () => {
     assert.equal(classifyScenarioPath("Content/Configuration/Config.ecf"), null);
     assert.equal(classifyScenarioPath("Prefabs/DroneBaseT1.epb"), "poi");
     assert.equal(classifyScenarioPath("Playfields/Akua/playfield.yaml"), "playfieldYaml");
+    assert.equal(classifyScenarioPath("Content/Sectors.yaml"), "sectors");
+    assert.equal(classifyScenarioPath("Content/Sectors/Sectors.yaml"), "sectors");
+    assert.equal(classifyScenarioPath("Content/sector.yaml"), "sectors");
+    assert.equal(classifyScenarioPath("Content/Sectors/CustomPlayfields.yaml"), "sectors");
     assert.equal(classifyScenarioPath("Extras/PDA/readfirst.jpg"), "picture");
     assert.equal(classifyScenarioPath("Content/Items/GoldCoins.png"), "itemPicture");
     assert.equal(
@@ -115,5 +119,31 @@ describe("scenario folder index", () => {
     const merged = mergeCatalog(a.catalog, b.catalog);
     assert.ok(lookupCatalog(merged, "Talon"));
     assert.ok(lookupCatalog(merged, "Outpost"));
+  });
+
+  it("keeps Sectors.yaml as catalog text even when the worker would strip bodies", () => {
+    const yaml = `GalaxyMode: true
+SolarSystems:
+- Name: Ellyon
+  StarClass: G
+  Playfields:
+    - ['66, 0, 0', Akua, Planet]
+`;
+    const files = [
+      { path: "Ascension-Reborn/Content/Sectors.yaml", text: yaml },
+      { path: "Ascension-Reborn/Content/Configuration/GalaxyConfig.ecf", text: "{ GalaxyConfig Name: G Type Star\n  StarClass: G\n}\n" },
+      { path: "Ascension-Reborn/Content/Sectors/notes.yaml", text: "Name: notes\n" },
+    ];
+    const indexed = indexScenario(files);
+    assert.ok(indexed.catalog.texts.some((t) => t.role === "sectors" && t.text.includes("Akua")));
+    const collected = collectCatalogTexts(files);
+    const sectors = collected.find((t) => t.role === "sectors");
+    assert.ok(sectors?.text.includes("Akua"));
+    assert.equal(sectors?.path, "Ascension-Reborn/Content/Sectors.yaml");
+    const merged = mergeCatalog(
+      { ...indexed.catalog, texts: [{ role: "sectors", path: "old/Sectors.yaml", text: "Sectors: []\n" }] },
+      { folderName: "x", files: [], entries: [], texts: collected, indexedAt: 1 },
+    );
+    assert.match(merged.texts.find((t) => t.role === "sectors")?.text || "", /Akua/);
   });
 });

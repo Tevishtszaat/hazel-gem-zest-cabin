@@ -92,13 +92,19 @@ export async function putCatalogTexts(texts: CatalogText[]): Promise<void> {
   if (typeof indexedDB === "undefined" || !texts.length) return;
   const db = await openPdaDb();
   if (!db.objectStoreNames.contains(TEXT_STORE)) return;
-  await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(TEXT_STORE, "readwrite");
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-    const store = tx.objectStore(TEXT_STORE);
-    for (const text of texts) store.put(text, text.role);
-  });
+  for (const text of texts) {
+    if (!text.text) continue;
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const tx = db.transaction(TEXT_STORE, "readwrite");
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+        tx.objectStore(TEXT_STORE).put(text, text.role);
+      });
+    } catch (err) {
+      console.warn(`Could not persist ${text.role} (${text.text.length} bytes)`, err);
+    }
+  }
 }
 
 export async function putCatalogText(text: CatalogText): Promise<void> {

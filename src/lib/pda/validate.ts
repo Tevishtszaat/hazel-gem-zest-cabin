@@ -157,9 +157,14 @@ export function validateProject(project: PdaProject, catalog?: ScenarioCatalog):
         code: "duplicate-title",
         message: `Duplicate chapter title “${stripBbcode(title)}”.`,
         path: chPath,
-        recommend: "delete",
-        suggestions: [],
-        fixes: [{ type: "delete", label: "Delete this copy" }],
+        recommend: "review",
+        field: "chapterTitle",
+        value: ch.chapterTitle,
+        suggestions: [`${stripBbcode(title)} (copy)`],
+        fixes: [
+          { type: "set", field: "chapterTitle", value: `${stripBbcode(title)} (copy)`, label: "Rename copy" },
+          { type: "delete", label: "Delete this copy" },
+        ],
       });
     } else if (title) {
       seenTitles.set(dupKey, ch.id);
@@ -258,6 +263,7 @@ export function validateProject(project: PdaProject, catalog?: ScenarioCatalog):
       }
     });
 
+    const seenTaskTitles = new Map<string, string>();
     ch.tasks.forEach((tk, ti) => {
       const tkPath = pathOf(ch, tk);
       const visTitle = stripBbcode(tk.taskTitle);
@@ -274,6 +280,28 @@ export function validateProject(project: PdaProject, catalog?: ScenarioCatalog):
           suggestions: [],
           fixes: [{ type: "delete", label: "Delete task" }],
         });
+      } else {
+        const taskKey = visTitle.toLowerCase();
+        if (seenTaskTitles.has(taskKey)) {
+          push({
+            id: tk.id,
+            kind: "task",
+            level: "warning",
+            code: "duplicate-title",
+            message: `Duplicate task title “${visTitle}” in “${stripBbcode(ch.chapterTitle)}”.`,
+            path: tkPath,
+            recommend: "review",
+            field: "taskTitle",
+            value: tk.taskTitle,
+            suggestions: [`${visTitle} (copy)`],
+            fixes: [
+              { type: "set", field: "taskTitle", value: `${visTitle} (copy)`, label: "Rename copy" },
+              { type: "delete", label: "Delete this copy" },
+            ],
+          });
+        } else {
+          seenTaskTitles.set(taskKey, tk.id);
+        }
       }
       if (visTitle.length > 26) {
         const short = visTitle.slice(0, 26).trim();
