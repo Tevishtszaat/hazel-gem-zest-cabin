@@ -96,7 +96,10 @@ export function parseEcfObjects(text: string): EcfObject[] {
         const key = prop[1]!;
         const value = unquote(prop[2] ?? "");
         if (key === "Name" && !current.name) current.name = value;
-        else if (key === "Id" && !current.id) current.id = value;
+        else if (key === "Id" && !current.id) {
+          if (/^\d+$/.test(value)) current.id = value;
+          else if (value) current.fields.Id = value;
+        }
         else current.fields[key] = value;
       }
     }
@@ -126,11 +129,13 @@ export function stringifyEcfObjects(objects: EcfObject[]): string {
   const emit = (obj: EcfObject, indent: number): string[] => {
     const pad = " ".repeat(indent);
     const head = [`${obj.plus ? "+" : ""}${obj.kind}`];
-    if (obj.id) head.push(`Id: ${obj.id}`);
+    const bits: string[] = [];
+    if (obj.id && /^\d+$/.test(obj.id.trim()) && Number(obj.id) > 0) bits.push(`Id: ${obj.id.trim()}`);
     if (obj.name) {
-      if (/^child$/i.test(obj.kind)) head.push(obj.name);
-      else head.push(`Name: ${needsQuote(obj.name) ? `"${obj.name}"` : obj.name}`);
+      if (/^child$/i.test(obj.kind)) bits.push(obj.name);
+      else bits.push(`Name: ${needsQuote(obj.name) ? `"${obj.name}"` : obj.name}`);
     }
+    if (bits.length) head.push(bits.join(", "));
     const lines = [`${pad}{ ${head.join(" ")}`];
     for (const [key, value] of Object.entries(obj.fields)) {
       if (value === "" || value == null) continue;

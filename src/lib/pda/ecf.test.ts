@@ -101,6 +101,50 @@ describe("templates and unused ids", () => {
     assert.doesNotMatch(back, /Id:/);
   });
 
+  it("accepts compact plus-name headers and name-on-next-line without inventing an Id", () => {
+    const objects = parseEcfObjects(`{+Block Name:NoSpaceCore
+  Category: Devices
+}
+{ +Item, Name: CommaHeader
+  StackSize: 4
+}
+{ +Block
+  Name: NextLineArmor
+  HitPoints: 40
+}
+{ Item Name: BlankIdLoot
+  Id:
+  StackSize: 2
+}
+{ +Block Id: 9, Name: NumberedOverride
+  Category: Devices
+}
+`);
+    const compact = objects.find((o) => o.name === "NoSpaceCore");
+    const comma = objects.find((o) => o.name === "CommaHeader");
+    const next = objects.find((o) => o.name === "NextLineArmor");
+    const blank = objects.find((o) => o.name === "BlankIdLoot");
+    const numbered = objects.find((o) => o.name === "NumberedOverride");
+    assert.equal(compact?.plus, true);
+    assert.equal(compact?.id, undefined);
+    assert.equal(blockIdentity(compact!).label, "+NoSpaceCore");
+    assert.equal(comma?.plus, true);
+    assert.equal(blockIdentity(comma!).kind, "floating");
+    assert.equal(next?.plus, true);
+    assert.equal(blockIdentity(next!).label, "+NextLineArmor");
+    assert.equal(blank?.id, undefined);
+    assert.equal(blockIdentity(blank!).label, "BlankIdLoot");
+    assert.equal(blockIdentity(numbered!).kind, "numeric");
+    assert.equal(blockIdentity(numbered!).label, "9");
+    const back = stringifyEcfObjects([compact!, comma!, next!, blank!, numbered!]);
+    assert.match(back, /\{\s*\+Block Name: NoSpaceCore/);
+    assert.match(back, /\{\s*\+Item Name: CommaHeader/);
+    assert.match(back, /\{\s*\+Block Name: NextLineArmor/);
+    assert.match(back, /\{\s*Item Name: BlankIdLoot/);
+    assert.match(back, /\{\s*\+Block Id: 9, Name: NumberedOverride/);
+    assert.equal((back.match(/\bId:/g) || []).length, 1);
+  });
+
   it("keeps GalaxyConfig nested territories and DefReputation rows", () => {
     const galaxy = parseEcfObjects(`{ GalaxyConfig, Name: General
   StarCount: "15000, 20000"

@@ -188,10 +188,14 @@ export function numericIds(objects: EcfObject[]): number[] {
     .sort((a, b) => a - b);
 }
 
-/** Empyrion treats Item/Block Name (with or without +) as a floating ID when Id is omitted. */
+export function isNumericConfigId(id: string | undefined): boolean {
+  return Boolean(id && /^\d+$/.test(id.trim()) && Number(id) > 0);
+}
+
+/** Empyrion treats +Item/+Block Name (and Item/Block Name) as the ID when no numeric Id is set. */
 export function entryIdentity(obj: EcfObject): { kind: "numeric" | "floating"; label: string } {
-  if (obj.id && /^\d+$/.test(obj.id.trim())) {
-    return { kind: "numeric", label: obj.id.trim() };
+  if (isNumericConfigId(obj.id)) {
+    return { kind: "numeric", label: obj.id!.trim() };
   }
   const name = (obj.name || "unnamed").trim();
   return { kind: "floating", label: `${obj.plus ? "+" : ""}${name}` };

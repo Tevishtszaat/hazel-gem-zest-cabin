@@ -14,7 +14,7 @@ import {
   Sun,
   Trash2,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AppHeader } from "@/components/app-header.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { filesFromDataTransfer, loadTutorialSources, sourcesFromFiles } from "@/lib/pda/folder-files.ts";
@@ -103,8 +103,14 @@ export function ImportPage() {
   const ingest = usePdaStore((s) => s.ingestSources);
   const reset = usePdaStore((s) => s.reset);
   const clearImageSet = usePdaStore((s) => s.clearImageSet);
-  const pdaPics = catalog.entries.filter((e) => e.kind === "picture" && e.group !== "item").length;
-  const itemPics = catalog.entries.filter((e) => e.kind === "picture" && e.group === "item").length;
+  const pdaPics = useMemo(
+    () => catalog.entries.filter((e) => e.kind === "picture" && e.group !== "item").length,
+    [catalog.entries],
+  );
+  const itemPics = useMemo(
+    () => catalog.entries.filter((e) => e.kind === "picture" && e.group === "item").length,
+    [catalog.entries],
+  );
   const [busy, setBusy] = useState<ImportKind | "tutorial" | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);

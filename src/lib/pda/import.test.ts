@@ -4,6 +4,7 @@ import path from "node:path";
 import { describe, it } from "node:test";
 import { parseCsv } from "./csv.ts";
 import { exportYaml } from "./yaml-export.ts";
+import { sourceReadMode } from "./folder-files.ts";
 import { applyCsvText, importPda, sanitizeYamlSource } from "./yaml-import.ts";
 
 const sampleDir = path.resolve("public/samples/tutorial");
@@ -86,5 +87,16 @@ describe("csv merge", () => {
     applyCsvText(project, "KEY,English\ntxt_hello,Welcome aboard\n");
     assert.equal(project.chapters[0]?.chapterTitle, "Welcome aboard");
     assert.equal(project.chapters[0]?.titleKey, "txt_hello");
+  });
+});
+
+describe("import read modes", () => {
+  it("does not read playfield yaml or prefab bytes during a scenario index", () => {
+    assert.equal(sourceReadMode("playfieldYaml"), "path");
+    assert.equal(sourceReadMode("poi"), "path");
+    assert.equal(sourceReadMode("itemPicture"), "blob");
+    assert.equal(sourceReadMode("picture"), "blob");
+    assert.equal(sourceReadMode("items"), "text");
+    assert.equal(sourceReadMode("galaxy"), "text");
   });
 });

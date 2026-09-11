@@ -17,9 +17,17 @@ export function catalogText(catalog: ScenarioCatalog, role: string) {
   return (catalog.texts ?? []).find((t) => t.role === role);
 }
 
+const parsedByRole = new Map<string, { text: string; objects: EcfObject[] }>();
+
 export function objectsFor(catalog: ScenarioCatalog, role: ConfigRole): EcfObject[] {
   const text = catalogText(catalog, role)?.text;
-  if (text) return parseEcfObjects(text);
+  if (text) {
+    const hit = parsedByRole.get(role);
+    if (hit && hit.text === text) return hit.objects;
+    const objects = parseEcfObjects(text);
+    parsedByRole.set(role, { text, objects });
+    return objects;
+  }
   const meta = configMeta(role);
   const kind = meta?.catalogKind || meta?.kind.toLowerCase() || "item";
   return catalog.entries

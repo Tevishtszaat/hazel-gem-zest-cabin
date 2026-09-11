@@ -74,21 +74,26 @@ export async function putImages(files: { path: string; blob: Blob; set: ImageSet
   if (typeof indexedDB === "undefined" || !files.length) return [];
   const db = await openPdaDb();
   const names: string[] = [];
-  await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction("blobs", "readwrite");
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-    const store = tx.objectStore("blobs");
-    for (const file of files) {
-      const name = basename(file.path);
-      names.push(name);
-      store.put({ name, set: file.set, path: file.path, blob: file.blob }, name);
-      const prev = urls.get(name);
-      if (prev) URL.revokeObjectURL(prev);
-      urls.set(name, URL.createObjectURL(file.blob));
-      remember(name);
-    }
-  });
+  const chunk = 80;
+  for (let i = 0; i < files.length; i += chunk) {
+    const slice = files.slice(i, i + chunk);
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction("blobs", "readwrite");
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      const store = tx.objectStore("blobs");
+      for (const file of slice) {
+        const name = basename(file.path);
+        names.push(name);
+        store.put({ name, set: file.set, path: file.path, blob: file.blob }, name);
+        const prev = urls.get(name);
+        if (prev) URL.revokeObjectURL(prev);
+        urls.set(name, URL.createObjectURL(file.blob));
+        remember(name);
+      }
+    });
+    if (i + chunk < files.length) await new Promise((r) => setTimeout(r, 0));
+  }
   return names;
 }
 
@@ -100,9 +105,10 @@ export async function getImageUrl(name: string): Promise<string | null> {
     await warmImageCache();
     const warmed = peekImageUrl(name);
     if (warmed) return warmed;
+    const key = resolveAlias(name) || basename(name);
     const db = await openPdaDb();
     const rec = await new Promise<StoredImage | undefined>((resolve, reject) => {
-      const req = db.transaction("blobs", "readonly").objectStore("blobs").get(basename(name));
+      const req = db.transaction("blobs", "readonly").objectStore("blobs").get(key);
       req.onsuccess = () => resolve(req.result as StoredImage | undefined);
       req.onerror = () => reject(req.error);
     });
@@ -123,6 +129,16 @@ export async function resolveIconUrl(names: (string | undefined)[]): Promise<str
     if (url) return url;
   }
   return null;
+}
+
+export async function listImageNames(): Promise<string[]> {
+  if (typeof indexedDB === "undefined") return [];
+  const db = await openPdaDb();
+  return await new Promise<string[]>((resolve, reject) => {
+    const req = db.transaction("blobs", "readonly").objectStore("blobs").getAllKeys();
+    req.onsuccess = () => resolve((req.result as string[]) || []);
+    req.onerror = () => reject(req.error);
+  });
 }
 
 export async function listImages(set?: ImageSet): Promise<StoredImage[]> {
@@ -170,10 +186,10 @@ export async function clearImages(set?: ImageSet): Promise<void> {
 }
 
 export async function warmImageCache(): Promise<void> {
-  const all = await listImages();
-  for (const img of all) {
-    remember(img.name);
-    if (urls.has(img.name) || !img.blob) continue;
-    urls.set(img.name, URL.createObjectURL(img.blob));
+  try {
+    const names = await listImageNames();
+    for (const name of names) remember(String(name));
+  } catch {
+    /* icons load on demand */
   }
 }

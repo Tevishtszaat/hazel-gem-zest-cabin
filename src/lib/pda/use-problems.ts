@@ -3,6 +3,7 @@ import { validateOffthread } from "./offload.ts";
 import { problemIgnoreKey, visibleProblems } from "./problems.ts";
 import { problemStats, type Problem } from "./validate.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
+import { useBusyStore } from "@/store/busy-store.ts";
 
 const emptyStats = problemStats([]);
 
@@ -10,10 +11,12 @@ export function useProblems(opts?: { includeLength?: boolean; includeIgnored?: b
   const project = usePdaStore((s) => s.project);
   const catalog = usePdaStore((s) => s.catalog);
   const ignoredProblems = usePdaStore((s) => s.ignoredProblems);
+  const loading = useBusyStore((s) => s.load);
   const [raw, setRaw] = useState<Problem[]>([]);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    if (loading) return;
     let cancelled = false;
     setBusy(true);
     const timer = window.setTimeout(() => {
@@ -25,12 +28,12 @@ export function useProblems(opts?: { includeLength?: boolean; includeIgnored?: b
         .finally(() => {
           if (!cancelled) setBusy(false);
         });
-    }, 220);
+    }, 280);
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [project, catalog]);
+  }, [project, catalog, loading]);
 
   const issues = useMemo(
     () => visibleProblems(raw, ignoredProblems, opts),

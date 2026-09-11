@@ -1,22 +1,42 @@
 import type { StateStorage } from "zustand/middleware";
 import { beginBusy, endBusy } from "@/store/busy-store.ts";
+import type { CatalogText } from "./scenario-index.ts";
 
 const DB = "pulsepda";
 const STORE = "kv";
-const DB_VERSION = 2;
+const TEXT_STORE = "texts";
+const DB_VERSION = 3;
 const LEGACY_KEYS = ["pulsepda.project.v2", "pulsepda.project.v1"];
 
+let dbPromise: Promise<IDBDatabase> | null = null;
+
 export function openPdaDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
+  if (dbPromise) return dbPromise;
+  dbPromise = new Promise((resolve, reject) => {
     const req = indexedDB.open(DB, DB_VERSION);
     req.onupgradeneeded = () => {
       const db = req.result;
       if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
       if (!db.objectStoreNames.contains("blobs")) db.createObjectStore("blobs");
+      if (!db.objectStoreNames.contains(TEXT_STORE)) db.createObjectStore(TEXT_STORE);
     };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+    req.onsuccess = () => {
+      const db = req.result;
+      db.onclose = () => {
+        dbPromise = null;
+      };
+      db.onversionchange = () => {
+        db.close();
+        dbPromise = null;
+      };
+      resolve(db);
+    };
+    req.onerror = () => {
+      dbPromise = null;
+      reject(req.error);
+    };
   });
+  return dbPromise;
 }
 
 const memory = new Map<string, string>();
@@ -66,6 +86,53 @@ async function flush(name: string, value: string) {
   const db = await openPdaDb();
   await txSet(db, name, value);
   dropLegacyLocal();
+}
+
+export async function putCatalogTexts(texts: CatalogText[]): Promise<void> {
+  if (typeof indexedDB === "undefined" || !texts.length) return;
+  const db = await openPdaDb();
+  if (!db.objectStoreNames.contains(TEXT_STORE)) return;
+  await new Promise<void>((resolve, reject) => {
+    const tx = db.transaction(TEXT_STORE, "readwrite");
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    const store = tx.objectStore(TEXT_STORE);
+    for (const text of texts) store.put(text, text.role);
+  });
+}
+
+export async function putCatalogText(text: CatalogText): Promise<void> {
+  return putCatalogTexts([text]);
+}
+
+export async function loadCatalogTexts(): Promise<CatalogText[]> {
+  if (typeof indexedDB === "undefined") return [];
+  try {
+    const db = await openPdaDb();
+    if (!db.objectStoreNames.contains(TEXT_STORE)) return [];
+    return await new Promise<CatalogText[]>((resolve, reject) => {
+      const req = db.transaction(TEXT_STORE, "readonly").objectStore(TEXT_STORE).getAll();
+      req.onsuccess = () => resolve((req.result as CatalogText[]) || []);
+      req.onerror = () => reject(req.error);
+    });
+  } catch {
+    return [];
+  }
+}
+
+export async function clearCatalogTexts(): Promise<void> {
+  if (typeof indexedDB === "undefined") return;
+  try {
+    const db = await openPdaDb();
+    if (!db.objectStoreNames.contains(TEXT_STORE)) return;
+    await new Promise<void>((resolve, reject) => {
+      const req = db.transaction(TEXT_STORE, "readwrite").objectStore(TEXT_STORE).clear();
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  } catch {
+    /* ignore */
+  }
 }
 
 export const durableStorage: StateStorage = {

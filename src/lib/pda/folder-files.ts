@@ -70,30 +70,46 @@ export async function filesFromDataTransfer(dt: DataTransfer): Promise<File[]> {
   return [...dt.files];
 }
 
+export function sourceReadMode(role: string | null): "text" | "blob" | "path" {
+  if (role === "poi" || role === "playfieldYaml") return "path";
+  if (role === "picture" || role === "itemPicture") return "blob";
+  if (!role) return "path";
+  return "text";
+}
+
+async function poolMap<T, R>(items: T[], limit: number, fn: (item: T, index: number) => Promise<R>): Promise<R[]> {
+  const out = new Array<R>(items.length);
+  let next = 0;
+  const workers = Array.from({ length: Math.min(Math.max(1, limit), items.length) || 0 }, async () => {
+    while (next < items.length) {
+      const index = next++;
+      out[index] = await fn(items[index]!, index);
+    }
+  });
+  await Promise.all(workers);
+  return out;
+}
+
 export async function sourcesFromFiles(
   files: File[],
   onProgress?: (done: number, total: number, path: string) => void,
   kind: ImportKind = "scenario",
 ): Promise<ScenarioSource[]> {
   const picked = files.filter((file) => fileMatchesKind(relativeOf(file), kind));
-  const sources: ScenarioSource[] = [];
   let done = 0;
-  for (const file of picked) {
+  const sources = await poolMap(picked, 10, async (file) => {
     const path = normalizePath(relativeOf(file));
     const role = classifyScenarioPath(path, kind);
-    onProgress?.(done, picked.length, path);
-    if (role === "poi") {
-      sources.push({ path });
-    } else if (role === "picture" || role === "itemPicture") {
-      sources.push({ path, blob: file });
-    } else if (file.size > 25_000_000) {
-      sources.push({ path });
-    } else {
-      sources.push({ path, text: await file.text() });
+    const mode = sourceReadMode(role);
+    let source: ScenarioSource = { path };
+    if (mode === "blob") source = { path, blob: file };
+    else if (mode === "text" && file.size <= 25_000_000) {
+      source = { path, text: await file.text() };
     }
     done += 1;
     onProgress?.(done, picked.length, path);
-  }
+    return source;
+  });
   return sources;
 }
 
