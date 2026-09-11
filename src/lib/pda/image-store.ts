@@ -1,4 +1,5 @@
 import { openPdaDb } from "./idb-storage.ts";
+import { downscaleImageBlob } from "./image-scale.ts";
 
 export type ImageSet = "pda" | "item" | "wallpaper";
 
@@ -11,6 +12,8 @@ export type StoredImage = {
 
 const urls = new Map<string, string>();
 const aliases = new Map<string, string>();
+let wallpaperNamesCache: string[] | null = null;
+const WP_CAP = 8;
 
 function basename(path: string): string {
   return path.replace(/\\/g, "/").split("/").pop() || path;
@@ -72,9 +75,34 @@ export function peekImageUrl(name: string): string | undefined {
 
 export async function putImages(files: { path: string; blob: Blob; set: ImageSet }[]): Promise<string[]> {
   if (typeof indexedDB === "undefined" || !files.length) return [];
+  const wallpapers: typeof files = [];
+  const others: typeof files = [];
+  for (const file of files) {
+    if (file.set === "wallpaper") wallpapers.push(file);
+    else others.push(file);
+  }
+  const names: string[] = [];
+  if (others.length) names.push(...(await writeImageSlice(others, false)));
+  if (wallpapers.length) {
+    const scaled: typeof files = [];
+    for (const file of wallpapers.slice(0, WP_CAP)) {
+      if (file.blob.size > 12_000_000) continue;
+      const blob = await downscaleImageBlob(file.blob);
+      if (!blob.size) continue;
+      scaled.push({ ...file, blob });
+      await new Promise((r) => setTimeout(r, 0));
+    }
+    names.push(...(await writeImageSlice(scaled, true)));
+    wallpaperNamesCache = names.filter((n) => n.startsWith("wp:"));
+  }
+  return names;
+}
+
+async function writeImageSlice(files: { path: string; blob: Blob; set: ImageSet }[], wallpaper: boolean): Promise<string[]> {
+  if (!files.length) return [];
   const db = await openPdaDb();
   const names: string[] = [];
-  const chunk = 80;
+  const chunk = wallpaper ? 2 : 80;
   for (let i = 0; i < files.length; i += chunk) {
     const slice = files.slice(i, i + chunk);
     await new Promise<void>((resolve, reject) => {
@@ -83,13 +111,15 @@ export async function putImages(files: { path: string; blob: Blob; set: ImageSet
       tx.onerror = () => reject(tx.error);
       const store = tx.objectStore("blobs");
       for (const file of slice) {
-        const name = file.set === "wallpaper" ? `wp:${basename(file.path)}` : basename(file.path);
+        const name = wallpaper ? `wp:${basename(file.path)}` : basename(file.path);
         names.push(name);
         store.put({ name, set: file.set, path: file.path, blob: file.blob }, name);
-        const prev = urls.get(name);
-        if (prev) URL.revokeObjectURL(prev);
-        urls.set(name, URL.createObjectURL(file.blob));
-        remember(name);
+        if (!wallpaper) {
+          const prev = urls.get(name);
+          if (prev) URL.revokeObjectURL(prev);
+          urls.set(name, URL.createObjectURL(file.blob));
+          remember(name);
+        }
       }
     });
     if (i + chunk < files.length) await new Promise((r) => setTimeout(r, 0));
@@ -102,10 +132,12 @@ export async function getImageUrl(name: string): Promise<string | null> {
   if (hit) return hit;
   if (typeof indexedDB === "undefined") return null;
   try {
-    await warmImageCache();
-    const warmed = peekImageUrl(name);
-    if (warmed) return warmed;
-    const key = resolveAlias(name) || basename(name);
+    if (!name.startsWith("wp:")) {
+      await warmImageCache();
+      const warmed = peekImageUrl(name);
+      if (warmed) return warmed;
+    }
+    const key = name.startsWith("wp:") ? name : resolveAlias(name) || basename(name);
     const db = await openPdaDb();
     const rec = await new Promise<StoredImage | undefined>((resolve, reject) => {
       const req = db.transaction("blobs", "readonly").objectStore("blobs").get(key);
@@ -113,9 +145,22 @@ export async function getImageUrl(name: string): Promise<string | null> {
       req.onerror = () => reject(req.error);
     });
     if (!rec?.blob) return null;
+    let blob = rec.blob;
+    if (rec.set === "wallpaper" || rec.name.startsWith("wp:")) {
+      blob = await downscaleImageBlob(blob);
+      if (!blob.size) return null;
+      if (blob !== rec.blob) {
+        try {
+          const tx = db.transaction("blobs", "readwrite");
+          tx.objectStore("blobs").put({ ...rec, blob }, rec.name);
+        } catch {
+          /* keep original */
+        }
+      }
+    }
     const existing = urls.get(rec.name);
     if (existing) return existing;
-    const url = URL.createObjectURL(rec.blob);
+    const url = URL.createObjectURL(blob);
     const raced = urls.get(rec.name);
     if (raced) {
       URL.revokeObjectURL(url);
@@ -149,8 +194,10 @@ export async function listImageNames(): Promise<string[]> {
 }
 
 export async function listWallpaperNames(): Promise<string[]> {
-  const names = await listImageNames();
-  return names.map(String).filter((name) => name.startsWith("wp:"));
+  if (wallpaperNamesCache) return wallpaperNamesCache.slice(0, WP_CAP);
+  const names = (await listImageNames()).map(String).filter((name) => name.startsWith("wp:"));
+  wallpaperNamesCache = names.slice(0, WP_CAP);
+  return wallpaperNamesCache;
 }
 
 export async function listImages(set?: ImageSet): Promise<StoredImage[]> {
@@ -171,6 +218,7 @@ export async function clearImages(set?: ImageSet): Promise<void> {
     for (const url of urls.values()) URL.revokeObjectURL(url);
     urls.clear();
     aliases.clear();
+    wallpaperNamesCache = null;
     await new Promise<void>((resolve, reject) => {
       const req = db.transaction("blobs", "readwrite").objectStore("blobs").clear();
       req.onsuccess = () => resolve();
@@ -190,6 +238,7 @@ export async function clearImages(set?: ImageSet): Promise<void> {
       const url = urls.get(img.name);
       if (url) URL.revokeObjectURL(url);
       urls.delete(img.name);
+      if (img.set === "wallpaper") wallpaperNamesCache = null;
       for (const [alias, target] of [...aliases.entries()]) {
         if (target === img.name) aliases.delete(alias);
       }

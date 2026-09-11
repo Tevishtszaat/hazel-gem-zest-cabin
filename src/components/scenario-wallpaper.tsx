@@ -9,6 +9,18 @@ function hashSeed(seed: string) {
   return h >>> 0;
 }
 
+function whenIdle(fn: () => void) {
+  const ric = (window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback;
+  if (typeof ric === "function") return ric(fn, { timeout: 2500 });
+  return window.setTimeout(fn, 400);
+}
+
+function cancelIdle(id: number) {
+  const cic = (window as Window & { cancelIdleCallback?: (id: number) => void }).cancelIdleCallback;
+  if (typeof cic === "function") cic(id);
+  else window.clearTimeout(id);
+}
+
 export function ScenarioWallpaper() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const indexedAt = usePdaStore((s) => s.catalog.indexedAt);
@@ -17,33 +29,41 @@ export function ScenarioWallpaper() {
 
   useEffect(() => {
     let alive = true;
-    void listWallpaperNames().then(async (names) => {
-      if (!alive) return;
-      if (!names.length) {
-        setUrl(null);
-        return;
-      }
-      const seed = `${pathname}|${folder}`;
-      const pick = names[hashSeed(seed) % names.length]!;
-      const cached = peekImageUrl(pick);
-      if (cached) {
-        setUrl(cached);
-        return;
-      }
-      const next = await getImageUrl(pick);
-      if (alive) setUrl(next);
-    });
+    let idleId = 0;
+    const delay = window.setTimeout(() => {
+      idleId = whenIdle(() => {
+        void (async () => {
+          try {
+            const names = await listWallpaperNames();
+            if (!alive || !names.length) {
+              if (alive) setUrl(null);
+              return;
+            }
+            const pick = names[hashSeed(`${pathname}|${folder}`) % names.length]!;
+            const cached = peekImageUrl(pick);
+            if (cached) {
+              if (alive) setUrl(cached);
+              return;
+            }
+            const next = await getImageUrl(pick);
+            if (alive) setUrl(next);
+          } catch {
+            if (alive) setUrl(null);
+          }
+        })();
+      });
+    }, 900);
     return () => {
       alive = false;
+      window.clearTimeout(delay);
+      if (idleId) cancelIdle(idleId);
     };
   }, [pathname, indexedAt, folder]);
 
   if (!url) return null;
   return (
-    <div
-      aria-hidden
-      className="scenario-wallpaper"
-      style={{ backgroundImage: `url(${JSON.stringify(url)})` }}
-    />
+    <div className="scenario-wallpaper" aria-hidden>
+      <img src={url} alt="" decoding="async" className="scenario-wallpaper-img" />
+    </div>
   );
 }
