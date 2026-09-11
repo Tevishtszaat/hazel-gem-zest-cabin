@@ -1,4 +1,5 @@
 import { fileMatchesKind, type ImportKind } from "./import-kinds.ts";
+import { parseEpbHeader } from "./epb.ts";
 import { classifyScenarioPath, normalizePath, type ScenarioSource } from "./scenario-index.ts";
 
 type DirReader = {
@@ -102,7 +103,14 @@ export async function sourcesFromFiles(
     const role = classifyScenarioPath(path, kind);
     const mode = sourceReadMode(role);
     let source: ScenarioSource = { path };
-    if (mode === "blob") source = { path, blob: file };
+    if (role === "poi") {
+      try {
+        const buf = new Uint8Array(await file.slice(0, 65536).arrayBuffer());
+        source = { path, meta: parseEpbHeader(buf, path) };
+      } catch {
+        source = { path };
+      }
+    } else if (mode === "blob") source = { path, blob: file };
     else if (mode === "text" && file.size <= 25_000_000) {
       if (role === "playfieldYaml" && file.size > 2_000_000) source = { path };
       else source = { path, text: await file.text() };

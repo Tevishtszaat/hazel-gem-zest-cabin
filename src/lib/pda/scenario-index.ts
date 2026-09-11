@@ -23,6 +23,8 @@ export type CatalogEntry = {
   label?: string;
   source: string;
   group?: "pda" | "item";
+  poiGroup?: string;
+  poiFile?: string;
 };
 
 export type CatalogFile = {
@@ -49,6 +51,7 @@ export type ScenarioSource = {
   path: string;
   text?: string;
   blob?: Blob;
+  meta?: { groupName?: string; spawnName?: string; fileName?: string };
 };
 
 export type IndexedScenario = {
@@ -279,7 +282,7 @@ function parseSectors(text: string, source: string, bag: CatalogEntry[], seen: S
 function applyLocalization(entries: CatalogEntry[], loc: Record<string, string>) {
   for (const entry of entries) {
     if (entry.label) continue;
-    const keys = [entry.name, `Items_${entry.name}`, `item_${entry.name}`, `Block_${entry.name}`];
+    const keys = locaKeysForName(entry.name, entry.kind);
     for (const key of keys) {
       const label = loc[key];
       if (label) {
@@ -287,7 +290,105 @@ function applyLocalization(entries: CatalogEntry[], loc: Record<string, string>)
         break;
       }
     }
+    if (entry.label) continue;
+    const packed = compactToken(entry.name);
+    for (const [key, label] of Object.entries(loc)) {
+      if (compactToken(key.replace(/^(items?_|blocks?_|tokens?_|factions?_)/i, "")) === packed) {
+        entry.label = label;
+        break;
+      }
+    }
   }
+}
+
+export function locaKeysForName(name: string, kind?: string) {
+  const keys = [name, `Items_${name}`, `Item_${name}`, `item_${name}`, `Block_${name}`, `Blocks_${name}`, `Token_${name}`, `Faction_${name}`];
+  if (kind === "block") keys.unshift(`Block_${name}`, `Blocks_${name}`);
+  if (kind === "item") keys.unshift(`Items_${name}`, `Item_${name}`);
+  if (kind === "token") keys.unshift(`Token_${name}`, `Items_${name}`);
+  if (kind === "faction") keys.unshift(`Faction_${name}`);
+  return [...new Set(keys)];
+}
+
+export function compactToken(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+export function localizationLabels(catalog: ScenarioCatalog | undefined): { key: string; name: string; label: string }[] {
+  if (!catalog) return [];
+  const rows: { key: string; name: string; label: string }[] = [];
+  const text = (catalog.texts ?? []).find((t) => t.role === "localization" && t.text)?.text;
+  if (text) {
+    const table = parseCsv(text);
+    const lang = table.languages.includes("English") ? "English" : table.languages[0];
+    if (lang) {
+      for (const [key, rec] of Object.entries(table.rows)) {
+        const label = rec[lang]?.trim();
+        if (!label) continue;
+        const name = key.replace(/^(items?_|blocks?_|tokens?_|factions?_)/i, "");
+        rows.push({ key, name, label });
+      }
+    }
+  }
+  for (const entry of catalog.entries) {
+    if (entry.label) rows.push({ key: entry.name, name: entry.name, label: entry.label });
+  }
+  return rows;
+}
+
+export function resolveCatalogToken(
+  catalog: ScenarioCatalog,
+  token: string,
+  kinds: CatalogKind[],
+): { entry: CatalogEntry; via: "name" | "label" | "file" | "group" } | null {
+  const needle = token.trim().toLowerCase();
+  const packed = compactToken(token);
+  if (!needle) return null;
+  const pool = catalog.entries.filter((e) => kinds.includes(e.kind));
+  const byName = pool.find((e) => e.name.toLowerCase() === needle);
+  if (byName) {
+    if (byName.poiFile && byName.poiGroup && compactToken(byName.poiFile) === packed && compactToken(byName.poiGroup) !== packed) {
+      return { entry: byName, via: "file" };
+    }
+    if (byName.poiGroup && compactToken(byName.poiGroup) === packed) return { entry: byName, via: "group" };
+    return { entry: byName, via: "name" };
+  }
+  const byFile = pool.find((e) => (e.poiFile ?? "").toLowerCase() === needle);
+  if (byFile) return { entry: byFile, via: byFile.poiGroup && byFile.poiGroup.toLowerCase() !== needle ? "file" : "name" };
+  const byGroup = pool.find((e) => (e.poiGroup ?? "").toLowerCase() === needle);
+  if (byGroup) return { entry: byGroup, via: "group" };
+  const byLabel = pool.find((e) => (e.label ?? "").toLowerCase() === needle);
+  if (byLabel) return { entry: byLabel, via: "label" };
+  if (packed.length >= 3) {
+    const byPackedName = pool.find((e) => compactToken(e.name) === packed);
+    if (byPackedName) return { entry: byPackedName, via: "name" };
+    const byPackedLabel = pool.find((e) => compactToken(e.label ?? "") === packed);
+    if (byPackedLabel) return { entry: byPackedLabel, via: "label" };
+  }
+  const loca = localizationLabels(catalog);
+  const hit = loca.find(
+    (row) =>
+      row.label.toLowerCase() === needle ||
+      row.key.toLowerCase() === needle ||
+      (packed.length >= 3 && (compactToken(row.label) === packed || compactToken(row.name) === packed || compactToken(row.key) === packed)),
+  );
+  if (hit) {
+    const entry =
+      pool.find((e) => e.name.toLowerCase() === hit.name.toLowerCase()) ||
+      pool.find((e) => compactToken(e.name) === compactToken(hit.name));
+    if (entry) return { entry, via: entry.name.toLowerCase() === needle ? "name" : "label" };
+  }
+  return null;
+}
+
+export function stampLocalization(catalog: ScenarioCatalog): ScenarioCatalog {
+  const loc: Record<string, string> = {};
+  for (const row of localizationLabels(catalog)) {
+    loc[row.key] = row.label;
+    loc[row.name] = row.label;
+  }
+  applyLocalization(catalog.entries, loc);
+  return catalog;
 }
 
 export function indexScenario(files: ScenarioSource[], hint?: string): IndexedScenario {
@@ -304,10 +405,30 @@ export function indexScenario(files: ScenarioSource[], hint?: string): IndexedSc
     let count = 0;
 
     if (role === "poi") {
-      const name = (file.path.split(/[/\\]/).pop() ?? "").replace(/\.epb$/i, "");
-      if (name) {
-        addEntry(entries, seen, { kind: "poi", name, source });
-        count = 1;
+      const fileName = (file.path.split(/[/\\]/).pop() ?? "").replace(/\.epb$/i, "");
+      if (fileName) {
+        const meta = file.meta ?? { fileName };
+        const groupName = (meta.groupName || "").trim();
+        const spawnName = (meta.spawnName || "").trim();
+        addEntry(entries, seen, {
+          kind: "poi",
+          name: fileName,
+          label: spawnName || groupName || undefined,
+          source,
+          poiFile: fileName,
+          poiGroup: groupName || undefined,
+        });
+        if (groupName && groupName.toLowerCase() !== fileName.toLowerCase()) {
+          addEntry(entries, seen, {
+            kind: "poi",
+            name: groupName,
+            label: spawnName || fileName,
+            source,
+            poiFile: fileName,
+            poiGroup: groupName,
+          });
+        }
+        count = groupName && groupName.toLowerCase() !== fileName.toLowerCase() ? 2 : 1;
       }
     } else if (role === "picture" || role === "itemPicture") {
       const name = file.path.split(/[/\\]/).pop() ?? "";
@@ -438,12 +559,14 @@ export function suggestionsFor(
     .map((entry) => {
       const name = entry.name.toLowerCase();
       const label = (entry.label ?? "").toLowerCase();
+      const group = (entry.poiGroup ?? "").toLowerCase();
+      const file = (entry.poiFile ?? "").toLowerCase();
       const cn = compact(name);
       let score = 0;
-      if (name === q) score = 100;
-      else if (name.startsWith(q) || q.startsWith(name)) score = 80;
+      if (name === q || group === q || file === q) score = 100;
+      else if (name.startsWith(q) || q.startsWith(name) || group.startsWith(q) || file.startsWith(q)) score = 80;
       else if (label.startsWith(q)) score = 70;
-      else if (name.includes(q)) score = 50;
+      else if (name.includes(q) || group.includes(q) || file.includes(q)) score = 50;
       else if (label.includes(q)) score = 40;
       else if (cq.length >= 3 && cn && (cn.includes(cq) || cq.includes(cn))) score = 35;
       return { entry, score };
@@ -463,6 +586,8 @@ export function mergeCatalog(base: ScenarioCatalog, extra: ScenarioCatalog): Sce
     );
     if (existing) {
       if (entry.label && !existing.label) existing.label = entry.label;
+      if (entry.poiGroup && !existing.poiGroup) existing.poiGroup = entry.poiGroup;
+      if (entry.poiFile && !existing.poiFile) existing.poiFile = entry.poiFile;
       continue;
     }
     seen.add(key);
@@ -491,6 +616,7 @@ export function mergeCatalog(base: ScenarioCatalog, extra: ScenarioCatalog): Sce
       texts[i] = text.text.length >= cur.text.length || text.path === cur.path ? text : cur;
     } else texts.push(text);
   }
+  stampLocalization({ folderName: extra.folderName || base.folderName, files, entries, texts, indexedAt: Date.now() });
   return {
     folderName: extra.folderName || base.folderName,
     files,

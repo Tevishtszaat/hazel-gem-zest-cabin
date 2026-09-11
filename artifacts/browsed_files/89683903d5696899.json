@@ -1,0 +1,2081 @@
+{
+  "sha": "3412348c47d4cb18b731643a43d31295afea759d",
+  "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/3412348c47d4cb18b731643a43d31295afea759d",
+  "tree": [
+    {
+      "path": ".gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6457f6880b970b9a1125206376cfb63bd73ae018",
+      "size": 4938,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/6457f6880b970b9a1125206376cfb63bd73ae018"
+    },
+    {
+      "path": "LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "79444124bb469fd52a420178532e4aec3fbdb04c",
+      "size": 1065,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/79444124bb469fd52a420178532e4aec3fbdb04c"
+    },
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "109f931125b1824131b3a49e11f13a8f777a01a8",
+      "size": 6076,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/109f931125b1824131b3a49e11f13a8f777a01a8"
+    },
+    {
+      "path": "scripts",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8c7503da5f1f5633e079be1b70a2d2533d356691",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/8c7503da5f1f5633e079be1b70a2d2533d356691"
+    },
+    {
+      "path": "scripts/allowedBlockTypes.sh",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9c3fa5e7ed55757e2e1d7b2a89458cdc260298d5",
+      "size": 1304,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/9c3fa5e7ed55757e2e1d7b2a89458cdc260298d5"
+    },
+    {
+      "path": "scripts/extractBlockTypes.sh",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d9ab8120895fcfd6531602ab6c76070b18bb5141",
+      "size": 1390,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/d9ab8120895fcfd6531602ab6c76070b18bb5141"
+    },
+    {
+      "path": "scripts/listAll.sh",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9cd7d0ba7d669caf19adef4d772fbb52aa16d275",
+      "size": 233,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/9cd7d0ba7d669caf19adef4d772fbb52aa16d275"
+    },
+    {
+      "path": "scripts/obj2code.sh",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b0372f977b265a3985f4d0777c0c99e7b04abaad",
+      "size": 5869,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/b0372f977b265a3985f4d0777c0c99e7b04abaad"
+    },
+    {
+      "path": "src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8e53552faaf33b985f243dcf1d83aa62831b89a5",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/8e53552faaf33b985f243dcf1d83aa62831b89a5"
+    },
+    {
+      "path": "src/BuildingBlocks.r3d",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d7a4daf75a1f2b4eb2be5684baeb74be701e727f",
+      "size": 1447560,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/d7a4daf75a1f2b4eb2be5684baeb74be701e727f"
+    },
+    {
+      "path": "src/EmpyrionStuff.sln",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "41ae0eaa8b835e828c9cc2a64a0d2a3d9dd59eaf",
+      "size": 4219,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/41ae0eaa8b835e828c9cc2a64a0d2a3d9dd59eaf"
+    },
+    {
+      "path": "src/Texture.jpg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8893594ca7dff26f4c00dd5175c4af6efc9637c5",
+      "size": 5985,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/8893594ca7dff26f4c00dd5175c4af6efc9637c5"
+    },
+    {
+      "path": "src/ecf",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f9e1c397bb15215ed577b4db59c64bb798b8b31c",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/f9e1c397bb15215ed577b4db59c64bb798b8b31c"
+    },
+    {
+      "path": "src/ecf/ECFLab",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "af2c2873e0ecf7e8c11925bb5ac7cd59bce3c629",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/af2c2873e0ecf7e8c11925bb5ac7cd59bce3c629"
+    },
+    {
+      "path": "src/ecf/ECFLab/App.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bae5d6d81451f47ae3ccd65377504a58b70a2208",
+      "size": 180,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/bae5d6d81451f47ae3ccd65377504a58b70a2208"
+    },
+    {
+      "path": "src/ecf/ECFLab/App.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3af70d3bf9b6542a99cc6b77afdda934c61ca83b",
+      "size": 753,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/3af70d3bf9b6542a99cc6b77afdda934c61ca83b"
+    },
+    {
+      "path": "src/ecf/ECFLab/App.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "95d3a19c78091f81334ca800a19c25b858e77ea0",
+      "size": 298,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/95d3a19c78091f81334ca800a19c25b858e77ea0"
+    },
+    {
+      "path": "src/ecf/ECFLab/Behaviours",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3609383fe353d9008ca4eb57164d9fe39923644e",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/3609383fe353d9008ca4eb57164d9fe39923644e"
+    },
+    {
+      "path": "src/ecf/ECFLab/Behaviours/BindableSelectedItemBehaviour.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "be389f3d4d7aa059cc3c4f768e414a9783f9b1c1",
+      "size": 3181,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/be389f3d4d7aa059cc3c4f768e414a9783f9b1c1"
+    },
+    {
+      "path": "src/ecf/ECFLab/Design",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "19cb3f881e2cea29f4f474eaa06b494351dece34",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/19cb3f881e2cea29f4f474eaa06b494351dece34"
+    },
+    {
+      "path": "src/ecf/ECFLab/Design/DesignDataService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4741b37ea1855a5fce2050af20cf382cd289c12b",
+      "size": 370,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/4741b37ea1855a5fce2050af20cf382cd289c12b"
+    },
+    {
+      "path": "src/ecf/ECFLab/ECFLab.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a475c385ae1af11a80ea28eb688a9000843a8fd",
+      "size": 8123,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/3a475c385ae1af11a80ea28eb688a9000843a8fd"
+    },
+    {
+      "path": "src/ecf/ECFLab/Model",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4ef6bcb6a74fd5322a9f255b1064c091b9f620d1",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/4ef6bcb6a74fd5322a9f255b1064c091b9f620d1"
+    },
+    {
+      "path": "src/ecf/ECFLab/Model/DataItem.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5642e098063f68cca8d9c67f1795db3f912f8b7c",
+      "size": 243,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/5642e098063f68cca8d9c67f1795db3f912f8b7c"
+    },
+    {
+      "path": "src/ecf/ECFLab/Model/DataService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "47f66ce980f3566c79f2bd485691151caa995b56",
+      "size": 345,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/47f66ce980f3566c79f2bd485691151caa995b56"
+    },
+    {
+      "path": "src/ecf/ECFLab/Model/IDataService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9192a1600862d8832a83ecc3b4eeb72b5af8a7ac",
+      "size": 223,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/9192a1600862d8832a83ecc3b4eeb72b5af8a7ac"
+    },
+    {
+      "path": "src/ecf/ECFLab/Properties",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f6d78df9165b9ebf0b45ad2d16d019a053dba1ce",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/f6d78df9165b9ebf0b45ad2d16d019a053dba1ce"
+    },
+    {
+      "path": "src/ecf/ECFLab/Properties/AssemblyInfo.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b7733a249f66d2d45ae1527323a82755e84f6cf1",
+      "size": 2371,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/b7733a249f66d2d45ae1527323a82755e84f6cf1"
+    },
+    {
+      "path": "src/ecf/ECFLab/Properties/Resources.Designer.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fd1b7a7f511f56d767eb1c12a1ae31d41a0b23ba",
+      "size": 2778,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/fd1b7a7f511f56d767eb1c12a1ae31d41a0b23ba"
+    },
+    {
+      "path": "src/ecf/ECFLab/Properties/Resources.resx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "af7dbebbacef595e3089c01c05671016c21a8304",
+      "size": 5496,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/af7dbebbacef595e3089c01c05671016c21a8304"
+    },
+    {
+      "path": "src/ecf/ECFLab/Properties/Settings.Designer.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "44d7c191ff7ae12810eb6a7dcd1533555c8964b4",
+      "size": 1063,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/44d7c191ff7ae12810eb6a7dcd1533555c8964b4"
+    },
+    {
+      "path": "src/ecf/ECFLab/Properties/Settings.settings",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "033d7a5e9e2266753180f4e3a9299f575046701e",
+      "size": 195,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/033d7a5e9e2266753180f4e3a9299f575046701e"
+    },
+    {
+      "path": "src/ecf/ECFLab/Skins",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b4c37fa45186ced5184ad35a96890add7053ad5d",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/b4c37fa45186ced5184ad35a96890add7053ad5d"
+    },
+    {
+      "path": "src/ecf/ECFLab/Skins/MainSkin.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "825650eb6df891a96416069bcd74d751ad009751",
+      "size": 191,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/825650eb6df891a96416069bcd74d751ad009751"
+    },
+    {
+      "path": "src/ecf/ECFLab/View",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "929d95bb7baa2947494c6b279bdd462aa16d1e8b",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/929d95bb7baa2947494c6b279bdd462aa16d1e8b"
+    },
+    {
+      "path": "src/ecf/ECFLab/View/Blocks",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "795c06ff84ed0954b0ae0722a7a313f3946092fb",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/795c06ff84ed0954b0ae0722a7a313f3946092fb"
+    },
+    {
+      "path": "src/ecf/ECFLab/View/Blocks/BlocksView.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4d764a6a71931c1c070da5eab56c3bf9d9456027",
+      "size": 5827,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/4d764a6a71931c1c070da5eab56c3bf9d9456027"
+    },
+    {
+      "path": "src/ecf/ECFLab/View/Blocks/BlocksView.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "342ea7589466457988e7faae9743f049460d656c",
+      "size": 647,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/342ea7589466457988e7faae9743f049460d656c"
+    },
+    {
+      "path": "src/ecf/ECFLab/View/Entities",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "dc75415161b83e0912acdfc648ebc9c8307f14f9",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/dc75415161b83e0912acdfc648ebc9c8307f14f9"
+    },
+    {
+      "path": "src/ecf/ECFLab/View/Entities/EntitiesView.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1645931887333cc497c4ef0997031b0926dcdbd8",
+      "size": 597,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/1645931887333cc497c4ef0997031b0926dcdbd8"
+    },
+    {
+      "path": "src/ecf/ECFLab/View/Entities/EntitiesView.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d1517e7a61b61111ccee1b3564e0b5d41e1fd603",
+      "size": 655,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/d1517e7a61b61111ccee1b3564e0b5d41e1fd603"
+    },
+    {
+      "path": "src/ecf/ECFLab/View/Items",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c70d85ce6d875d1e860e0a9ef674d47c23076332",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/c70d85ce6d875d1e860e0a9ef674d47c23076332"
+    },
+    {
+      "path": "src/ecf/ECFLab/View/Items/ItemsView.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "249640e19e2f762d586884fba5085fbf0d1ce72d",
+      "size": 585,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/249640e19e2f762d586884fba5085fbf0d1ce72d"
+    },
+    {
+      "path": "src/ecf/ECFLab/View/Items/ItemsView.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "30a55bc90723fa9341634b5a92ef780984cbcba1",
+      "size": 643,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/30a55bc90723fa9341634b5a92ef780984cbcba1"
+    },
+    {
+      "path": "src/ecf/ECFLab/View/MainWindow.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a4835e955b4a05014d896ce2341307170fb134b3",
+      "size": 2123,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/a4835e955b4a05014d896ce2341307170fb134b3"
+    },
+    {
+      "path": "src/ecf/ECFLab/View/MainWindow.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "62bc98cfb6ab074a73626dc2877de08ea4e1531d",
+      "size": 468,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/62bc98cfb6ab074a73626dc2877de08ea4e1531d"
+    },
+    {
+      "path": "src/ecf/ECFLab/View/Templates",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "88723087102886636a345f9a6d78dd4e74bcafac",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/88723087102886636a345f9a6d78dd4e74bcafac"
+    },
+    {
+      "path": "src/ecf/ECFLab/View/Templates/TemplatesView.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1bd009e2b6c32fdc1c5109df3ebc38dedff125c6",
+      "size": 601,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/1bd009e2b6c32fdc1c5109df3ebc38dedff125c6"
+    },
+    {
+      "path": "src/ecf/ECFLab/View/Templates/TemplatesView.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fdf266a53bae8bcf1e1a5c9aa0932e31caf24655",
+      "size": 659,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/fdf266a53bae8bcf1e1a5c9aa0932e31caf24655"
+    },
+    {
+      "path": "src/ecf/ECFLab/ViewModel",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d415146c5c5656c588eb51ce3567131e383341ff",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/d415146c5c5656c588eb51ce3567131e383341ff"
+    },
+    {
+      "path": "src/ecf/ECFLab/ViewModel/Blocks",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "226c8cfb2e0984996f8faa13cad425f14f51dd22",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/226c8cfb2e0984996f8faa13cad425f14f51dd22"
+    },
+    {
+      "path": "src/ecf/ECFLab/ViewModel/Blocks/BlockViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9e80b35b10566be267aca94faa36d8a274112154",
+      "size": 831,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/9e80b35b10566be267aca94faa36d8a274112154"
+    },
+    {
+      "path": "src/ecf/ECFLab/ViewModel/Blocks/BlocksViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "398731360c1abeb5d1fb7ebaf11f67114f54bbc9",
+      "size": 3687,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/398731360c1abeb5d1fb7ebaf11f67114f54bbc9"
+    },
+    {
+      "path": "src/ecf/ECFLab/ViewModel/Entities",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "69ffc693b0f25c3df182fcfeb434e922537a9581",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/69ffc693b0f25c3df182fcfeb434e922537a9581"
+    },
+    {
+      "path": "src/ecf/ECFLab/ViewModel/Entities/EntitiesViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cfd142b6f33bd33095446b1535f4a8ad98cb51bf",
+      "size": 279,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/cfd142b6f33bd33095446b1535f4a8ad98cb51bf"
+    },
+    {
+      "path": "src/ecf/ECFLab/ViewModel/Items",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "02741c5022f60e234416b5bacd7e3eb83d926600",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/02741c5022f60e234416b5bacd7e3eb83d926600"
+    },
+    {
+      "path": "src/ecf/ECFLab/ViewModel/Items/ItemsViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "83e47d94cfbc7c9b480efc5814a355018d4d4fba",
+      "size": 269,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/83e47d94cfbc7c9b480efc5814a355018d4d4fba"
+    },
+    {
+      "path": "src/ecf/ECFLab/ViewModel/MainViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "712e2ddbfeb9ad4cf2d161653fb7e0d10db2de8a",
+      "size": 3033,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/712e2ddbfeb9ad4cf2d161653fb7e0d10db2de8a"
+    },
+    {
+      "path": "src/ecf/ECFLab/ViewModel/Templates",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d25845b8baf25d102702dd18fad2709c744e04e1",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/d25845b8baf25d102702dd18fad2709c744e04e1"
+    },
+    {
+      "path": "src/ecf/ECFLab/ViewModel/Templates/TemplatesViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d79cfb05baf71c2a1f34a2dd709e402c785f9630",
+      "size": 281,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/d79cfb05baf71c2a1f34a2dd709e402c785f9630"
+    },
+    {
+      "path": "src/ecf/ECFLab/ViewModel/Tree",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "aafbc94e659422556f1f1ca10c56ca2f7dad7eed",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/aafbc94e659422556f1f1ca10c56ca2f7dad7eed"
+    },
+    {
+      "path": "src/ecf/ECFLab/ViewModel/Tree/GroupNode.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dd5eb4ded0f249780075cab9bf7e75a0895b3b54",
+      "size": 390,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/dd5eb4ded0f249780075cab9bf7e75a0895b3b54"
+    },
+    {
+      "path": "src/ecf/ECFLab/ViewModel/Tree/ITreeNode.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c35260f055de54ee4d7459232b639e4ccf798908",
+      "size": 218,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/c35260f055de54ee4d7459232b639e4ccf798908"
+    },
+    {
+      "path": "src/ecf/ECFLab/ViewModel/ViewModelLocator.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ac50a601c15251f502a59bc4ad28f60e0a742e0c",
+      "size": 1833,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/ac50a601c15251f502a59bc4ad28f60e0a742e0c"
+    },
+    {
+      "path": "src/ecf/ECFLab/packages.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "acc5c71bb71961cda8ee9de3a594f1ed3963e56b",
+      "size": 219,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/acc5c71bb71961cda8ee9de3a594f1ed3963e56b"
+    },
+    {
+      "path": "src/ecf/ECFLib",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "80f67bdc36173ece369a64ab54ef79dc0b8e8e06",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/80f67bdc36173ece369a64ab54ef79dc0b8e8e06"
+    },
+    {
+      "path": "src/ecf/ECFLib/Attributes",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5d6b4ba9317beeba0ca831cf8e22258cf3a65f28",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/5d6b4ba9317beeba0ca831cf8e22258cf3a65f28"
+    },
+    {
+      "path": "src/ecf/ECFLib/Attributes/AttributeBool.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a70b380a8cabf28fd61b05c40e47d03a3994b739",
+      "size": 378,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/a70b380a8cabf28fd61b05c40e47d03a3994b739"
+    },
+    {
+      "path": "src/ecf/ECFLib/Attributes/AttributeColour.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e90f4079cb8fa341420054d11144a9c9e4dccf84",
+      "size": 685,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/e90f4079cb8fa341420054d11144a9c9e4dccf84"
+    },
+    {
+      "path": "src/ecf/ECFLib/Attributes/AttributeFloat.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c91b0b70b0aaa17f5858d7dfe9cec3a182320ffa",
+      "size": 368,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/c91b0b70b0aaa17f5858d7dfe9cec3a182320ffa"
+    },
+    {
+      "path": "src/ecf/ECFLib/Attributes/AttributeInt.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ae758f57360c360e71366ab70ecf33e2611bb59",
+      "size": 359,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/3ae758f57360c360e71366ab70ecf33e2611bb59"
+    },
+    {
+      "path": "src/ecf/ECFLib/Attributes/AttributeIntArray.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ad1479d8b0a80f6a25b27ea5ea0f5688cc1957df",
+      "size": 1056,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/ad1479d8b0a80f6a25b27ea5ea0f5688cc1957df"
+    },
+    {
+      "path": "src/ecf/ECFLib/Attributes/AttributeString.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c1abee3185d336acea6a25f85e77417d50dab807",
+      "size": 677,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/c1abee3185d336acea6a25f85e77417d50dab807"
+    },
+    {
+      "path": "src/ecf/ECFLib/Attributes/AttributeStringArray.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7d55abe7515ee0f4fec21ea5a919e84fdd569213",
+      "size": 1075,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/7d55abe7515ee0f4fec21ea5a919e84fdd569213"
+    },
+    {
+      "path": "src/ecf/ECFLib/Attributes/ECFAttribute.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ad64c9a498d414d9a6aa56d9ef7f07ae12476f78",
+      "size": 522,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/ad64c9a498d414d9a6aa56d9ef7f07ae12476f78"
+    },
+    {
+      "path": "src/ecf/ECFLib/BlockType.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bec77b8dad14aa10a8d9f7575769f5a592e896b6",
+      "size": 12487,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/bec77b8dad14aa10a8d9f7575769f5a592e896b6"
+    },
+    {
+      "path": "src/ecf/ECFLib/BlockTypeProperty.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "26c0706ee7ecf9a92956a88aa0e958d9d6a04dbf",
+      "size": 201,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/26c0706ee7ecf9a92956a88aa0e958d9d6a04dbf"
+    },
+    {
+      "path": "src/ecf/ECFLib/Config.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "83e567f099264fc8b1c0955a9b0902ae4d78a7d3",
+      "size": 6724,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/83e567f099264fc8b1c0955a9b0902ae4d78a7d3"
+    },
+    {
+      "path": "src/ecf/ECFLib/ECFLib.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f5c4f4abb611103e8d62ab979dda9bfcb5a7fc2",
+      "size": 138,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/9f5c4f4abb611103e8d62ab979dda9bfcb5a7fc2"
+    },
+    {
+      "path": "src/ecf/ECFLib/EcfObject.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "28f9d1eec1898ec3fa6ddb408f5174d253054956",
+      "size": 853,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/28f9d1eec1898ec3fa6ddb408f5174d253054956"
+    },
+    {
+      "path": "src/ecf/ECFLib/EntityType.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c9b69e819aba70989e2172d551e843db214bb295",
+      "size": 263,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/c9b69e819aba70989e2172d551e843db214bb295"
+    },
+    {
+      "path": "src/ecf/ECFLib/IO",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0061acac4a098ddf137dc02d71d1456ab2490b23",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/0061acac4a098ddf137dc02d71d1456ab2490b23"
+    },
+    {
+      "path": "src/ecf/ECFLib/IO/StreamReaderExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "958187844ac728c2f32d202b8e591adb107cee7b",
+      "size": 27786,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/958187844ac728c2f32d202b8e591adb107cee7b"
+    },
+    {
+      "path": "src/ecf/ECFLib/IO/StreamWriterExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "23394839776b308566dee01eb991a7ace0da2937",
+      "size": 5936,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/23394839776b308566dee01eb991a7ace0da2937"
+    },
+    {
+      "path": "src/ecf/ECFLib/ItemType.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ba56f0cd08bd72a8e3f57d318b4b892286e8066b",
+      "size": 392,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/ba56f0cd08bd72a8e3f57d318b4b892286e8066b"
+    },
+    {
+      "path": "src/ecf/ECFLib/OperationMode.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c9b9e932e0b78a9e04d149fd71fc43a487dc4d3e",
+      "size": 153,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/c9b9e932e0b78a9e04d149fd71fc43a487dc4d3e"
+    },
+    {
+      "path": "src/ecf/ECFLib/TabGroupGridType.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e68eaffd3b6c06a1ffbd9e5010e66733d37d269c",
+      "size": 275,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/e68eaffd3b6c06a1ffbd9e5010e66733d37d269c"
+    },
+    {
+      "path": "src/ecf/ECFLib/TabGroupType.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a7f6c2a2c07e9e584a288a5c8234d9699b815b64",
+      "size": 745,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/a7f6c2a2c07e9e584a288a5c8234d9699b815b64"
+    },
+    {
+      "path": "src/ecf/ECFLib/TemplateType.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4f669ec40d5f85e2d8e7d4b969289007b3399988",
+      "size": 382,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/4f669ec40d5f85e2d8e7d4b969289007b3399988"
+    },
+    {
+      "path": "src/ecf/ecf",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e5e882ae0d714e8a73bd0b4003796a0b766172ff",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/e5e882ae0d714e8a73bd0b4003796a0b766172ff"
+    },
+    {
+      "path": "src/ecf/ecf/Program.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "210c0749fb50cc71d37230bf6208023b6d6f3a6e",
+      "size": 5282,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/210c0749fb50cc71d37230bf6208023b6d6f3a6e"
+    },
+    {
+      "path": "src/ecf/ecf/ecf.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a5522e6016841490440a7fbbee8989d3adfdb5d7",
+      "size": 379,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/a5522e6016841490440a7fbbee8989d3adfdb5d7"
+    },
+    {
+      "path": "src/epb",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "fbf04f4b935f47564a0e1ce7fca3804d0c3226b9",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/fbf04f4b935f47564a0e1ce7fca3804d0c3226b9"
+    },
+    {
+      "path": "src/epb/EPBLab",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "19fcf8f5ed64fd01b46e8597f3f4725eb6c2b675",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/19fcf8f5ed64fd01b46e8597f3f4725eb6c2b675"
+    },
+    {
+      "path": "src/epb/EPBLab/App.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5caf13a272001fac9cfaf8364ce3ba640f57e1bc",
+      "size": 572,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/5caf13a272001fac9cfaf8364ce3ba640f57e1bc"
+    },
+    {
+      "path": "src/epb/EPBLab/App.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b52f418e5e1b080569726d058492e9bae838ad6a",
+      "size": 1005,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/b52f418e5e1b080569726d058492e9bae838ad6a"
+    },
+    {
+      "path": "src/epb/EPBLab/App.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "97e6e69fb7d6078a34a4ea6123c12635e2ccaa4b",
+      "size": 298,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/97e6e69fb7d6078a34a4ea6123c12635e2ccaa4b"
+    },
+    {
+      "path": "src/epb/EPBLab/Behaviours",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5e623c3d07ce59ad29cde3866eb2531b51c94680",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/5e623c3d07ce59ad29cde3866eb2531b51c94680"
+    },
+    {
+      "path": "src/epb/EPBLab/Behaviours/OpenFileBehaviour.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9340bc975eb6a2696a8c8378391ee4ae06d9d0cd",
+      "size": 1571,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/9340bc975eb6a2696a8c8378391ee4ae06d9d0cd"
+    },
+    {
+      "path": "src/epb/EPBLab/Behaviours/SaveFileBehaviour.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c01531ee8b8fd8f35fdf40603e93305ed2b3fbff",
+      "size": 1487,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/c01531ee8b8fd8f35fdf40603e93305ed2b3fbff"
+    },
+    {
+      "path": "src/epb/EPBLab/Design",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8e5b073e774203ed0a8f5bb763cea231c21f8c5c",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/8e5b073e774203ed0a8f5bb763cea231c21f8c5c"
+    },
+    {
+      "path": "src/epb/EPBLab/Design/DesignDataService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0ce816f1d68d119606e6a259dcd91c02cd062e15",
+      "size": 370,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/0ce816f1d68d119606e6a259dcd91c02cd062e15"
+    },
+    {
+      "path": "src/epb/EPBLab/EPBLab.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "23fb1edd4df95a4d489b68f2ae453797742a1aaf",
+      "size": 13128,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/23fb1edd4df95a4d489b68f2ae453797742a1aaf"
+    },
+    {
+      "path": "src/epb/EPBLab/Helpers",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b92b8c3b41e057080e70224718992012ca2ba3ab",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/b92b8c3b41e057080e70224718992012ca2ba3ab"
+    },
+    {
+      "path": "src/epb/EPBLab/Helpers/CollectionExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "050842a48a9051a43d2b0827c555161bf87f8f64",
+      "size": 602,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/050842a48a9051a43d2b0827c555161bf87f8f64"
+    },
+    {
+      "path": "src/epb/EPBLab/Helpers/ColourExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "91237170953d8cec07754a61bd0a039f4a9ecef4",
+      "size": 259,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/91237170953d8cec07754a61bd0a039f4a9ecef4"
+    },
+    {
+      "path": "src/epb/EPBLab/Helpers/Point3DExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "98e29a8c061423f04904684a1dacdaacb92dfd50",
+      "size": 768,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/98e29a8c061423f04904684a1dacdaacb92dfd50"
+    },
+    {
+      "path": "src/epb/EPBLab/Helpers/Vector3DExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7f0f0fb41a89559a81fbe819986ed0265ea135cf",
+      "size": 955,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/7f0f0fb41a89559a81fbe819986ed0265ea135cf"
+    },
+    {
+      "path": "src/epb/EPBLab/Images",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "9b9adcf68046d9e783fa30b4a01a374d21deaee0",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/9b9adcf68046d9e783fa30b4a01a374d21deaee0"
+    },
+    {
+      "path": "src/epb/EPBLab/Images/ToolbarCommandIcons",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0e29f3d08db025b39da35be935bcac482da3736f",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/0e29f3d08db025b39da35be935bcac482da3736f"
+    },
+    {
+      "path": "src/epb/EPBLab/Images/ToolbarCommandIcons/BuildStructure",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f503a56afbb4ff652a536a86c962b3a0ce9cb561",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/f503a56afbb4ff652a536a86c962b3a0ce9cb561"
+    },
+    {
+      "path": "src/epb/EPBLab/Images/ToolbarCommandIcons/BuildStructure/Box.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "80bf4a86db34de8f432b877ba2b003f2a486a949",
+      "size": 3619,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/80bf4a86db34de8f432b877ba2b003f2a486a949"
+    },
+    {
+      "path": "src/epb/EPBLab/Images/ToolbarCommandIcons/BuildStructure/BoxFrame.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "033276a238646bf603ce2e71f374e9a9fed1faa5",
+      "size": 24592,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/033276a238646bf603ce2e71f374e9a9fed1faa5"
+    },
+    {
+      "path": "src/epb/EPBLab/Images/ToolbarCommandIcons/BuildStructure/BuildStructureIcons.psd",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "31a8fb5f01cd0856a91d4d651191c4ab29b3bb70",
+      "size": 1855885,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/31a8fb5f01cd0856a91d4d651191c4ab29b3bb70"
+    },
+    {
+      "path": "src/epb/EPBLab/Images/ToolbarCommandIcons/BuildStructure/Cylinder.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "65c765109f1913784c13ecfbcd6873455a4fcb2b",
+      "size": 4916,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/65c765109f1913784c13ecfbcd6873455a4fcb2b"
+    },
+    {
+      "path": "src/epb/EPBLab/Images/ToolbarCommandIcons/BuildStructure/Pyramid.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "766158ed16078bb06d2e2896fc200756e53eafac",
+      "size": 22074,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/766158ed16078bb06d2e2896fc200756e53eafac"
+    },
+    {
+      "path": "src/epb/EPBLab/Images/ToolbarCommandIcons/BuildStructure/Sphere.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "52b372746dfcb9565259e79f513e00a618612729",
+      "size": 4155,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/52b372746dfcb9565259e79f513e00a618612729"
+    },
+    {
+      "path": "src/epb/EPBLab/Images/ToolbarCommandIcons/Empty.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "78631e8c8f2331a2b9a76b49970946312164b89b",
+      "size": 17785,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/78631e8c8f2331a2b9a76b49970946312164b89b"
+    },
+    {
+      "path": "src/epb/EPBLab/Messages",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d4b2ff24b9b40d4048019286f08340edb3e51644",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/d4b2ff24b9b40d4048019286f08340edb3e51644"
+    },
+    {
+      "path": "src/epb/EPBLab/Messages/CloseBlueprintMessage.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "499500999c02c3e953fb325b911923e3498743ee",
+      "size": 389,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/499500999c02c3e953fb325b911923e3498743ee"
+    },
+    {
+      "path": "src/epb/EPBLab/Messages/FilesOpenedMessage.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "76366e53be4580b4835eeda27a5b79a37686a188",
+      "size": 398,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/76366e53be4580b4835eeda27a5b79a37686a188"
+    },
+    {
+      "path": "src/epb/EPBLab/Messages/ProgressUpdateMessage.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4815c60eddcfd5ef3c417e5fea71e23de99b7409",
+      "size": 670,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/4815c60eddcfd5ef3c417e5fea71e23de99b7409"
+    },
+    {
+      "path": "src/epb/EPBLab/Messages/SaveFileSelectedMessage.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "45f49b592b7faf4df2c4fbe0904ebefb0aafbdf9",
+      "size": 380,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/45f49b592b7faf4df2c4fbe0904ebefb0aafbdf9"
+    },
+    {
+      "path": "src/epb/EPBLab/Model",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "822eec815a201f35e04e48fe7e831b450f002d79",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/822eec815a201f35e04e48fe7e831b450f002d79"
+    },
+    {
+      "path": "src/epb/EPBLab/Model/DataItem.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4e9021c026c616fc93da34e4fb2ee97021a14840",
+      "size": 243,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/4e9021c026c616fc93da34e4fb2ee97021a14840"
+    },
+    {
+      "path": "src/epb/EPBLab/Model/DataService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8e4b3b4516b5e15f3979fe4408d9a4533759c162",
+      "size": 345,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/8e4b3b4516b5e15f3979fe4408d9a4533759c162"
+    },
+    {
+      "path": "src/epb/EPBLab/Model/IDataService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b6024a89cce3e2d1d08c319315ac8d133c7eaea4",
+      "size": 223,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/b6024a89cce3e2d1d08c319315ac8d133c7eaea4"
+    },
+    {
+      "path": "src/epb/EPBLab/Properties",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5cda6b94c8cfc1391122845c2458d7803b64d139",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/5cda6b94c8cfc1391122845c2458d7803b64d139"
+    },
+    {
+      "path": "src/epb/EPBLab/Properties/AssemblyInfo.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "26667e71f0c4fa1c890cf721c21d5dd8e9383c66",
+      "size": 2371,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/26667e71f0c4fa1c890cf721c21d5dd8e9383c66"
+    },
+    {
+      "path": "src/epb/EPBLab/Properties/Resources.Designer.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d8b365235b16fa92be7d34b5b31445ac6d683c2f",
+      "size": 2778,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/d8b365235b16fa92be7d34b5b31445ac6d683c2f"
+    },
+    {
+      "path": "src/epb/EPBLab/Properties/Resources.resx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "af7dbebbacef595e3089c01c05671016c21a8304",
+      "size": 5496,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/af7dbebbacef595e3089c01c05671016c21a8304"
+    },
+    {
+      "path": "src/epb/EPBLab/Properties/Settings.Designer.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "80abc754b054cb1e21e49108a932d0afc76a3410",
+      "size": 1063,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/80abc754b054cb1e21e49108a932d0afc76a3410"
+    },
+    {
+      "path": "src/epb/EPBLab/Properties/Settings.settings",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8e615f25fdc66f1a373ff9c5ab281ca0eebc52fb",
+      "size": 196,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/8e615f25fdc66f1a373ff9c5ab281ca0eebc52fb"
+    },
+    {
+      "path": "src/epb/EPBLab/View",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c7cd3157eb04b5109bcc2fe42e82dc8f3d3c15d2",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/c7cd3157eb04b5109bcc2fe42e82dc8f3d3c15d2"
+    },
+    {
+      "path": "src/epb/EPBLab/View/BlockInfo",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "de5c7bcf45a6641949d2553a50c69a37a6bace91",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/de5c7bcf45a6641949d2553a50c69a37a6bace91"
+    },
+    {
+      "path": "src/epb/EPBLab/View/BlockInfo/Common.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "39c34af1c2fc84b56ff3c415d54c5e496d24b581",
+      "size": 4466,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/39c34af1c2fc84b56ff3c415d54c5e496d24b581"
+    },
+    {
+      "path": "src/epb/EPBLab/View/BlockInfo/Common.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "68a89e883234e15d988662bb249f68bcf7c84059",
+      "size": 647,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/68a89e883234e15d988662bb249f68bcf7c84059"
+    },
+    {
+      "path": "src/epb/EPBLab/View/BlockInfo/Tags.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "684c353f2fe80b5d04603093c215a1bbb02f6bca",
+      "size": 4174,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/684c353f2fe80b5d04603093c215a1bbb02f6bca"
+    },
+    {
+      "path": "src/epb/EPBLab/View/BlockInfo/Tags.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8f39da984348b5f84489219186570746d4a01be8",
+      "size": 632,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/8f39da984348b5f84489219186570746d4a01be8"
+    },
+    {
+      "path": "src/epb/EPBLab/View/BlocksView.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "36a5cd7171057164f501129addbf60d107ee53c9",
+      "size": 8993,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/36a5cd7171057164f501129addbf60d107ee53c9"
+    },
+    {
+      "path": "src/epb/EPBLab/View/BlocksView.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a2bcc4eed542ffbfd96de919cef0dd410ea3957a",
+      "size": 4684,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/a2bcc4eed542ffbfd96de919cef0dd410ea3957a"
+    },
+    {
+      "path": "src/epb/EPBLab/View/BlueprintView.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "efc44cd37a1fb862c506c63a9e54f64bbbe6dcfe",
+      "size": 962,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/efc44cd37a1fb862c506c63a9e54f64bbbe6dcfe"
+    },
+    {
+      "path": "src/epb/EPBLab/View/BlueprintView.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "52a0a42d980b2f93948df923a3c3ced4f6c76cce",
+      "size": 649,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/52a0a42d980b2f93948df923a3c3ced4f6c76cce"
+    },
+    {
+      "path": "src/epb/EPBLab/View/Logic",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "2694d5d1b77efbf9af1aaaa43c0a72d0607a7525",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/2694d5d1b77efbf9af1aaaa43c0a72d0607a7525"
+    },
+    {
+      "path": "src/epb/EPBLab/View/Logic/ConnectionPointView.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ebe7e6d9291c03d8b2429d4583906ee2df930a25",
+      "size": 1940,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/ebe7e6d9291c03d8b2429d4583906ee2df930a25"
+    },
+    {
+      "path": "src/epb/EPBLab/View/Logic/ConnectionPointView.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6c91a14a5769871fc855974d65a484ed602582ec",
+      "size": 676,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/6c91a14a5769871fc855974d65a484ed602582ec"
+    },
+    {
+      "path": "src/epb/EPBLab/View/Logic/ConnectorView.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e3292ac9573c66811d71c5137047119b86902d0c",
+      "size": 1450,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/e3292ac9573c66811d71c5137047119b86902d0c"
+    },
+    {
+      "path": "src/epb/EPBLab/View/Logic/ConnectorView.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "373045fe83a370b823bc1bd83fb70a402ab5397a",
+      "size": 655,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/373045fe83a370b823bc1bd83fb70a402ab5397a"
+    },
+    {
+      "path": "src/epb/EPBLab/View/Logic/LogicNodeView.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "66b4d8c23a8224b69f039e204baedb237a9c60b9",
+      "size": 3988,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/66b4d8c23a8224b69f039e204baedb237a9c60b9"
+    },
+    {
+      "path": "src/epb/EPBLab/View/Logic/SignalOperatorView.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4920a3d6f8144bf0efe93b6ebb16e007eea3a066",
+      "size": 4281,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/4920a3d6f8144bf0efe93b6ebb16e007eea3a066"
+    },
+    {
+      "path": "src/epb/EPBLab/View/Logic/SignalOperatorView.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6e439ef1c229894b4652f3376ff4f2c89d0c615a",
+      "size": 697,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/6e439ef1c229894b4652f3376ff4f2c89d0c615a"
+    },
+    {
+      "path": "src/epb/EPBLab/View/Logic/SignalSourceView.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0c1eeae05b2512d5ab5540c8640b2279c65fd3cb",
+      "size": 3593,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/0c1eeae05b2512d5ab5540c8640b2279c65fd3cb"
+    },
+    {
+      "path": "src/epb/EPBLab/View/Logic/SignalSourceView.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a975d5ef8f0d2718c69391e12e2bc6ef6657874c",
+      "size": 741,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/a975d5ef8f0d2718c69391e12e2bc6ef6657874c"
+    },
+    {
+      "path": "src/epb/EPBLab/View/Logic/SignalTargetView.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6b149e2fa9b7d87cac05fd695e3df7e8d3a09331",
+      "size": 3599,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/6b149e2fa9b7d87cac05fd695e3df7e8d3a09331"
+    },
+    {
+      "path": "src/epb/EPBLab/View/Logic/SignalTargetView.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8735e6fb452020bc74ee29eb9dc496e150855014",
+      "size": 666,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/8735e6fb452020bc74ee29eb9dc496e150855014"
+    },
+    {
+      "path": "src/epb/EPBLab/View/LogicView.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4819c32ab439a9968cf95aeb870460a6f2f8c718",
+      "size": 9042,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/4819c32ab439a9968cf95aeb870460a6f2f8c718"
+    },
+    {
+      "path": "src/epb/EPBLab/View/LogicView.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aa9a9272e8373ac635ed898b8ecfad08c1df7604",
+      "size": 637,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/aa9a9272e8373ac635ed898b8ecfad08c1df7604"
+    },
+    {
+      "path": "src/epb/EPBLab/View/MainWindow.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0aaa604726f6fdc26dc5a35c7b623b224a18cc5e",
+      "size": 12328,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/0aaa604726f6fdc26dc5a35c7b623b224a18cc5e"
+    },
+    {
+      "path": "src/epb/EPBLab/View/MainWindow.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dbe32aef99c7a20b3d9624b621a5049eb27470e0",
+      "size": 2194,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/dbe32aef99c7a20b3d9624b621a5049eb27470e0"
+    },
+    {
+      "path": "src/epb/EPBLab/View/PositionAimPoint2LookDirectionConverter.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eb8bc69498ab5edda4c21428d4ddda5bccc3cbd3",
+      "size": 1015,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/eb8bc69498ab5edda4c21428d4ddda5bccc3cbd3"
+    },
+    {
+      "path": "src/epb/EPBLab/View/PositionAimPoint2UpDirectionConverter.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "689e9f3517b2ff162c2d909bc28e489751b53f8d",
+      "size": 1185,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/689e9f3517b2ff162c2d909bc28e489751b53f8d"
+    },
+    {
+      "path": "src/epb/EPBLab/View/Skins",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "9519c11b254cfebed465f55076122c7a4dba6e64",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/9519c11b254cfebed465f55076122c7a4dba6e64"
+    },
+    {
+      "path": "src/epb/EPBLab/View/Skins/MainSkin.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c0bbf1036ffcf486aa5a51252ca1de894ee76c14",
+      "size": 3111,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/c0bbf1036ffcf486aa5a51252ca1de894ee76c14"
+    },
+    {
+      "path": "src/epb/EPBLab/View/SummaryView.xaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ef28b501923927534b0507b3ba301f7bae66208e",
+      "size": 21659,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/ef28b501923927534b0507b3ba301f7bae66208e"
+    },
+    {
+      "path": "src/epb/EPBLab/View/SummaryView.xaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "895740674676df13c434594b072aae82f7fc954e",
+      "size": 643,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/895740674676df13c434594b072aae82f7fc954e"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "22a6cc515ecaed1269eb0774796ad7c35d9ff47a",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/22a6cc515ecaed1269eb0774796ad7c35d9ff47a"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/BlockMeshes",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6c17f61f4b170bac95367b4e69c65ae8b9b84b9b",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/6c17f61f4b170bac95367b4e69c65ae8b9b84b9b"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/BlockMeshes/MeshGenerators.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5442015e18efb81f77280167ac98f1cbe03bfa1e",
+      "size": 3835151,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/5442015e18efb81f77280167ac98f1cbe03bfa1e"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/BlocksViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "909d53bba4b981595381cd5c5571d3cb4a5534b5",
+      "size": 31188,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/909d53bba4b981595381cd5c5571d3cb4a5534b5"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/BlueprintViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "37cae7277fa3d514a859e0bf584efb1baa5fdbb9",
+      "size": 2493,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/37cae7277fa3d514a859e0bf584efb1baa5fdbb9"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/Logic",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "34e17b77bc392dc3ddf7cdcb2fc661ba280af730",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/34e17b77bc392dc3ddf7cdcb2fc661ba280af730"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/Logic/ConnectionPointViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b1b7c88ab52fd1143d8273e3c92438ba626a6076",
+      "size": 578,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/b1b7c88ab52fd1143d8273e3c92438ba626a6076"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/Logic/ConnectorViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "52f589bd967ba1a62860c2294d0c79a03c730f07",
+      "size": 5311,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/52f589bd967ba1a62860c2294d0c79a03c730f07"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/Logic/Line.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a36344d39ab48789ed17aea389933aeb8f2af026",
+      "size": 3303,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/a36344d39ab48789ed17aea389933aeb8f2af026"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/Logic/LogicNodeViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fa446062f6d5e85b0e65421e7323ca3dd5195e1f",
+      "size": 2362,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/fa446062f6d5e85b0e65421e7323ca3dd5195e1f"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/Logic/LogicViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "db57e73346bc91cdb0ca271cb9c518cd4af6bad2",
+      "size": 5365,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/db57e73346bc91cdb0ca271cb9c518cd4af6bad2"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/Logic/SignalOperatorViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "520fdb0304ad153dc435521e2ad60ff040e5bff6",
+      "size": 3399,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/520fdb0304ad153dc435521e2ad60ff040e5bff6"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/Logic/SignalSourceViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "35e55981349c7684090c65228858de60b8de41f2",
+      "size": 1144,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/35e55981349c7684090c65228858de60b8de41f2"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/Logic/SignalTargetViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ba53830fdab08939dc8036f0b4c0e9d9aa78d1d7",
+      "size": 1962,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/ba53830fdab08939dc8036f0b4c0e9d9aa78d1d7"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/MainViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "969bfa8ea2da0a62f8f468ba8b34ae3da0d6c5de",
+      "size": 57956,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/969bfa8ea2da0a62f8f468ba8b34ae3da0d6c5de"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/MetaTags",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e0a3cff27ecbf229f717e236f63eff900492a520",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/e0a3cff27ecbf229f717e236f63eff900492a520"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/MetaTags/MetaTag04ViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "51ae93be875b3092e761b11165ac1de38d1c2cf5",
+      "size": 898,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/51ae93be875b3092e761b11165ac1de38d1c2cf5"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/MetaTags/MetaTagDateTimeViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4827926fb87b4827124a8cd5bc0019927132f00e",
+      "size": 885,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/4827926fb87b4827124a8cd5bc0019927132f00e"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/MetaTags/MetaTagFloatViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3561e4330af82dbd04cdc335df3571303918c1ae",
+      "size": 838,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/3561e4330af82dbd04cdc335df3571303918c1ae"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/MetaTags/MetaTagStringViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1e5f34e0aa6ae6c89da4ff2521149329413d0876",
+      "size": 528,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/1e5f34e0aa6ae6c89da4ff2521149329413d0876"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/MetaTags/MetaTagUInt10x3ViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "08c2f2f97b8033672f6ce6dec78134c17a15ae59",
+      "size": 1425,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/08c2f2f97b8033672f6ce6dec78134c17a15ae59"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/MetaTags/MetaTagUInt16ViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5d26b88867aed2c7d63ba552f41bcd251349955d",
+      "size": 568,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/5d26b88867aed2c7d63ba552f41bcd251349955d"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/MetaTags/MetaTagUInt32ViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f65dcc519b76c43439b37776a223ce9e85c43086",
+      "size": 770,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/f65dcc519b76c43439b37776a223ce9e85c43086"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/MetaTags/MetaTagViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ef820e8a8ee6eafcdb3d8191e29859c73696519f",
+      "size": 707,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/ef820e8a8ee6eafcdb3d8191e29859c73696519f"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/SummaryViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "60221d836b99c91313df023b636ee35627bc0ff9",
+      "size": 10154,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/60221d836b99c91313df023b636ee35627bc0ff9"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/ToolbarCommands",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1e7d43782e673414b170d820b1c6036a99785994",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/1e7d43782e673414b170d820b1c6036a99785994"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/ToolbarCommands/Command.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "662f2076499734dd1b79926e053feeb40bc8dc15",
+      "size": 869,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/662f2076499734dd1b79926e053feeb40bc8dc15"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/ToolbarCommands/Parameter.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f7f2168b3a82afadfc1cbe28727997ca3317d5ed",
+      "size": 179,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/f7f2168b3a82afadfc1cbe28727997ca3317d5ed"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/ToolbarCommands/ParameterBool.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7e6434f85b96590c87e8db47e5bfa3e0995473b7",
+      "size": 147,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/7e6434f85b96590c87e8db47e5bfa3e0995473b7"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/ToolbarCommands/ParameterInt.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "090df719c9761b5f275d7f9300298d1ea341cf8e",
+      "size": 144,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/090df719c9761b5f275d7f9300298d1ea341cf8e"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/ToolbarCommands/ParameterIntVector.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6d2ee4df7078558e7ce397a367abb1ca302c8e40",
+      "size": 216,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/6d2ee4df7078558e7ce397a367abb1ca302c8e40"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/Tree",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "89e90955c50016db825a124f2d4af2ca8b837c50",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/89e90955c50016db825a124f2d4af2ca8b837c50"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/Tree/BindableSelectedItemBehaviour.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e724aba818334869c50375e160a59bd51e86b68c",
+      "size": 3191,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/e724aba818334869c50375e160a59bd51e86b68c"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/Tree/BlockNode.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ab1408f6a46c5ef5636867407e8497435a73254b",
+      "size": 2378,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/ab1408f6a46c5ef5636867407e8497435a73254b"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/Tree/DeviceGroupViewModel.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9b751736bb949c4e8e508711ba7896de4fe78b6b",
+      "size": 763,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/9b751736bb949c4e8e508711ba7896de4fe78b6b"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/Tree/GroupNode.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5771d657aa7be2a1adda2dabc33969804a1b28cc",
+      "size": 149,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/5771d657aa7be2a1adda2dabc33969804a1b28cc"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/Tree/ITreeNode.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4b8bc88cf4cdc2148eeb483ae88727f869a3734b",
+      "size": 246,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/4b8bc88cf4cdc2148eeb483ae88727f869a3734b"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/Tree/LcdNode.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "48291979577c57f2ee338312c0b6c6c21cb6ee80",
+      "size": 1265,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/48291979577c57f2ee338312c0b6c6c21cb6ee80"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/Tree/TreeNode.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "836e07b83ac70b40ba39365de59c9f20c2b4de1b",
+      "size": 896,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/836e07b83ac70b40ba39365de59c9f20c2b4de1b"
+    },
+    {
+      "path": "src/epb/EPBLab/ViewModel/ViewModelLocator.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d8d4ef2573d7bfb0e577d2cd64ce8ae24f8f0310",
+      "size": 1819,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/d8d4ef2573d7bfb0e577d2cd64ce8ae24f8f0310"
+    },
+    {
+      "path": "src/epb/EPBLab/packages.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3c10ab48c2f40045dc4df2722defc30136b13734",
+      "size": 335,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/3c10ab48c2f40045dc4df2722defc30136b13734"
+    },
+    {
+      "path": "src/epb/EPBLib",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "01c07ef53fb46d0ccb771270c12246cfe30f1f58",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/01c07ef53fb46d0ccb771270c12246cfe30f1f58"
+    },
+    {
+      "path": "src/epb/EPBLib/Block.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9efa9d4155f44bcfe24e56e477b80207b329cfa9",
+      "size": 4832,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/9efa9d4155f44bcfe24e56e477b80207b329cfa9"
+    },
+    {
+      "path": "src/epb/EPBLib/BlockData",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a61637b0efcd768c62cd68d888f222818438585c",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/a61637b0efcd768c62cd68d888f222818438585c"
+    },
+    {
+      "path": "src/epb/EPBLib/BlockData/BlockTags",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "9c9080521e796a9ba33243eb18c66a6f201d0330",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/9c9080521e796a9ba33243eb18c66a6f201d0330"
+    },
+    {
+      "path": "src/epb/EPBLib/BlockData/BlockTags/BlockTag.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1f1926cf90617b775a1c3594a759a363e4ec8134",
+      "size": 502,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/1f1926cf90617b775a1c3594a759a363e4ec8134"
+    },
+    {
+      "path": "src/epb/EPBLib/BlockData/BlockTags/BlockTagBool.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e3f084792f505c9c59a53a28b2d87b75bd798278",
+      "size": 544,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/e3f084792f505c9c59a53a28b2d87b75bd798278"
+    },
+    {
+      "path": "src/epb/EPBLib/BlockData/BlockTags/BlockTagColour.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9d590c8e0a46e976766028d66d9fa156c4727275",
+      "size": 1290,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/9d590c8e0a46e976766028d66d9fa156c4727275"
+    },
+    {
+      "path": "src/epb/EPBLib/BlockData/BlockTags/BlockTagFloat.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b9dfb61304cba27b28da62f641bcfd3439036969",
+      "size": 572,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/b9dfb61304cba27b28da62f641bcfd3439036969"
+    },
+    {
+      "path": "src/epb/EPBLib/BlockData/BlockTags/BlockTagPos.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ee034da41840f39fe0531627d1dea8ac964794cf",
+      "size": 446,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/ee034da41840f39fe0531627d1dea8ac964794cf"
+    },
+    {
+      "path": "src/epb/EPBLib/BlockData/BlockTags/BlockTagString.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7cf42f33e828cc6462d8beb9a9aa463eae402823",
+      "size": 562,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/7cf42f33e828cc6462d8beb9a9aa463eae402823"
+    },
+    {
+      "path": "src/epb/EPBLib/BlockData/BlockTags/BlockTagUInt32.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "184821c0fdc0fe243bb7836a1cc17a9ef89f3b33",
+      "size": 572,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/184821c0fdc0fe243bb7836a1cc17a9ef89f3b33"
+    },
+    {
+      "path": "src/epb/EPBLib/BlockData/Colour.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "243a0ff62da6fd52a56f08bdcdfd644eb15acf31",
+      "size": 4868,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/243a0ff62da6fd52a56f08bdcdfd644eb15acf31"
+    },
+    {
+      "path": "src/epb/EPBLib/BlockList.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4b20428ac57e55b9d6e099c2f5041d3ddf195aa4",
+      "size": 1787,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/4b20428ac57e55b9d6e099c2f5041d3ddf195aa4"
+    },
+    {
+      "path": "src/epb/EPBLib/BlockPos.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d0180a6de1a118e1bc6e42fca54878ac0c5e843a",
+      "size": 619,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/d0180a6de1a118e1bc6e42fca54878ac0c5e843a"
+    },
+    {
+      "path": "src/epb/EPBLib/BlockType.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "99cc1afdb4ed2cf132e47dec40632645301cb4d2",
+      "size": 458874,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/99cc1afdb4ed2cf132e47dec40632645301cb4d2"
+    },
+    {
+      "path": "src/epb/EPBLib/Blueprint.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "093d8e4ea58152f2e17c7d27809351919961ad86",
+      "size": 6207,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/093d8e4ea58152f2e17c7d27809351919961ad86"
+    },
+    {
+      "path": "src/epb/EPBLib/DeviceGroup.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fb63e8db06b01f81a3c13d54582937e904e1db18",
+      "size": 415,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/fb63e8db06b01f81a3c13d54582937e904e1db18"
+    },
+    {
+      "path": "src/epb/EPBLib/DeviceGroupEntry.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "96e50d1fb9e93927c5a667d6770ecb81be5509e0",
+      "size": 168,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/96e50d1fb9e93927c5a667d6770ecb81be5509e0"
+    },
+    {
+      "path": "src/epb/EPBLib/EPBLib.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b9d4e8e67f4ba3f67e570e9d8ab4b59005701d2",
+      "size": 5256,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/8b9d4e8e67f4ba3f67e570e9d8ab4b59005701d2"
+    },
+    {
+      "path": "src/epb/EPBLib/Helpers",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "82ff3aa60b38dfff160317e1745761fa5dc0b416",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/82ff3aa60b38dfff160317e1745761fa5dc0b416"
+    },
+    {
+      "path": "src/epb/EPBLib/Helpers/BinaryReaderExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "322c56aa8299ad9986e8ef1cd060efa0b379ae58",
+      "size": 57493,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/322c56aa8299ad9986e8ef1cd060efa0b379ae58"
+    },
+    {
+      "path": "src/epb/EPBLib/Helpers/BinaryWriterExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a548a74ffbbeaf85ff5337ed921490bcc38926d7",
+      "size": 33981,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/a548a74ffbbeaf85ff5337ed921490bcc38926d7"
+    },
+    {
+      "path": "src/epb/EPBLib/Helpers/BoolArrayExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e5379874d90c48e45ec28359ef282f37e18c7abf",
+      "size": 903,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/e5379874d90c48e45ec28359ef282f37e18c7abf"
+    },
+    {
+      "path": "src/epb/EPBLib/Helpers/ByteArrayExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "64ee4fb8945094836b19ed4c149ee251e893001f",
+      "size": 2002,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/64ee4fb8945094836b19ed4c149ee251e893001f"
+    },
+    {
+      "path": "src/epb/EPBLib/Logic",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "937cc198cb49de4034554291cbc4aace6134247d",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/937cc198cb49de4034554291cbc4aace6134247d"
+    },
+    {
+      "path": "src/epb/EPBLib/Logic/SignalOperator.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "046a2067db645da14ccf380bd57889aef2e5c0a3",
+      "size": 585,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/046a2067db645da14ccf380bd57889aef2e5c0a3"
+    },
+    {
+      "path": "src/epb/EPBLib/Logic/SignalOperatorAnd2.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "32dea407ec6aa1ab1dadb37a5312cee766bcc60d",
+      "size": 422,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/32dea407ec6aa1ab1dadb37a5312cee766bcc60d"
+    },
+    {
+      "path": "src/epb/EPBLib/Logic/SignalOperatorAnd4.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bd4590b575a35cdb3385e4f8d65ee89b662d8a21",
+      "size": 752,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/bd4590b575a35cdb3385e4f8d65ee89b662d8a21"
+    },
+    {
+      "path": "src/epb/EPBLib/Logic/SignalOperatorDelay.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "94a46d6a53c8e0ba254f613acfb183dd906775a6",
+      "size": 415,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/94a46d6a53c8e0ba254f613acfb183dd906775a6"
+    },
+    {
+      "path": "src/epb/EPBLib/Logic/SignalOperatorInverter.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e35236c2118e9ba06124206fc1aa25ebb4c2c4ed",
+      "size": 263,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/e35236c2118e9ba06124206fc1aa25ebb4c2c4ed"
+    },
+    {
+      "path": "src/epb/EPBLib/Logic/SignalOperatorNand2.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "08f17951daafaf02eef1f9913ba69865b3eb6c05",
+      "size": 424,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/08f17951daafaf02eef1f9913ba69865b3eb6c05"
+    },
+    {
+      "path": "src/epb/EPBLib/Logic/SignalOperatorNand4.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "21ffe13470bad4058e3d4db4b0f68ce4d31b9dc3",
+      "size": 752,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/21ffe13470bad4058e3d4db4b0f68ce4d31b9dc3"
+    },
+    {
+      "path": "src/epb/EPBLib/Logic/SignalOperatorNor2.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ace3a685591dd90b3628fd07d48b355ebd606be8",
+      "size": 423,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/ace3a685591dd90b3628fd07d48b355ebd606be8"
+    },
+    {
+      "path": "src/epb/EPBLib/Logic/SignalOperatorNor4.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1212c3b5b4425a029ce4a125b0473c9327da449a",
+      "size": 751,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/1212c3b5b4425a029ce4a125b0473c9327da449a"
+    },
+    {
+      "path": "src/epb/EPBLib/Logic/SignalOperatorOr2.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cb2478093bbdede505a2c4fa9292311a9d42a5d1",
+      "size": 422,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/cb2478093bbdede505a2c4fa9292311a9d42a5d1"
+    },
+    {
+      "path": "src/epb/EPBLib/Logic/SignalOperatorOr4.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b1ddd55624df6242c6cc1d21cc806ee82e715d36",
+      "size": 750,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/b1ddd55624df6242c6cc1d21cc806ee82e715d36"
+    },
+    {
+      "path": "src/epb/EPBLib/Logic/SignalOperatorSRLatch.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5c4ca5997eecdabbe135e515f7a4ef691337998d",
+      "size": 426,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/5c4ca5997eecdabbe135e515f7a4ef691337998d"
+    },
+    {
+      "path": "src/epb/EPBLib/Logic/SignalOperatorXnor.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eb637d50bb920b1bc4899f302ef58c17ccd51fee",
+      "size": 423,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/eb637d50bb920b1bc4899f302ef58c17ccd51fee"
+    },
+    {
+      "path": "src/epb/EPBLib/Logic/SignalOperatorXor.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a57de0943a3850d88f802664d9ec2d9db6ca5dde",
+      "size": 422,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/a57de0943a3850d88f802664d9ec2d9db6ca5dde"
+    },
+    {
+      "path": "src/epb/EPBLib/Logic/SignalSource.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "849fd6d230acab6ecbcdcef5ac7774f1829df520",
+      "size": 1467,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/849fd6d230acab6ecbcdcef5ac7774f1829df520"
+    },
+    {
+      "path": "src/epb/EPBLib/Logic/SignalTarget.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8babfed170ce6e7301407551bf43e258290b6eee",
+      "size": 1059,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/8babfed170ce6e7301407551bf43e258290b6eee"
+    },
+    {
+      "path": "src/epb/EPBLib/MetaTags",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c343833b39540949e22e60187ed6153f263d3732",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/c343833b39540949e22e60187ed6153f263d3732"
+    },
+    {
+      "path": "src/epb/EPBLib/MetaTags/MetaTag.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a6377658d223c308e64eea63608f2c75939323b",
+      "size": 1678,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/0a6377658d223c308e64eea63608f2c75939323b"
+    },
+    {
+      "path": "src/epb/EPBLib/MetaTags/MetaTag04.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3156e1399072b2c5a6f10e2ac9fd647ca87609ed",
+      "size": 567,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/3156e1399072b2c5a6f10e2ac9fd647ca87609ed"
+    },
+    {
+      "path": "src/epb/EPBLib/MetaTags/MetaTagDateTime.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "baa133ec890439851ed1755739ba94593761296b",
+      "size": 581,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/baa133ec890439851ed1755739ba94593761296b"
+    },
+    {
+      "path": "src/epb/EPBLib/MetaTags/MetaTagFloat.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b62d7089b6c0bf9f57ad9224cf3dc950b36a09f7",
+      "size": 554,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/b62d7089b6c0bf9f57ad9224cf3dc950b36a09f7"
+    },
+    {
+      "path": "src/epb/EPBLib/MetaTags/MetaTagString.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f07dd3cd24aaabc7dd8fa2fb589922a2d50dd9bd",
+      "size": 468,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/f07dd3cd24aaabc7dd8fa2fb589922a2d50dd9bd"
+    },
+    {
+      "path": "src/epb/EPBLib/MetaTags/MetaTagUInt10x3.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bf36a2f4946e75750729ca952a85b5ef23904480",
+      "size": 1076,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/bf36a2f4946e75750729ca952a85b5ef23904480"
+    },
+    {
+      "path": "src/epb/EPBLib/MetaTags/MetaTagUInt16.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "862793cdcae699d94b737517e74a46d8ac9cf5a7",
+      "size": 478,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/862793cdcae699d94b737517e74a46d8ac9cf5a7"
+    },
+    {
+      "path": "src/epb/EPBLib/MetaTags/MetaTagUInt32.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7f62e85571b393bf3530e2ce8e16a973186fd9dd",
+      "size": 573,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/7f62e85571b393bf3530e2ce8e16a973186fd9dd"
+    },
+    {
+      "path": "src/epb/EPBLib/Properties",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e1bbaafc719cbf83c3208192e5697b4cc7c28ba5",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/e1bbaafc719cbf83c3208192e5697b4cc7c28ba5"
+    },
+    {
+      "path": "src/epb/EPBLib/Properties/AssemblyInfo.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8852b838f018d17ff9dbab9b9f58ea4c4d5270ff",
+      "size": 1388,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/8852b838f018d17ff9dbab9b9f58ea4c4d5270ff"
+    },
+    {
+      "path": "src/epb/EPBLib/packages.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "977791ccdf8d8600fc2d7d4a1affc5b6602b2965",
+      "size": 217,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/977791ccdf8d8600fc2d7d4a1affc5b6602b2965"
+    },
+    {
+      "path": "src/epb/epb",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "bb47a3930a41633b40e166d87d5427dab0f65334",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/bb47a3930a41633b40e166d87d5427dab0f65334"
+    },
+    {
+      "path": "src/epb/epb/App.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bae5d6d81451f47ae3ccd65377504a58b70a2208",
+      "size": 180,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/bae5d6d81451f47ae3ccd65377504a58b70a2208"
+    },
+    {
+      "path": "src/epb/epb/Program.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "afb9574019d7a2d670b3b3abb9ff805af9490496",
+      "size": 24768,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/afb9574019d7a2d670b3b3abb9ff805af9490496"
+    },
+    {
+      "path": "src/epb/epb/Properties",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b9dd79faf69c0667cfcfbacacb459a6d96633de3",
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/trees/b9dd79faf69c0667cfcfbacacb459a6d96633de3"
+    },
+    {
+      "path": "src/epb/epb/Properties/AssemblyInfo.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca4643387a0bdcf7480cdb03e87e30a0ec26a220",
+      "size": 1382,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/ca4643387a0bdcf7480cdb03e87e30a0ec26a220"
+    },
+    {
+      "path": "src/epb/epb/epb.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7f008b463f77ac519e17d69aa137a90e52b15adc",
+      "size": 3080,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/7f008b463f77ac519e17d69aa137a90e52b15adc"
+    },
+    {
+      "path": "src/epb/epb/packages.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c4987fe52f614ae6551e95e9732c36034618a748",
+      "size": 138,
+      "url": "https://api.github.com/repos/ApanLoon/EmpyrionStuff/git/blobs/c4987fe52f614ae6551e95e9732c36034618a748"
+    }
+  ],
+  "truncated": false
+}

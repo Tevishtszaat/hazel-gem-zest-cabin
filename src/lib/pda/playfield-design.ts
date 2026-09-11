@@ -1,5 +1,6 @@
 import * as yaml from "js-yaml";
 import type { ScenarioCatalog } from "./scenario-index.ts";
+import { resolveCatalogToken } from "./scenario-index.ts";
 import type { PlayfieldFile, PlayfieldKind } from "./playfield.ts";
 
 export type YamlDoc = Record<string, unknown>;
@@ -333,13 +334,37 @@ export function preflightPlayfield(
         path: `POIs.Random[${i}]`,
       });
     } else seen.add(name.toLowerCase());
-    if (name && pois.length && !pois.some((p) => p.toLowerCase() === name.toLowerCase())) {
-      issues.push({
-        level: "warning",
-        code: "poi",
-        message: `GroupName “${name}” is not in imported Prefabs.`,
-        path: `POIs.Random[${i}].GroupName`,
-      });
+    if (name && catalog) {
+      const hit = resolveCatalogToken(catalog, name, ["poi"]);
+      if (!hit && pois.length) {
+        issues.push({
+          level: "warning",
+          code: "poi",
+          message: `GroupName “${name}” is not in imported Prefabs, EPB GroupName tags, or Localization.csv.`,
+          path: `POIs.Random[${i}].GroupName`,
+        });
+      } else if (hit?.via === "file" && hit.entry.poiGroup) {
+        issues.push({
+          level: "warning",
+          code: "poi-group",
+          message: `“${name}” is the .epb file. Random POIs use GroupName ${hit.entry.poiGroup}.`,
+          path: `POIs.Random[${i}].GroupName`,
+        });
+      } else if (hit?.via === "label" && hit.entry.poiGroup) {
+        issues.push({
+          level: "warning",
+          code: "loca-name",
+          message: `“${name}” is the spawn/display name. GroupName is ${hit.entry.poiGroup}.`,
+          path: `POIs.Random[${i}].GroupName`,
+        });
+      } else if (hit && hit.via === "label") {
+        issues.push({
+          level: "warning",
+          code: "loca-name",
+          message: `“${name}” is the Localization.csv name. Prefab/group id is ${hit.entry.name}.`,
+          path: `POIs.Random[${i}].GroupName`,
+        });
+      }
     }
     const order = pairOrder(row.CountMinMax);
     if (order) {
@@ -360,6 +385,19 @@ export function preflightPlayfield(
         message: `Fixed POI ${i + 1} needs a Prefab or Name.`,
         path: `POIs.Fixed[${i}]`,
       });
+      return;
+    }
+    const prefab = String(row.Prefab ?? "").trim();
+    if (prefab && catalog) {
+      const hit = resolveCatalogToken(catalog, prefab, ["poi"]);
+      if (hit?.via === "group" && hit.entry.poiFile && hit.entry.poiFile.toLowerCase() !== prefab.toLowerCase()) {
+        issues.push({
+          level: "warning",
+          code: "poi-file",
+          message: `“${prefab}” is the GroupName. Fixed POIs use Prefab file ${hit.entry.poiFile}.`,
+          path: `POIs.Fixed[${i}].Prefab`,
+        });
+      }
     }
   });
 
@@ -375,13 +413,23 @@ export function preflightPlayfield(
           message: `Creature ${ei + 1} in ${biomeName} has no Name.`,
           path: `CreatureSpawning[${bi}].Entities[${ei}]`,
         });
-      } else if (entities.length && !entities.some((e) => e.toLowerCase() === name.toLowerCase())) {
-        issues.push({
-          level: "warning",
-          code: "creature",
-          message: `Creature “${name}” is not in EClassConfig.`,
-          path: `CreatureSpawning[${bi}].Entities[${ei}].Name`,
-        });
+      } else if (catalog) {
+        const hit = resolveCatalogToken(catalog, name, ["entity"]);
+        if (entities.length && !hit) {
+          issues.push({
+            level: "warning",
+            code: "creature",
+            message: `Creature “${name}” is not in EClassConfig or Localization.csv.`,
+            path: `CreatureSpawning[${bi}].Entities[${ei}].Name`,
+          });
+        } else if (hit && hit.via === "label") {
+          issues.push({
+            level: "warning",
+            code: "loca-name",
+            message: `“${name}” is the Localization.csv name. Entity id is ${hit.entry.name}.`,
+            path: `CreatureSpawning[${bi}].Entities[${ei}].Name`,
+          });
+        }
       }
     });
   });

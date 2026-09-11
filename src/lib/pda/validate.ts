@@ -4,6 +4,7 @@ import {
   CHECK_NAME_KINDS,
   CHECK_TYPE_KINDS,
   catalogLoaded,
+  resolveCatalogToken,
   splitTokens,
   suggestionsFor,
   type CatalogKind,
@@ -42,8 +43,22 @@ function unknownIn(catalog: ScenarioCatalog, value: string, kinds: CatalogKind[]
   if (!kinds.length || !kindPresent(catalog, kinds)) return [];
   return splitTokens(value).filter((token) => {
     if (BUILTIN_NAMES.has(token)) return false;
-    const needle = token.toLowerCase();
-    return !catalog.entries.some((e) => kinds.includes(e.kind) && e.name.toLowerCase() === needle);
+    return !resolveCatalogToken(catalog, token, kinds);
+  });
+}
+
+function locaNameHits(catalog: ScenarioCatalog, value: string, kinds: CatalogKind[]) {
+  if (!kinds.length || !kindPresent(catalog, kinds)) return [];
+  return splitTokens(value).flatMap((token) => {
+    if (BUILTIN_NAMES.has(token)) return [];
+    const hit = resolveCatalogToken(catalog, token, kinds);
+    if (!hit || hit.via === "name" || hit.via === "group") return [];
+    if (hit.via === "file" && hit.entry.poiGroup) {
+      return [{ token, name: hit.entry.poiGroup, label: hit.entry.label || token }];
+    }
+    if (hit.via !== "label") return [];
+    if (hit.entry.name.toLowerCase() === token.toLowerCase()) return [];
+    return [{ token, name: hit.entry.name, label: hit.entry.label || token }];
   });
 }
 
@@ -213,6 +228,29 @@ export function validateProject(project: PdaProject, catalog?: ScenarioCatalog):
     ch.rewards.forEach((reward, ri) => {
       if (!catalogLoaded(catalog)) return;
       if (reward.item) {
+        const loca = locaNameHits(catalog!, reward.item, ["item", "token", "block"]);
+        if (loca.length) {
+          const hit = loca[0]!;
+          push({
+            id: ch.id,
+            kind: "chapter",
+            level: "warning",
+            code: "loca-name",
+            message: `Reward “${hit.token}” is the Localization.csv name. Item/block id is ${hit.name}.`,
+            path: chPath,
+            recommend: "fix",
+            field: "rewards",
+            value: reward.item,
+            suggestions: [hit.name],
+            fixes: [
+              {
+                type: "rewards",
+                rewards: ch.rewards.map((r, i) => (i === ri ? { ...r, item: hit.name } : r)),
+                label: `Use ${hit.name}`,
+              },
+            ],
+          });
+        } else {
         const miss = unknownIn(catalog!, reward.item, ["item", "token", "block"]);
         if (miss.length) {
           const suggestions = nearby(catalog, reward.item, ["item", "token", "block"], suggestCache);
@@ -238,8 +276,31 @@ export function validateProject(project: PdaProject, catalog?: ScenarioCatalog):
             ],
           });
         }
+        }
       }
       if (reward.faction) {
+        const locaFaction = locaNameHits(catalog!, reward.faction, ["faction"]);
+        if (locaFaction.length) {
+          const hit = locaFaction[0]!;
+          push({
+            id: ch.id,
+            kind: "chapter",
+            level: "warning",
+            code: "loca-name",
+            message: `Faction “${hit.token}” is the Localization.csv name. Config name is ${hit.name}.`,
+            path: chPath,
+            recommend: "fix",
+            value: reward.faction,
+            suggestions: [hit.name],
+            fixes: [
+              {
+                type: "rewards",
+                rewards: ch.rewards.map((r, i) => (i === ri ? { ...r, faction: hit.name } : r)),
+                label: `Use ${hit.name}`,
+              },
+            ],
+          });
+        } else {
         const miss = unknownIn(catalog!, reward.faction, ["faction"]);
         if (miss.length) {
           const suggestions = nearby(catalog, reward.faction, ["faction"], suggestCache);
@@ -259,6 +320,7 @@ export function validateProject(project: PdaProject, catalog?: ScenarioCatalog):
               label: `Use ${name}`,
             })),
           });
+        }
         }
       }
     });
@@ -414,6 +476,21 @@ export function validateProject(project: PdaProject, catalog?: ScenarioCatalog):
         if (catalogLoaded(catalog)) {
           const nameKinds = CHECK_NAME_KINDS[ac.check] ?? [];
           const typeKinds = CHECK_TYPE_KINDS[ac.check] ?? [];
+          for (const hit of locaNameHits(catalog!, ac.names, nameKinds).slice(0, 4)) {
+            push({
+              id: ac.id,
+              kind: "action",
+              level: "warning",
+              code: "loca-name",
+              message: `“${hit.token}” is the Localization.csv or Prefab file name. ${ac.check} needs ${hit.name}.`,
+              path: acPath,
+              recommend: "fix",
+              field: "names",
+              value: hit.token,
+              suggestions: [hit.name],
+              fixes: tokenFixes("names", ac.names, hit.token, [hit.name]),
+            });
+          }
           for (const token of unknownIn(catalog!, ac.names, nameKinds).slice(0, 4)) {
             const suggestions = nearby(catalog, token, nameKinds, suggestCache);
             push({

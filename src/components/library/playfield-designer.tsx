@@ -134,7 +134,7 @@ export function PlayfieldDesigner({
         <div className="mt-4 space-y-6">
           <YamlTable
             title="Random POIs"
-            hint="Survival scatter. GroupName is the blueprint group from Prefabs."
+            hint="Survival scatter. GroupName is the blueprint group tag inside the .epb — not the file name."
             cols={RANDOM_POI_COLS.map((col) =>
               col.key === "GroupName" && pois.length ? { ...col, options: pois } : col,
             )}
@@ -144,7 +144,7 @@ export function PlayfieldDesigner({
           />
           <YamlTable
             title="Fixed POIs"
-            hint="Placed at Pos. Prefab is the .epb file name."
+            hint="Placed at Pos. Prefab is the .epb file name, not the GroupName."
             cols={FIXED_POI_COLS.map((col) => {
               if (col.key === "Prefab" && pois.length) return { ...col, options: pois };
               if (col.key === "Faction" && factions.length) return { ...col, options: factions };

@@ -24,7 +24,7 @@ export function slimCatalog(catalog: ScenarioCatalog): ScenarioCatalog {
     folderName: catalog.folderName,
     files: catalog.files,
     entries: catalog.entries,
-    texts: [],
+    texts: (catalog.texts ?? []).filter((t) => t.role === "localization"),
     indexedAt: catalog.indexedAt,
   };
 }

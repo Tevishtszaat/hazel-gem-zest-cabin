@@ -121,6 +121,20 @@ describe("scenario folder index", () => {
     assert.ok(lookupCatalog(merged, "Outpost"));
   });
 
+  it("indexes EPB GroupName separately from the prefab file name", () => {
+    const indexed = indexScenario([
+      {
+        path: "S/Prefabs/BA_CivilFarm.epb",
+        meta: { fileName: "BA_CivilFarm", groupName: "CivilSettlement", spawnName: "Farm" },
+      },
+    ]);
+    assert.ok(lookupCatalog(indexed.catalog, "BA_CivilFarm"));
+    assert.ok(lookupCatalog(indexed.catalog, "CivilSettlement"));
+    const farm = indexed.catalog.entries.find((e) => e.name === "BA_CivilFarm");
+    assert.equal(farm?.poiGroup, "CivilSettlement");
+    assert.equal(farm?.label, "Farm");
+  });
+
   it("keeps Sectors.yaml as catalog text even when the worker would strip bodies", () => {
     const yaml = `GalaxyMode: true
 SolarSystems:
