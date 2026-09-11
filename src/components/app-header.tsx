@@ -13,7 +13,7 @@ export function AppHeader() {
   const languages = project.csv.languages.length ? project.csv.languages : [project.language || "English"];
 
   return (
-    <header className="border-b border-border bg-surface">
+    <header className="border-b border-border bg-surface/80 backdrop-blur-md">
       <div className="flex flex-wrap items-center gap-3 px-3 py-2 sm:px-4">
         <div className="flex items-center gap-3">
           <div className="grid size-8 place-items-center rounded-sm border border-border bg-elevated text-[10px] font-medium tracking-wide">

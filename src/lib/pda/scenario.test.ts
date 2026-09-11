@@ -63,6 +63,16 @@ describe("scenario folder index", () => {
     assert.equal(classifyScenarioPath("Content/Blocks/ConstructorSurvival.jpg"), "itemPicture");
     assert.equal(classifyScenarioPath("Playfields/Akua/minimap.png"), null);
     assert.equal(classifyScenarioPath("shot.png", "pdaImages"), "picture");
+    assert.equal(
+      classifyScenarioPath("SharedData/Content/Gui/LoadingScreens/Load01.jpg"),
+      "wallpaper",
+    );
+    assert.equal(
+      classifyScenarioPath("Ascension-Reborn/SharedData/Content/Gui/Textures/LoadingScreens/02.png"),
+      "wallpaper",
+    );
+    assert.equal(classifyScenarioPath("SharedData/LoadingScreenshots/orbit.jpg"), "wallpaper");
+    assert.equal(classifyScenarioPath("SharedData/Content/Bundles/ItemIcons/LoadingScreenIcon.png"), "itemPicture");
     assert.equal(classifyScenarioPath("custom.yaml", "pdaYaml"), "pdaYaml");
     assert.equal(classifyScenarioPath("readme.txt"), null);
   });

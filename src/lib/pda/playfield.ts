@@ -151,6 +151,15 @@ export function playfieldFromText(path: string, text: string): PlayfieldFile {
   };
 }
 
+function rankVariant(variant: PlayfieldVariant) {
+  if (variant === "static") return 0;
+  if (variant === "playfield") return 1;
+  if (variant === "space-static") return 2;
+  if (variant === "dynamic") return 3;
+  if (variant === "space-dynamic") return 4;
+  return 5;
+}
+
 function rankKind(kind: PlayfieldKind) {
   if (kind === "planet") return 4;
   if (kind === "moon") return 3;
@@ -172,7 +181,7 @@ export function bundlePlayfields(texts: CatalogText[]): PlayfieldBundle[] {
     .map((files) => {
       const kind = files.reduce((best, file) => (rankKind(file.kind) > rankKind(best) ? file.kind : best), "unknown" as PlayfieldKind);
       const folder = files[0]!.folder;
-      return { folder, name: folder, kind, files: files.sort((a, b) => a.variant.localeCompare(b.variant)) };
+      return { folder, name: folder, kind, files: files.sort((a, b) => rankVariant(a.variant) - rankVariant(b.variant)) };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
 }

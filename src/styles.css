@@ -78,6 +78,29 @@
     line-height: 1.5;
   }
 
+  .scenario-wallpaper {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .scenario-wallpaper::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgb(7 9 12 / 0.7), rgb(7 9 12 / 0.86) 55%, rgb(7 9 12 / 0.92));
+  }
+
+  .app-shell {
+    position: relative;
+    z-index: 1;
+    background: transparent;
+  }
+
   h1,
   h2,
   h3 {

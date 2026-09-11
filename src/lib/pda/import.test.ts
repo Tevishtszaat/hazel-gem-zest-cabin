@@ -96,6 +96,7 @@ describe("import read modes", () => {
     assert.equal(sourceReadMode("poi"), "path");
     assert.equal(sourceReadMode("itemPicture"), "blob");
     assert.equal(sourceReadMode("picture"), "blob");
+    assert.equal(sourceReadMode("wallpaper"), "blob");
     assert.equal(sourceReadMode("items"), "text");
     assert.equal(sourceReadMode("galaxy"), "text");
   });

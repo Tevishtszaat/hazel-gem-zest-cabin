@@ -10,6 +10,13 @@ import { clearImages, putImages, warmImageCache, type ImageSet } from "@/lib/pda
 import type { ImportKind } from "@/lib/pda/import-kinds.ts";
 import type { ChapterNode, PdaProject } from "@/lib/pda/types.ts";
 
+function imageSetFor(path: string, kind: ImportKind): ImageSet {
+  const role = classifyScenarioPath(path, kind);
+  if (role === "wallpaper") return "wallpaper";
+  if (role === "itemPicture") return "item";
+  return "pda";
+}
+
 type Sel = { kind: "chapter" | "task" | "action"; id: string } | null;
 
 type PdaState = {
@@ -157,7 +164,7 @@ export const usePdaStore = create<PdaState>()(
 
           const imageFiles = files.filter((file) => {
             const role = classifyScenarioPath(file.path, kind);
-            return (role === "picture" || role === "itemPicture") && file.blob;
+            return (role === "picture" || role === "itemPicture" || role === "wallpaper") && file.blob;
           });
 
           const csvOnly =
@@ -173,7 +180,7 @@ export const usePdaStore = create<PdaState>()(
             if (imageFiles.length) void putImages(imageFiles.map((file) => ({
               path: file.path,
               blob: file.blob!,
-              set: classifyScenarioPath(file.path, kind) === "itemPicture" ? "item" : "pda",
+              set: imageSetFor(file.path, kind),
             })));
             return importReport(catalog, `Merged ${Object.keys(project.csv.rows).length} CSV keys.`);
           }
@@ -199,7 +206,7 @@ export const usePdaStore = create<PdaState>()(
                 imageFiles.map((file) => ({
                   path: file.path,
                   blob: file.blob!,
-                  set: classifyScenarioPath(file.path, kind) === "itemPicture" ? "item" : "pda",
+                  set: imageSetFor(file.path, kind),
                 })),
               );
             return importReport(catalog, `Loaded ${project.chapters.length} chapters from ${indexed.pda.yamlName || "PDA.yaml"}.`);
@@ -212,7 +219,7 @@ export const usePdaStore = create<PdaState>()(
               imageFiles.map((file) => ({
                 path: file.path,
                 blob: file.blob!,
-                set: classifyScenarioPath(file.path, kind) === "itemPicture" ? "item" : "pda",
+                set: imageSetFor(file.path, kind),
               })),
             );
           const added = indexed.catalog.files.length;
@@ -227,7 +234,9 @@ export const usePdaStore = create<PdaState>()(
       },
       clearImageSet: async (imageSet) => {
         await clearImages(imageSet);
-        set({ catalog: dropCatalogGroup(get().catalog, imageSet) });
+        if (imageSet === "pda" || imageSet === "item") {
+          set({ catalog: dropCatalogGroup(get().catalog, imageSet) });
+        }
       },
       setCatalog: (catalog) => set({ catalog }),
       setCatalogText: (role, text, path) =>

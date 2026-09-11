@@ -1,7 +1,6 @@
 import * as yaml from "js-yaml";
-import type { ScenarioCatalog } from "./scenario-index.ts";
-import { resolveCatalogToken } from "./scenario-index.ts";
 import type { PlayfieldFile, PlayfieldKind } from "./playfield.ts";
+import { resolveCatalogToken, type ScenarioCatalog } from "./scenario-index.ts";
 
 export type YamlDoc = Record<string, unknown>;
 export type YamlRow = Record<string, unknown>;

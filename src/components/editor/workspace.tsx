@@ -16,10 +16,10 @@ export function Workspace() {
   const [tab, setTab] = useState<"tree" | "edit" | "preview">("tree");
 
   return (
-    <div className="flex h-dvh flex-col bg-bg text-fg">
+    <div className="app-shell flex h-dvh flex-col text-fg">
       <AppHeader />
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-border bg-bg px-4 py-1.5 text-xs text-muted">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-border bg-bg/50 px-4 py-1.5 text-xs text-muted">
         <span className="min-w-0 truncate">
           <BbText className="font-medium text-fg" text={project.name} inline />
         </span>

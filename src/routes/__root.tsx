@@ -4,6 +4,7 @@ import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import appCss from "../styles.css?url";
 
 import { BusyMascot } from "@/components/busy-mascot.tsx";
+import { ScenarioWallpaper } from "@/components/scenario-wallpaper.tsx";
 import { TooltipProvider } from "@/components/ui/tooltip.tsx";
 import { APP_NAME } from "@/lib/brand.ts";
 
@@ -39,6 +40,7 @@ export const Route = createRootRoute({
       </head>
       <body className="bg-bg text-fg">
         <PreviewHostBridge />
+        <ScenarioWallpaper />
         <AuthProvider>
           <TooltipProvider>
             <Outlet />

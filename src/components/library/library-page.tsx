@@ -111,7 +111,7 @@ export function LibraryPage() {
   };
   const meta = configMeta(tab);
   return (
-    <div className="flex h-dvh flex-col overflow-x-hidden bg-bg text-fg">
+    <div className="app-shell flex h-dvh flex-col overflow-x-hidden text-fg">
       <AppHeader />
       <div className="flex flex-wrap items-end justify-between gap-3 border-b border-border px-4 py-3">
         <div>

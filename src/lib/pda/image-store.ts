@@ -1,6 +1,6 @@
 import { openPdaDb } from "./idb-storage.ts";
 
-export type ImageSet = "pda" | "item";
+export type ImageSet = "pda" | "item" | "wallpaper";
 
 export type StoredImage = {
   name: string;
@@ -83,7 +83,7 @@ export async function putImages(files: { path: string; blob: Blob; set: ImageSet
       tx.onerror = () => reject(tx.error);
       const store = tx.objectStore("blobs");
       for (const file of slice) {
-        const name = basename(file.path);
+        const name = file.set === "wallpaper" ? `wp:${basename(file.path)}` : basename(file.path);
         names.push(name);
         store.put({ name, set: file.set, path: file.path, blob: file.blob }, name);
         const prev = urls.get(name);
@@ -113,7 +113,14 @@ export async function getImageUrl(name: string): Promise<string | null> {
       req.onerror = () => reject(req.error);
     });
     if (!rec?.blob) return null;
+    const existing = urls.get(rec.name);
+    if (existing) return existing;
     const url = URL.createObjectURL(rec.blob);
+    const raced = urls.get(rec.name);
+    if (raced) {
+      URL.revokeObjectURL(url);
+      return raced;
+    }
     urls.set(rec.name, url);
     remember(rec.name);
     return url;
@@ -139,6 +146,11 @@ export async function listImageNames(): Promise<string[]> {
     req.onsuccess = () => resolve((req.result as string[]) || []);
     req.onerror = () => reject(req.error);
   });
+}
+
+export async function listWallpaperNames(): Promise<string[]> {
+  const names = await listImageNames();
+  return names.map(String).filter((name) => name.startsWith("wp:"));
 }
 
 export async function listImages(set?: ImageSet): Promise<StoredImage[]> {

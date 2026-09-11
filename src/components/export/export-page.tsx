@@ -25,7 +25,7 @@ export function ExportPage() {
   };
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg text-fg">
+    <div className="app-shell flex min-h-dvh flex-col text-fg">
       <AppHeader />
       <main className="canvas-wash mx-auto w-full max-w-5xl flex-1 px-4 py-6">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">

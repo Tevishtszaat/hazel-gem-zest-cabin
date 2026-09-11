@@ -73,7 +73,7 @@ export async function filesFromDataTransfer(dt: DataTransfer): Promise<File[]> {
 
 export function sourceReadMode(role: string | null): "text" | "blob" | "path" {
   if (role === "poi") return "path";
-  if (role === "picture" || role === "itemPicture") return "blob";
+  if (role === "picture" || role === "itemPicture" || role === "wallpaper") return "blob";
   if (!role) return "path";
   return "text";
 }

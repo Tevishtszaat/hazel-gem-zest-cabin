@@ -362,7 +362,8 @@ function CreatureEditor({
   onChange: (list: YamlRow[]) => void;
 }) {
   const [picked, setPicked] = useState(0);
-  const biome = list[Math.min(picked, Math.max(0, list.length - 1))];
+  const idx = list.length ? Math.min(Math.max(0, picked), list.length - 1) : -1;
+  const biome = idx >= 0 ? list[idx] : undefined;
   const entities = asRows(biome?.Entities);
   return (
     <div className="mt-4 grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
@@ -370,7 +371,7 @@ function CreatureEditor({
         {list.map((row, i) => (
           <button
             key={i}
-            className={`block w-full truncate px-3 py-2 text-left text-sm ${i === picked ? "bg-elevated" : "hover:bg-elevated/50"}`}
+            className={`block w-full truncate px-3 py-2 text-left text-sm ${i === idx ? "bg-elevated" : "hover:bg-elevated/50"}`}
             onClick={() => setPicked(i)}
           >
             {String(row.Biome ?? row.Name ?? `Biome ${i + 1}`)}
@@ -393,7 +394,7 @@ function CreatureEditor({
             <Input
               value={String(biome.Biome ?? biome.Name ?? "")}
               onChange={(e) =>
-                onChange(list.map((row, i) => (i === picked ? { ...row, Biome: e.target.value } : row)))
+                onChange(list.map((row, i) => (i === idx ? { ...row, Biome: e.target.value } : row)))
               }
             />
           </label>
@@ -406,7 +407,7 @@ function CreatureEditor({
               list={entities}
               blank={{ Name: entityNames[0] || "AlienBug01", Period: "Always", Amount: 1, Delay: 0 }}
               onChange={(next) =>
-                onChange(list.map((row, i) => (i === picked ? { ...row, Entities: next } : row)))
+                onChange(list.map((row, i) => (i === idx ? { ...row, Entities: next } : row)))
               }
             />
           </div>
@@ -415,7 +416,7 @@ function CreatureEditor({
             size="sm"
             variant="danger"
             onClick={() => {
-              onChange(list.filter((_, i) => i !== picked));
+              onChange(list.filter((_, i) => i !== idx));
               setPicked(0);
             }}
           >

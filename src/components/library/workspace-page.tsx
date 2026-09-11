@@ -14,7 +14,7 @@ export function WorkspacePage({
   children: ReactNode;
 }) {
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-bg text-fg">
+    <div className="app-shell flex h-dvh flex-col overflow-hidden text-fg">
       <AppHeader />
       <div className="flex min-h-10 flex-wrap items-center gap-2 border-b border-border px-4 py-2">
         <Link to="/library" className="text-xs uppercase tracking-[0.14em] text-muted hover:text-fg">

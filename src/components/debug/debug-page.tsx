@@ -98,7 +98,7 @@ export function DebugPage() {
   };
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg text-fg">
+    <div className="app-shell flex min-h-dvh flex-col text-fg">
       <AppHeader />
       <main className="canvas-wash mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-6">
         <div className="mb-5">

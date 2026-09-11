@@ -141,6 +141,7 @@ export function classifyScenarioPath(path: string, hint?: string): string | null
   if (base.endsWith(".ecf")) return hint === "configs" || hint === "scenario" ? "ecf" : "ecf";
   if (base.endsWith(".epb")) return "poi";
   if (/\.(png|jpe?g|webp|gif)$/.test(base)) {
+    if (isLoadingScreenPath(p)) return "wallpaper";
     if (hint === "pdaImages" || /(?:^|\/)pda(?:\/|$)/.test(p) || /extras\/pda/.test(p)) return "picture";
     if (hint === "itemImages") return "itemPicture";
     if (isIconPath(p)) return "itemPicture";
@@ -211,7 +212,20 @@ export function catalogLoadSummary(catalog: ScenarioCatalog) {
   return { missing, loaded };
 }
 
+export function isLoadingScreenPath(path: string) {
+  const p = normalizePath(path).toLowerCase();
+  if (!/\.(png|jpe?g|webp|gif)$/.test(p)) return false;
+  if (/(?:^|\/)loading.?screens?(?:hots?)?(?:\/|$)/.test(p)) return true;
+  if (/(?:^|\/)loadingscreenshots?(?:\/|$)/.test(p)) return true;
+  if (/gui\/(?:textures\/)?loading(?:screens?)?(?:\/|$)/.test(p)) return true;
+  if (/(?:^|\/)extras\/loading(?:screens?)?(?:\/|$)/.test(p)) return true;
+  if (/shareddata/.test(p) && /(?:^|\/)screenshots?(?:\/|$)/.test(p)) return true;
+  if (/shareddata/.test(p) && /(?:^|\/)(?:menu.?bg|mainmenu|menubackground|wallpaper)(?:\/|$)/.test(p)) return true;
+  return false;
+}
+
 function isIconPath(p: string) {
+  if (isLoadingScreenPath(p)) return false;
   if (/\/playfields?\//.test(p) || /\/prefabs?\//.test(p)) return false;
   if (/(?:^|\/)(?:itemicons?|blockicons?)(?:\/|$)/.test(p)) return true;
   if (/\/bundles\/(?:itemicons?|blockicons?|icons)(?:\/|$)/.test(p)) return true;
@@ -314,10 +328,14 @@ export function compactToken(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
+let locaCache: { sig: string; rows: { key: string; name: string; label: string }[] } | null = null;
+
 export function localizationLabels(catalog: ScenarioCatalog | undefined): { key: string; name: string; label: string }[] {
   if (!catalog) return [];
+  const text = (catalog.texts ?? []).find((t) => t.role === "localization" && t.text)?.text ?? "";
+  const sig = `${catalog.indexedAt}:${catalog.entries.length}:${text.length}`;
+  if (locaCache?.sig === sig) return locaCache.rows;
   const rows: { key: string; name: string; label: string }[] = [];
-  const text = (catalog.texts ?? []).find((t) => t.role === "localization" && t.text)?.text;
   if (text) {
     const table = parseCsv(text);
     const lang = table.languages.includes("English") ? "English" : table.languages[0];
@@ -333,6 +351,7 @@ export function localizationLabels(catalog: ScenarioCatalog | undefined): { key:
   for (const entry of catalog.entries) {
     if (entry.label) rows.push({ key: entry.name, name: entry.name, label: entry.label });
   }
+  locaCache = { sig, rows };
   return rows;
 }
 
@@ -441,6 +460,8 @@ export function indexScenario(files: ScenarioSource[], hint?: string): IndexedSc
         });
         count = 1;
       }
+    } else if (role === "wallpaper") {
+      count = 1;
     } else if (role === "playfieldYaml") {
       const parts = normalizePath(file.path).split("/");
       const folder = parts[parts.length - 2];

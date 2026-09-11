@@ -90,4 +90,23 @@ PvP: False
     assert.ok(bundles.some((b) => b.kind === "planet"));
     assert.ok(bundles.some((b) => b.kind === "orbit"));
   });
+
+  it("lists playfield_static.yaml before playfield_dynamic.yaml", () => {
+    const bundles = bundlePlayfields([
+      {
+        role: "playfieldYaml",
+        path: "Playfields/1AntsTempPlanet/playfield_dynamic.yaml",
+        text: "PlayfieldType: Planet\n",
+      },
+      {
+        role: "playfieldYaml",
+        path: "Playfields/1AntsTempPlanet/playfield_static.yaml",
+        text: "PlayfieldType: Planet\nUseFixed: True\n",
+      },
+    ]);
+    assert.deepEqual(
+      bundles[0]?.files.map((f) => f.variant),
+      ["static", "dynamic"],
+    );
+  });
 });
