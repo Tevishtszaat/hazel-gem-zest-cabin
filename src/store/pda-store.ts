@@ -308,7 +308,7 @@ export const usePdaStore = create<PdaState>()(
         })),
       updateSelected: (mut) =>
         set((s) => {
-          const next = structuredClone(s.project);
+          const next = { ...s.project, chapters: structuredClone(s.project.chapters) };
           mut(next);
           return { project: next };
         }),
@@ -542,7 +542,13 @@ export const usePdaStore = create<PdaState>()(
       storage: createJSONStorage(() => durableStorage),
       partialize: (s) => ({
         project: s.project,
-        catalog: { ...s.catalog, texts: [] as typeof s.catalog.texts },
+        catalog: {
+          folderName: s.catalog.folderName,
+          files: s.catalog.files,
+          indexedAt: s.catalog.indexedAt,
+          entries: [] as typeof s.catalog.entries,
+          texts: [] as typeof s.catalog.texts,
+        },
         selected: s.selected,
         collapsed: s.collapsed,
         category: s.category,
@@ -563,10 +569,29 @@ export const usePdaStore = create<PdaState>()(
           void (async () => {
             const cat = usePdaStore.getState().catalog;
             const stored = await loadCatalogTexts();
-            if (stored.length) {
+            if (!stored.length) {
+              if (cat.texts?.length) await putCatalogTexts(cat.texts);
+              return;
+            }
+            const sources: ScenarioSource[] = stored.map((t) => ({ path: t.path, text: t.text }));
+            for (const file of cat.files) {
+              if (file.role === "poi" || file.role === "playfieldYaml" || file.role === "picture" || file.role === "itemPicture") {
+                sources.push({ path: file.path });
+              }
+            }
+            try {
+              const indexed = await indexScenarioOffthread(sources, "scenario");
+              const next = mergeCatalog({ ...cat, texts: stored, entries: [] }, indexed.catalog);
+              usePdaStore.setState({
+                catalog: {
+                  ...next,
+                  texts: stored,
+                  folderName: cat.folderName || next.folderName,
+                  files: cat.files.length ? cat.files : next.files,
+                },
+              });
+            } catch {
               usePdaStore.setState({ catalog: { ...cat, texts: stored } });
-            } else if (cat.texts?.length) {
-              await putCatalogTexts(cat.texts);
             }
           })()
             .catch(() => {

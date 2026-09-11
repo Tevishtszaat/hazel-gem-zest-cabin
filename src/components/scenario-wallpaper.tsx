@@ -52,7 +52,7 @@ export function ScenarioWallpaper() {
           }
         })();
       });
-    }, 900);
+    }, 350);
     return () => {
       alive = false;
       window.clearTimeout(delay);

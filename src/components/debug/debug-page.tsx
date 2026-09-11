@@ -26,12 +26,12 @@ export function DebugPage() {
   const unignoreProblems = usePdaStore((s) => s.unignoreProblems);
   const ignoredProblems = usePdaStore((s) => s.ignoredProblems);
   const navigate = useNavigate();
-  const [file, setFile] = useState<(typeof FILE_DEBUG_TABS)[number]["id"]>("all");
+  const [file, setFile] = useState<(typeof FILE_DEBUG_TABS)[number]["id"]>("pda");
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["id"]>("all");
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState<Record<string, boolean>>({});
   const [showLength, setShowLength] = useState(false);
-  const { issues, stats, busy, raw, ignoredCount } = useProblems({
+  const { issues, stats, busy, raw, ignoredCount, scan } = useProblems({
     includeLength: showLength || filter === "ignored",
     includeIgnored: filter === "ignored",
     source: file,
@@ -116,11 +116,24 @@ export function DebugPage() {
         <div className="mb-5">
           <h1 className="text-2xl font-medium tracking-tight">Debug</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted">
-            Scans PDA, dialogues, and each config for broken syntax (unclosed blocks, bad YAML/CSV) plus the usual
-            missing names and duplicate IDs. All files fills in as each area finishes so the page stays responsive.
-            {busy ? " Scanning in the background…" : ""}
+            Scans PDA, dialogues, and each config for broken syntax plus missing names and duplicate IDs.
           </p>
         </div>
+
+        {busy || scan ? (
+          <div className="mb-4 rounded-md border border-accent/35 bg-surface px-4 py-3">
+            <div className="mb-2 flex items-center justify-between gap-3 text-xs">
+              <p className="text-fg">{scan?.label || "Starting scan…"}</p>
+              <p className="tabular-nums text-muted">{scan?.pct ?? 0}%</p>
+            </div>
+            <div className="h-3.5 overflow-hidden rounded-full bg-elevated ring-1 ring-border">
+              <div
+                className="area-bar-fill h-full rounded-full"
+                style={{ width: `${Math.max(6, Math.min(100, scan?.pct ?? 6))}%` }}
+              />
+            </div>
+          </div>
+        ) : null}
 
         <div className="mb-3 flex flex-wrap gap-1.5">
           {FILE_DEBUG_TABS.map((tab) => {
@@ -159,6 +172,7 @@ export function DebugPage() {
                 filter === item.id ? "bg-elevated text-fg" : "text-muted hover:text-fg"
               }`}
             >
+              {item.label}
               {item.id === "titles" && dupCount ? ` (${dupCount})` : ""}
               {item.id === "delete" && stats.deletable ? ` (${stats.deletable})` : ""}
             </button>

@@ -549,3 +549,5 @@ export function problemStats(issues: Problem[]) {
     deletable: issues.filter((i) => i.recommend === "delete" && i.id).length,
   };
 }
+
+export type ProblemStats = ReturnType<typeof problemStats>;

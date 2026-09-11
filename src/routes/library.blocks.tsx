@@ -11,7 +11,7 @@ function BlocksWorkspace() {
       <ObjectBrowser
         role="blocks"
         title="Blocks"
-        listCap={4000}
+        listCap={200}
         onCompare={() => {
           void navigate({ to: "/library" });
         }}

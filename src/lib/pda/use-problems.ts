@@ -5,6 +5,7 @@ import { problemStats, validateProject, type Problem } from "./validate.ts";
 import { FILE_DEBUG_TABS, FILE_SCAN_ORDER, type FileDebugId } from "./validate-files.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
 import { useBusyStore } from "@/store/busy-store.ts";
+import { setDebugStats } from "@/store/debug-stats.ts";
 
 export type ScanProgress = { label: string; file: string; pct: number };
 
@@ -28,9 +29,15 @@ export function useProblems(opts?: {
   const [scan, setScan] = useState<ScanProgress | null>(null);
 
   useEffect(() => {
-    if (loading) return;
     let cancelled = false;
+    if (loading) {
+      setBusy(false);
+      setScan(null);
+      return;
+    }
     setBusy(true);
+    setRaw([]);
+    setScan({ label: "Starting scan…", file: source === "all" ? "pda" : source, pct: 0 });
     const timer = window.setTimeout(() => {
       void (async () => {
         const merged: Problem[] = [];
@@ -58,7 +65,7 @@ export function useProblems(opts?: {
         };
         try {
           for (let i = 0; i < queue.length; i++) {
-            if (cancelled) return;
+            if (cancelled) break;
             const step = queue[i]!;
             mark(step, i);
             if (step === "pda-tree") {
@@ -71,7 +78,7 @@ export function useProblems(opts?: {
               }
             } else {
               try {
-                const part = await validateFilesOffthread(catalog, step);
+                const part = await validateFilesOffthread(catalog, step as FileDebugId);
                 add(part.issues || []);
               } catch (err) {
                 console.warn(`Debug scan failed for ${step}`, err);
@@ -92,6 +99,7 @@ export function useProblems(opts?: {
           if (!cancelled) {
             setScan(null);
             setBusy(false);
+            setDebugStats(problemStats(merged));
           }
         }
       })();

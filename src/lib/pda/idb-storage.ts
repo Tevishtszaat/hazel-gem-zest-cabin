@@ -185,7 +185,7 @@ export const durableStorage: StateStorage = {
     if (memory.get(name) === value) return Promise.resolve();
     memory.set(name, value);
     pending = { name, value };
-    const wait = value.length > 800_000 ? 1200 : value.length > 120_000 ? 700 : 280;
+    const wait = value.length > 800_000 ? 1800 : value.length > 120_000 ? 900 : 400;
     return new Promise<void>((resolve) => {
       if (writeTimer) clearTimeout(writeTimer);
       writeTimer = setTimeout(() => {

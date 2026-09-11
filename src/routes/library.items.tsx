@@ -7,7 +7,7 @@ export const Route = createFileRoute("/library/items")({ component: ItemsWorkspa
 function ItemsWorkspace() {
   return (
     <WorkspacePage group="Catalog" title="Items" kicker="ItemsConfig.ecf · Id or +Item Name">
-      <ObjectBrowser role="items" title="Items" listCap={4000} />
+      <ObjectBrowser role="items" title="Items" listCap={200} />
     </WorkspacePage>
   );
 }

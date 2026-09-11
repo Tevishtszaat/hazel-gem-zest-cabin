@@ -1,16 +1,17 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Bug, Download, Library, MessageSquareText, ScrollText, Upload } from "lucide-react";
 import { APP_MARK, APP_SHORT, APP_SUBTITLE } from "@/lib/brand.ts";
-import { useProblems } from "@/lib/pda/use-problems.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
+import { useDebugStats } from "@/store/debug-stats.ts";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
 import { Tooltip } from "@/components/ui/tooltip.tsx";
 
 export function AppHeader() {
-  const project = usePdaStore((s) => s.project);
+  const language = usePdaStore((s) => s.project.language);
+  const languages = usePdaStore((s) => s.project.csv.languages);
   const setLanguage = usePdaStore((s) => s.setLanguage);
-  const languages = project.csv.languages.length ? project.csv.languages : [project.language || "English"];
+  const langs = languages.length ? languages : [language || "English"];
 
   return (
     <header className="border-b border-border bg-surface/80 backdrop-blur-md">
@@ -27,12 +28,12 @@ export function AppHeader() {
 
         <div className="ml-auto flex min-w-0 items-center gap-2 text-xs text-muted">
           <span className="hidden sm:inline">PDA Language</span>
-          <Select value={project.language} onValueChange={setLanguage}>
+          <Select value={language} onValueChange={setLanguage}>
             <SelectTrigger aria-label="PDA language">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {languages.map((lang) => (
+              {langs.map((lang) => (
                 <SelectItem key={lang} value={lang}>
                   {lang}
                 </SelectItem>
@@ -48,7 +49,7 @@ export function AppHeader() {
 
 function AppNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { stats } = useProblems();
+  const stats = useDebugStats();
   const items = [
     { to: "/" as const, label: "PDA", icon: ScrollText },
     { to: "/dialogues" as const, label: "Dialogues", icon: MessageSquareText },

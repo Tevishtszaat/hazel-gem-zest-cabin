@@ -229,23 +229,27 @@ export async function clearImages(set?: ImageSet): Promise<void> {
     });
     return;
   }
-  const keep = await listImages();
   await new Promise<void>((resolve, reject) => {
     const tx = db.transaction("blobs", "readwrite");
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
-    const store = tx.objectStore("blobs");
-    for (const img of keep) {
-      if (img.set !== set) continue;
-      store.delete(img.name);
-      const url = urls.get(img.name);
-      if (url) URL.revokeObjectURL(url);
-      urls.delete(img.name);
-      if (img.set === "wallpaper") wallpaperNamesCache = null;
-      for (const [alias, target] of [...aliases.entries()]) {
-        if (target === img.name) aliases.delete(alias);
+    const req = tx.objectStore("blobs").openCursor();
+    req.onsuccess = () => {
+      const cursor = req.result;
+      if (!cursor) return;
+      const img = cursor.value as StoredImage;
+      if (img.set === set) {
+        cursor.delete();
+        const url = urls.get(img.name);
+        if (url) URL.revokeObjectURL(url);
+        urls.delete(img.name);
+        if (img.set === "wallpaper") wallpaperNamesCache = null;
+        for (const [alias, target] of [...aliases.entries()]) {
+          if (target === img.name) aliases.delete(alias);
+        }
       }
-    }
+      cursor.continue();
+    };
   });
 }
 

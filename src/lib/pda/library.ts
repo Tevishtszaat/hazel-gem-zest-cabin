@@ -42,10 +42,17 @@ export function objectsFor(catalog: ScenarioCatalog, role: ConfigRole): EcfObjec
     }));
 }
 
+const locaByText = new Map<string, CsvTable>();
+
 export function localizationTable(catalog: ScenarioCatalog): CsvTable {
   const text = catalogText(catalog, "localization")?.text;
-  if (text) return parseCsv(text);
-  return { languages: ["English"], rows: {} };
+  if (!text) return { languages: ["English"], rows: {} };
+  const hit = locaByText.get(text);
+  if (hit) return hit;
+  const table = parseCsv(text);
+  locaByText.set(text, table);
+  if (locaByText.size > 3) locaByText.delete(locaByText.keys().next().value!);
+  return table;
 }
 
 export function dialogueStrings(catalog: ScenarioCatalog): CsvTable {

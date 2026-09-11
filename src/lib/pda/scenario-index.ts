@@ -294,6 +294,10 @@ function parseSectors(text: string, source: string, bag: CatalogEntry[], seen: S
 }
 
 function applyLocalization(entries: CatalogEntry[], loc: Record<string, string>) {
+  const packedToLabel = new Map<string, string>();
+  for (const [key, label] of Object.entries(loc)) {
+    packedToLabel.set(compactToken(key.replace(/^(items?_|blocks?_|tokens?_|factions?_)/i, "")), label);
+  }
   for (const entry of entries) {
     if (entry.label) continue;
     const keys = locaKeysForName(entry.name, entry.kind);
@@ -306,12 +310,8 @@ function applyLocalization(entries: CatalogEntry[], loc: Record<string, string>)
     }
     if (entry.label) continue;
     const packed = compactToken(entry.name);
-    for (const [key, label] of Object.entries(loc)) {
-      if (compactToken(key.replace(/^(items?_|blocks?_|tokens?_|factions?_)/i, "")) === packed) {
-        entry.label = label;
-        break;
-      }
-    }
+    const label = packedToLabel.get(packed);
+    if (label) entry.label = label;
   }
 }
 
@@ -329,6 +329,62 @@ export function compactToken(value: string) {
 }
 
 let locaCache: { sig: string; rows: { key: string; name: string; label: string }[] } | null = null;
+
+type CatalogIndex = {
+  byKind: Map<CatalogKind, CatalogEntry[]>;
+  name: Map<string, CatalogEntry>;
+  label: Map<string, CatalogEntry>;
+  file: Map<string, CatalogEntry>;
+  group: Map<string, CatalogEntry>;
+  packedName: Map<string, CatalogEntry>;
+  packedLabel: Map<string, CatalogEntry>;
+  locaLabel: Map<string, { name: string; label: string }>;
+  locaKey: Map<string, { name: string; label: string }>;
+  locaPacked: Map<string, { name: string; label: string }>;
+};
+
+let catalogIndex: CatalogIndex | null = null;
+let catalogIndexRef: ScenarioCatalog | null = null;
+
+function putMap(map: Map<string, CatalogEntry>, key: string, entry: CatalogEntry) {
+  if (key && !map.has(key)) map.set(key, entry);
+}
+
+export function getCatalogIndex(catalog: ScenarioCatalog): CatalogIndex {
+  if (catalogIndex && catalogIndexRef === catalog) return catalogIndex;
+  const byKind = new Map<CatalogKind, CatalogEntry[]>();
+  const name = new Map<string, CatalogEntry>();
+  const label = new Map<string, CatalogEntry>();
+  const file = new Map<string, CatalogEntry>();
+  const group = new Map<string, CatalogEntry>();
+  const packedName = new Map<string, CatalogEntry>();
+  const packedLabel = new Map<string, CatalogEntry>();
+  for (const entry of catalog.entries) {
+    const list = byKind.get(entry.kind);
+    if (list) list.push(entry);
+    else byKind.set(entry.kind, [entry]);
+    const kn = `${entry.kind}:${entry.name.toLowerCase()}`;
+    putMap(name, kn, entry);
+    if (entry.label) putMap(label, `${entry.kind}:${entry.label.toLowerCase()}`, entry);
+    if (entry.poiFile) putMap(file, `${entry.kind}:${entry.poiFile.toLowerCase()}`, entry);
+    if (entry.poiGroup) putMap(group, `${entry.kind}:${entry.poiGroup.toLowerCase()}`, entry);
+    putMap(packedName, `${entry.kind}:${compactToken(entry.name)}`, entry);
+    if (entry.label) putMap(packedLabel, `${entry.kind}:${compactToken(entry.label)}`, entry);
+  }
+  const locaLabel = new Map<string, { name: string; label: string }>();
+  const locaKey = new Map<string, { name: string; label: string }>();
+  const locaPacked = new Map<string, { name: string; label: string }>();
+  for (const row of localizationLabels(catalog)) {
+    const rec = { name: row.name, label: row.label };
+    if (!locaLabel.has(row.label.toLowerCase())) locaLabel.set(row.label.toLowerCase(), rec);
+    if (!locaKey.has(row.key.toLowerCase())) locaKey.set(row.key.toLowerCase(), rec);
+    const packed = compactToken(row.label) || compactToken(row.name) || compactToken(row.key);
+    if (packed && !locaPacked.has(packed)) locaPacked.set(packed, rec);
+  }
+  catalogIndex = { byKind, name, label, file, group, packedName, packedLabel, locaLabel, locaKey, locaPacked };
+  catalogIndexRef = catalog;
+  return catalogIndex;
+}
 
 export function localizationLabels(catalog: ScenarioCatalog | undefined): { key: string; name: string; label: string }[] {
   if (!catalog) return [];
@@ -363,8 +419,15 @@ export function resolveCatalogToken(
   const needle = token.trim().toLowerCase();
   const packed = compactToken(token);
   if (!needle) return null;
-  const pool = catalog.entries.filter((e) => kinds.includes(e.kind));
-  const byName = pool.find((e) => e.name.toLowerCase() === needle);
+  const index = getCatalogIndex(catalog);
+  const pick = (map: Map<string, CatalogEntry>) => {
+    for (const kind of kinds) {
+      const hit = map.get(`${kind}:${needle}`);
+      if (hit) return hit;
+    }
+    return null;
+  };
+  const byName = pick(index.name);
   if (byName) {
     if (byName.poiFile && byName.poiGroup && compactToken(byName.poiFile) === packed && compactToken(byName.poiGroup) !== packed) {
       return { entry: byName, via: "file" };
@@ -372,30 +435,32 @@ export function resolveCatalogToken(
     if (byName.poiGroup && compactToken(byName.poiGroup) === packed) return { entry: byName, via: "group" };
     return { entry: byName, via: "name" };
   }
-  const byFile = pool.find((e) => (e.poiFile ?? "").toLowerCase() === needle);
+  const byFile = pick(index.file);
   if (byFile) return { entry: byFile, via: byFile.poiGroup && byFile.poiGroup.toLowerCase() !== needle ? "file" : "name" };
-  const byGroup = pool.find((e) => (e.poiGroup ?? "").toLowerCase() === needle);
+  const byGroup = pick(index.group);
   if (byGroup) return { entry: byGroup, via: "group" };
-  const byLabel = pool.find((e) => (e.label ?? "").toLowerCase() === needle);
+  const byLabel = pick(index.label);
   if (byLabel) return { entry: byLabel, via: "label" };
   if (packed.length >= 3) {
-    const byPackedName = pool.find((e) => compactToken(e.name) === packed);
-    if (byPackedName) return { entry: byPackedName, via: "name" };
-    const byPackedLabel = pool.find((e) => compactToken(e.label ?? "") === packed);
-    if (byPackedLabel) return { entry: byPackedLabel, via: "label" };
+    for (const kind of kinds) {
+      const packedName = index.packedName.get(`${kind}:${packed}`);
+      if (packedName) return { entry: packedName, via: "name" };
+    }
+    for (const kind of kinds) {
+      const packedLabel = index.packedLabel.get(`${kind}:${packed}`);
+      if (packedLabel) return { entry: packedLabel, via: "label" };
+    }
   }
-  const loca = localizationLabels(catalog);
-  const hit = loca.find(
-    (row) =>
-      row.label.toLowerCase() === needle ||
-      row.key.toLowerCase() === needle ||
-      (packed.length >= 3 && (compactToken(row.label) === packed || compactToken(row.name) === packed || compactToken(row.key) === packed)),
-  );
-  if (hit) {
-    const entry =
-      pool.find((e) => e.name.toLowerCase() === hit.name.toLowerCase()) ||
-      pool.find((e) => compactToken(e.name) === compactToken(hit.name));
-    if (entry) return { entry, via: entry.name.toLowerCase() === needle ? "name" : "label" };
+  const loca =
+    index.locaLabel.get(needle) ||
+    index.locaKey.get(needle) ||
+    (packed.length >= 3 ? index.locaPacked.get(packed) : undefined);
+  if (loca) {
+    for (const kind of kinds) {
+      const entry =
+        index.name.get(`${kind}:${loca.name.toLowerCase()}`) || index.packedName.get(`${kind}:${compactToken(loca.name)}`);
+      if (entry) return { entry, via: entry.name.toLowerCase() === needle ? "name" : "label" };
+    }
   }
   return null;
 }
@@ -568,51 +633,54 @@ export function suggestionsFor(
   limit = 12,
 ): CatalogEntry[] {
   const q = query.trim().toLowerCase();
-  const pool = catalog.entries.filter((e) => {
-    if (!kinds.includes(e.kind)) return false;
-    if (e.kind === "picture" && e.group === "item") return false;
-    return true;
-  });
+  const index = getCatalogIndex(catalog);
+  const pool: CatalogEntry[] = [];
+  for (const kind of kinds) {
+    const list = index.byKind.get(kind);
+    if (!list) continue;
+    for (const entry of list) {
+      if (entry.kind === "picture" && entry.group === "item") continue;
+      pool.push(entry);
+    }
+  }
   if (!q) return pool.slice(0, limit);
-  const compact = (s: string) => s.replace(/[^a-z0-9]/g, "");
-  const cq = compact(q);
-  const scored = pool
-    .map((entry) => {
-      const name = entry.name.toLowerCase();
-      const label = (entry.label ?? "").toLowerCase();
-      const group = (entry.poiGroup ?? "").toLowerCase();
-      const file = (entry.poiFile ?? "").toLowerCase();
-      const cn = compact(name);
-      let score = 0;
-      if (name === q || group === q || file === q) score = 100;
-      else if (name.startsWith(q) || q.startsWith(name) || group.startsWith(q) || file.startsWith(q)) score = 80;
-      else if (label.startsWith(q)) score = 70;
-      else if (name.includes(q) || group.includes(q) || file.includes(q)) score = 50;
-      else if (label.includes(q)) score = 40;
-      else if (cq.length >= 3 && cn && (cn.includes(cq) || cq.includes(cn))) score = 35;
-      return { entry, score };
-    })
-    .filter((x) => x.score > 0)
-    .sort((a, b) => b.score - a.score || a.entry.name.localeCompare(b.entry.name));
+  const cq = compactToken(q);
+  const scored: { entry: CatalogEntry; score: number }[] = [];
+  for (const entry of pool) {
+    const name = entry.name.toLowerCase();
+    const label = (entry.label ?? "").toLowerCase();
+    const group = (entry.poiGroup ?? "").toLowerCase();
+    const file = (entry.poiFile ?? "").toLowerCase();
+    const cn = compactToken(name);
+    let score = 0;
+    if (name === q || group === q || file === q) score = 100;
+    else if (name.startsWith(q) || q.startsWith(name) || group.startsWith(q) || file.startsWith(q)) score = 80;
+    else if (label.startsWith(q)) score = 70;
+    else if (name.includes(q) || group.includes(q) || file.includes(q)) score = 50;
+    else if (label.includes(q)) score = 40;
+    else if (cq.length >= 3 && cn && (cn.includes(cq) || cq.includes(cn))) score = 35;
+    if (score) scored.push({ entry, score });
+  }
+  scored.sort((a, b) => b.score - a.score || a.entry.name.localeCompare(b.entry.name));
   return scored.slice(0, limit).map((x) => x.entry);
 }
 
 export function mergeCatalog(base: ScenarioCatalog, extra: ScenarioCatalog): ScenarioCatalog {
-  const seen = new Set(base.entries.map((e) => `${e.kind}:${e.name.toLowerCase()}:${e.group ?? ""}`));
   const entries = base.entries.map((e) => ({ ...e }));
+  const byKey = new Map<string, CatalogEntry>();
+  for (const e of entries) byKey.set(`${e.kind}:${e.name.toLowerCase()}:${e.group ?? ""}`, e);
   for (const entry of extra.entries) {
     const key = `${entry.kind}:${entry.name.toLowerCase()}:${entry.group ?? ""}`;
-    const existing = entries.find(
-      (e) => e.kind === entry.kind && e.name.toLowerCase() === entry.name.toLowerCase() && (e.group ?? "") === (entry.group ?? ""),
-    );
+    const existing = byKey.get(key);
     if (existing) {
       if (entry.label && !existing.label) existing.label = entry.label;
       if (entry.poiGroup && !existing.poiGroup) existing.poiGroup = entry.poiGroup;
       if (entry.poiFile && !existing.poiFile) existing.poiFile = entry.poiFile;
       continue;
     }
-    seen.add(key);
-    entries.push({ ...entry });
+    const copy = { ...entry };
+    byKey.set(key, copy);
+    entries.push(copy);
   }
   const files = [...base.files];
   for (const file of extra.files) {
