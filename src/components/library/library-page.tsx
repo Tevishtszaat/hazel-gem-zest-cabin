@@ -1,10 +1,10 @@
+import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AppHeader } from "@/components/app-header.tsx";
 import { BbText } from "@/components/editor/bb-text.tsx";
 import { ItemIcon } from "@/components/editor/pda-image.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Input, Textarea } from "@/components/ui/input.tsx";
-import { GalaxyEditor, ReputationTable, WarfareEditor } from "@/components/library/config-tabs.tsx";
 import {
   blockIdentity,
   classFieldValue,
@@ -57,6 +57,12 @@ const GROUP_TABS: Record<ConfigGroup, Tab[]> = {
   loot: ["containers", "lootgroups", "traders"],
   defs: ["materials", "statuseffects", "globaldefs", "blockgroups", "blockshapes", "animations", "baiconfig"],
   text: ["localization", "sectors"],
+};
+
+const WORKSPACE: Partial<Record<Tab, "/library/galaxy" | "/library/reputation" | "/library/warfare">> = {
+  galaxy: "/library/galaxy",
+  reputation: "/library/reputation",
+  warfare: "/library/warfare",
 };
 
 function tabLabel(id: Tab) {
@@ -112,28 +118,31 @@ export function LibraryPage() {
         ))}
       </div>
       <div className="flex gap-1 overflow-x-auto border-b border-border px-3">
-        {tabs.map((id) => (
-          <button
-            key={id}
-            onClick={() => setTab(id)}
-            className={`relative h-10 shrink-0 px-3 text-sm ${tab === id ? "text-fg" : "text-muted hover:text-fg"}`}
-          >
-            {tabLabel(id)}
-            {tab === id ? <span className="absolute inset-x-2 bottom-0 h-px bg-accent" /> : null}
-          </button>
-        ))}
+        {tabs.map((id) => {
+            const href = WORKSPACE[id];
+            const active = tab === id;
+            const className = `relative h-10 shrink-0 px-3 text-sm ${active ? "text-fg" : "text-muted hover:text-fg"}`;
+            if (href) {
+              return (
+                <Link key={id} to={href} className={className}>
+                  {tabLabel(id)}
+                  <span className="ml-1 text-[10px] uppercase tracking-wide text-subtle">page</span>
+                </Link>
+              );
+            }
+            return (
+              <button key={id} onClick={() => setTab(id)} className={className}>
+                {tabLabel(id)}
+                {active ? <span className="absolute inset-x-2 bottom-0 h-px bg-accent" /> : null}
+              </button>
+            );
+          })}
       </div>
       <div className="min-h-0 flex-1">
         {tab === "compare" ? (
           <BlockCompare initial={compareLeft} />
         ) : tab === "localization" ? (
           <LocaEditor />
-        ) : tab === "reputation" ? (
-          <ReputationTable />
-        ) : tab === "warfare" ? (
-          <WarfareEditor />
-        ) : tab === "galaxy" ? (
-          <GalaxyEditor />
         ) : tab === "sectors" ? (
           <YamlEditor role="sectors" fileName="Sectors.yaml" title="Sectors" />
         ) : meta ? (

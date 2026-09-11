@@ -15,6 +15,10 @@ import { Route as DialoguesRouteImport } from './routes/dialogues'
 import { Route as ExportRouteImport } from './routes/export'
 import { Route as ImportRouteImport } from './routes/import'
 import { Route as LibraryRouteImport } from './routes/library'
+import { Route as LibraryIndexRouteImport } from './routes/library.index'
+import { Route as LibraryGalaxyRouteImport } from './routes/library.galaxy'
+import { Route as LibraryReputationRouteImport } from './routes/library.reputation'
+import { Route as LibraryWarfareRouteImport } from './routes/library.warfare'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +50,26 @@ const LibraryRoute = LibraryRouteImport.update({
   path: '/library',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LibraryIndexRoute = LibraryIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LibraryRoute,
+} as any)
+const LibraryGalaxyRoute = LibraryGalaxyRouteImport.update({
+  id: '/galaxy',
+  path: '/galaxy',
+  getParentRoute: () => LibraryRoute,
+} as any)
+const LibraryReputationRoute = LibraryReputationRouteImport.update({
+  id: '/reputation',
+  path: '/reputation',
+  getParentRoute: () => LibraryRoute,
+} as any)
+const LibraryWarfareRoute = LibraryWarfareRouteImport.update({
+  id: '/warfare',
+  path: '/warfare',
+  getParentRoute: () => LibraryRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -53,7 +77,11 @@ export interface FileRoutesByFullPath {
   '/dialogues': typeof DialoguesRoute
   '/export': typeof ExportRoute
   '/import': typeof ImportRoute
-  '/library': typeof LibraryRoute
+  '/library': typeof LibraryRouteWithChildren
+  '/library/galaxy': typeof LibraryGalaxyRoute
+  '/library/reputation': typeof LibraryReputationRoute
+  '/library/warfare': typeof LibraryWarfareRoute
+  '/library/': typeof LibraryIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -61,7 +89,10 @@ export interface FileRoutesByTo {
   '/dialogues': typeof DialoguesRoute
   '/export': typeof ExportRoute
   '/import': typeof ImportRoute
-  '/library': typeof LibraryRoute
+  '/library/galaxy': typeof LibraryGalaxyRoute
+  '/library/reputation': typeof LibraryReputationRoute
+  '/library/warfare': typeof LibraryWarfareRoute
+  '/library': typeof LibraryIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -70,13 +101,36 @@ export interface FileRoutesById {
   '/dialogues': typeof DialoguesRoute
   '/export': typeof ExportRoute
   '/import': typeof ImportRoute
-  '/library': typeof LibraryRoute
+  '/library': typeof LibraryRouteWithChildren
+  '/library/galaxy': typeof LibraryGalaxyRoute
+  '/library/reputation': typeof LibraryReputationRoute
+  '/library/warfare': typeof LibraryWarfareRoute
+  '/library/': typeof LibraryIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/debug' | '/dialogues' | '/export' | '/import' | '/library'
+  fullPaths:
+    | '/'
+    | '/debug'
+    | '/dialogues'
+    | '/export'
+    | '/import'
+    | '/library'
+    | '/library/galaxy'
+    | '/library/reputation'
+    | '/library/warfare'
+    | '/library/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/debug' | '/dialogues' | '/export' | '/import' | '/library'
+  to:
+    | '/'
+    | '/debug'
+    | '/dialogues'
+    | '/export'
+    | '/import'
+    | '/library/galaxy'
+    | '/library/reputation'
+    | '/library/warfare'
+    | '/library'
   id:
     | '__root__'
     | '/'
@@ -85,6 +139,10 @@ export interface FileRouteTypes {
     | '/export'
     | '/import'
     | '/library'
+    | '/library/galaxy'
+    | '/library/reputation'
+    | '/library/warfare'
+    | '/library/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -93,7 +151,7 @@ export interface RootRouteChildren {
   DialoguesRoute: typeof DialoguesRoute
   ExportRoute: typeof ExportRoute
   ImportRoute: typeof ImportRoute
-  LibraryRoute: typeof LibraryRoute
+  LibraryRoute: typeof LibraryRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -140,8 +198,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LibraryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/library/': {
+      id: '/library/'
+      path: '/'
+      fullPath: '/library/'
+      preLoaderRoute: typeof LibraryIndexRouteImport
+      parentRoute: typeof LibraryRoute
+    }
+    '/library/galaxy': {
+      id: '/library/galaxy'
+      path: '/galaxy'
+      fullPath: '/library/galaxy'
+      preLoaderRoute: typeof LibraryGalaxyRouteImport
+      parentRoute: typeof LibraryRoute
+    }
+    '/library/reputation': {
+      id: '/library/reputation'
+      path: '/reputation'
+      fullPath: '/library/reputation'
+      preLoaderRoute: typeof LibraryReputationRouteImport
+      parentRoute: typeof LibraryRoute
+    }
+    '/library/warfare': {
+      id: '/library/warfare'
+      path: '/warfare'
+      fullPath: '/library/warfare'
+      preLoaderRoute: typeof LibraryWarfareRouteImport
+      parentRoute: typeof LibraryRoute
+    }
   }
 }
+
+interface LibraryRouteChildren {
+  LibraryGalaxyRoute: typeof LibraryGalaxyRoute
+  LibraryReputationRoute: typeof LibraryReputationRoute
+  LibraryWarfareRoute: typeof LibraryWarfareRoute
+  LibraryIndexRoute: typeof LibraryIndexRoute
+}
+
+const LibraryRouteChildren: LibraryRouteChildren = {
+  LibraryGalaxyRoute: LibraryGalaxyRoute,
+  LibraryReputationRoute: LibraryReputationRoute,
+  LibraryWarfareRoute: LibraryWarfareRoute,
+  LibraryIndexRoute: LibraryIndexRoute,
+}
+
+const LibraryRouteWithChildren =
+  LibraryRoute._addFileChildren(LibraryRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -149,7 +252,7 @@ const rootRouteChildren: RootRouteChildren = {
   DialoguesRoute: DialoguesRoute,
   ExportRoute: ExportRoute,
   ImportRoute: ImportRoute,
-  LibraryRoute: LibraryRoute,
+  LibraryRoute: LibraryRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -4,10 +4,15 @@ import {
   applyZoneDrag,
   axisMax,
   auToSectors,
-  bodiesForStar,
+  clusterTicks,
   fluxLabel,
+  groupSystems,
+  kindGroup,
   luminosityOf,
+  overlayBodies,
   physicsHabitableAU,
+  pickDefaultSystem,
+  placeBodyLabels,
   rgbFromField,
   sectorsToAu,
   solarAdvice,
@@ -21,24 +26,49 @@ import {
   type ZoneHandle,
 } from "@/lib/pda/galaxy.ts";
 
+function shortName(name: string, max = 14) {
+  const clean = name.replace(/\s+/g, " ").trim();
+  return clean.length > max ? `${clean.slice(0, max - 1)}…` : clean;
+}
+
 export function GalaxyStarChart({
   star,
   bodies,
+  starterName,
   onPatchStar,
 }: {
   star: EcfObject;
   bodies: SystemBody[];
+  starterName?: string;
   onPatchStar?: (fields: Record<string, string>) => void;
 }) {
   const L = luminosityOf(star);
   const spans = starZoneSpans(star);
-  const related = bodiesForStar(star, bodies);
+  const systems = useMemo(() => groupSystems(bodies), [bodies]);
+  const [systemName, setSystemName] = useState(() => pickDefaultSystem(star, systems, starterName));
+  const [showMoons, setShowMoons] = useState(false);
+  const [showOther, setShowOther] = useState(false);
+
+  useEffect(() => {
+    setSystemName(pickDefaultSystem(star, systems, starterName));
+  }, [star.name, starterName, systems]);
+
+  const selected = systems.find((s) => s.name === systemName) ?? systems[0];
+  const related = overlayBodies(star, selected?.bodies ?? []).filter((body) => {
+    const group = kindGroup(body.kind);
+    if (group === "planet") return true;
+    if (group === "moon") return showMoons;
+    return showOther;
+  });
   const max = Math.max(axisMax(star, related), 8);
+  const inView = related.filter((b) => b.distance <= max);
+  const offscale = related.filter((b) => b.distance > max);
   const physics = physicsHabitableAU(L);
   const warnings = zoneWarnings(star);
   const svgRef = useRef<SVGSVGElement>(null);
   const [probe, setProbe] = useState(0);
   const [drag, setDrag] = useState<ZoneHandle | "probe" | null>(null);
+  const [hover, setHover] = useState<string | null>(null);
 
   useEffect(() => {
     const temp = spans.find((s) => s.key === "HabitableTemperate");
@@ -48,13 +78,21 @@ export function GalaxyStarChart({
   const flux = solarFlux(L, probe);
   const zone = zoneAtDistance(star, probe);
   const color = rgbFromField(star.fields.Color || star.fields.LightColor);
-  const w = 720;
-  const bandH = 56;
-  const fluxH = 110;
-  const pad = { l: 44, r: 16, t: 18, b: 28 };
+  const w = 760;
+  const bandY = 28;
+  const bandH = 44;
+  const fluxH = 96;
+  const pad = { l: 52, r: 18, t: 10, b: 22 };
   const innerW = w - pad.l - pad.r;
   const x = (sectors: number) => pad.l + (Math.max(0, Math.min(sectors, max)) / max) * innerW;
   const handles = zoneHandleList(spans);
+  const ticks = clusterTicks(inView, x, 5);
+  const { placed, hidden } = placeBodyLabels(inView, x, 70, 3);
+  const lanes = Math.max(1, ...placed.map((p) => p.lane + 1), 1);
+  const labelH = 8 + lanes * 16;
+  const axisY = bandY + bandH + labelH + 18;
+  const fluxY = axisY + 14;
+  const height = fluxY + fluxH + pad.b;
 
   const sectorsFromEvent = (event: PointerEvent) => {
     const svg = svgRef.current;
@@ -81,19 +119,19 @@ export function GalaxyStarChart({
 
   const fluxPts = useMemo(() => {
     const pts: { x: number; y: number }[] = [];
-    for (let i = 0; i <= 40; i++) {
-      const sectors = (i / 40) * max;
+    for (let i = 0; i <= 48; i++) {
+      const sectors = (i / 48) * max;
       const f = solarFlux(L, Math.max(sectors, 0.2));
       const log = Math.log10(Math.max(f, 0.001));
-      const y = pad.t + fluxH - ((log - Math.log10(0.001)) / (Math.log10(20) - Math.log10(0.001))) * fluxH;
-      pts.push({ x: x(sectors), y: Math.max(pad.t, Math.min(pad.t + fluxH, y)) });
+      const y = fluxY + fluxH - ((log - Math.log10(0.001)) / (Math.log10(20) - Math.log10(0.001))) * fluxH;
+      pts.push({ x: x(sectors), y: Math.max(fluxY, Math.min(fluxY + fluxH, y)) });
     }
     return pts;
-  }, [L, max]);
+  }, [L, max, fluxY]);
 
   const earthY = (() => {
     const log = Math.log10(1);
-    return pad.t + fluxH - ((log - Math.log10(0.001)) / (Math.log10(20) - Math.log10(0.001))) * fluxH;
+    return fluxY + fluxH - ((log - Math.log10(0.001)) / (Math.log10(20) - Math.log10(0.001))) * fluxH;
   })();
 
   return (
@@ -106,10 +144,34 @@ export function GalaxyStarChart({
             <span className="ml-2 font-mono text-sm text-muted">L = {L} Sol</span>
           </h3>
           <p className="mt-1 text-xs text-subtle">
-            Drag the dots to resize generation bands. Game ranges are sectors (10 = 1 AU). Dashed bar is physics HZ from
-            luminosity.
+            One solar system, scaled to this star’s outer band. Far playfields stay off-chart so names don’t pile up.
           </p>
         </div>
+        <div className="flex flex-wrap items-end gap-2">
+          {systems.length ? (
+            <label className="text-xs text-muted">
+              System
+              <select
+                className="ml-2 h-8 max-w-48 rounded-sm border border-border bg-bg px-2 text-sm text-fg"
+                value={selected?.name || ""}
+                onChange={(e) => setSystemName(e.target.value)}
+              >
+                {systems.map((sys) => (
+                  <option key={sys.name} value={sys.name}>
+                    {sys.starClass ? `${sys.name} (${sys.starClass})` : sys.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          <label className="flex items-center gap-1 text-xs text-muted">
+            <input type="checkbox" checked={showMoons} onChange={(e) => setShowMoons(e.target.checked)} />
+            Moons
+          </label>
+          <label className="flex items-center gap-1 text-xs text-muted">
+            <input type="checkbox" checked={showOther} onChange={(e) => setShowOther(e.target.checked)} />
+            Other
+          </label>
         <label className="text-xs text-muted">
           Probe distance
           <input
@@ -119,60 +181,105 @@ export function GalaxyStarChart({
           />
           <span className="ml-1 text-subtle">sec</span>
         </label>
+        </div>
       </div>
 
       <svg
         ref={svgRef}
-        viewBox={`0 0 ${w} ${pad.t + bandH + 36 + pad.t + fluxH + pad.b}`}
+        viewBox={`0 0 ${w} ${height}`}
         className="mt-3 w-full touch-none"
         onPointerMove={onPointerMove}
         onPointerUp={() => setDrag(null)}
         onPointerCancel={() => setDrag(null)}
       >
-        <circle cx={22} cy={pad.t + bandH / 2} r={10} fill={color} />
-        {spans.map((span) => (
-          <g key={span.key}>
-            <rect
-              x={x(span.min)}
-              y={pad.t}
-              width={Math.max(2, x(span.max) - x(span.min))}
-              height={bandH}
-              fill={span.color}
-              opacity={0.35}
-            />
-            <text x={x((span.min + span.max) / 2)} y={pad.t + 16} textAnchor="middle" fill="currentColor" className="fill-muted" fontSize="10">
-              {span.label}
-            </text>
-            <text x={x((span.min + span.max) / 2)} y={pad.t + 30} textAnchor="middle" fill="currentColor" className="fill-subtle" fontSize="9">
-              {span.min}–{span.max}
-            </text>
-          </g>
-        ))}
+        <rect x={pad.l} y={bandY} width={innerW} height={bandH} className="fill-bg" rx="4" />
+        {spans.map((span) => {
+          const left = x(span.min);
+          const width = Math.max(2, x(span.max) - left);
+          return (
+            <g key={span.key}>
+              <rect x={left} y={bandY} width={width} height={bandH} fill={span.color} opacity={0.38} />
+              {width >= 36 ? (
+                <text
+                  x={left + width / 2}
+                  y={bandY + 18}
+                  textAnchor="middle"
+                  className="fill-fg"
+                  fontSize="10"
+                  fontWeight="500"
+                >
+                  {span.label}
+                </text>
+              ) : null}
+              {width >= 52 ? (
+                <text x={left + width / 2} y={bandY + 32} textAnchor="middle" className="fill-subtle" fontSize="9">
+                  {span.min}–{span.max}
+                </text>
+              ) : null}
+            </g>
+          );
+        })}
         <rect
           x={x(auToSectors(physics.inner))}
-          y={pad.t + bandH - 8}
+          y={bandY + bandH - 7}
           width={Math.max(2, x(auToSectors(physics.outer)) - x(auToSectors(physics.inner)))}
-          height={8}
+          height={6}
           fill="none"
-          stroke="currentColor"
           className="stroke-fg"
           strokeDasharray="4 3"
-          opacity={0.85}
+          opacity={0.8}
         />
-        {related.map((body) => (
-          <g key={`${body.system}-${body.name}`}>
-            <line x1={x(body.distance)} x2={x(body.distance)} y1={pad.t} y2={pad.t + bandH} stroke="currentColor" className="stroke-fg" strokeWidth={1.5} />
-            <text x={x(body.distance)} y={pad.t + bandH + 14} textAnchor="middle" fill="currentColor" className="fill-fg" fontSize="10">
-              {body.name}
-            </text>
-          </g>
+
+        <circle cx={pad.l} cy={bandY + bandH / 2} r={14} fill={color} opacity={0.35} />
+        <circle cx={pad.l} cy={bandY + bandH / 2} r={8} fill={color} />
+        <text x={pad.l} y={bandY - 8} textAnchor="middle" className="fill-muted" fontSize="9">
+          {star.fields.StarClass || "★"}
+        </text>
+
+        {ticks.map((tick) => (
+          <line
+            key={`t-${tick.x}`}
+            x1={tick.x}
+            x2={tick.x}
+            y1={bandY + 4}
+            y2={bandY + bandH - 4}
+            className="stroke-fg"
+            opacity={tick.bodies.some((b) => b.name === hover) ? 0.95 : 0.35}
+            strokeWidth={tick.bodies.some((b) => b.name === hover) ? 2 : 1}
+          />
         ))}
+        {placed.map((item) => {
+          const tick = x(item.body.distance);
+          const labelY = bandY + bandH + 14 + item.lane * 16;
+          const active = hover === item.body.name;
+          return (
+            <g
+              key={`${item.body.system}-${item.body.name}`}
+              onPointerEnter={() => setHover(item.body.name)}
+              onPointerLeave={() => setHover(null)}
+            >
+              <line x1={tick} x2={tick} y1={bandY + bandH} y2={labelY - 8} className="stroke-border" strokeWidth={1} />
+              <text
+                x={tick}
+                y={labelY}
+                textAnchor="middle"
+                className={active ? "fill-fg" : "fill-muted"}
+                fontSize="10"
+                stroke="var(--color-surface)"
+                strokeWidth={3}
+                paintOrder="stroke"
+              >
+                {shortName(item.body.name)}
+              </text>
+            </g>
+          );
+        })}
+
         <line
           x1={x(probe)}
           x2={x(probe)}
-          y1={pad.t}
-          y2={pad.t + bandH}
-          stroke="currentColor"
+          y1={bandY}
+          y2={bandY + bandH}
           className="stroke-accent"
           strokeWidth={2}
           onPointerDown={(e) => {
@@ -185,9 +292,8 @@ export function GalaxyStarChart({
               <circle
                 key={handle.id}
                 cx={x(handle.sectors)}
-                cy={pad.t + bandH / 2}
-                r={7}
-                fill="currentColor"
+                cy={bandY + bandH / 2}
+                r={9}
                 className="fill-fg cursor-ew-resize"
                 onPointerDown={(e) => {
                   e.stopPropagation();
@@ -197,39 +303,46 @@ export function GalaxyStarChart({
               />
             ))
           : null}
-        <text x={pad.l} y={pad.t + bandH + 32} fill="currentColor" className="fill-subtle" fontSize="10">
-          0 sec / 0 AU
+
+        <text x={pad.l} y={axisY} className="fill-subtle" fontSize="10">
+          0 AU
         </text>
-        <text x={w - pad.r} y={pad.t + bandH + 32} textAnchor="end" fill="currentColor" className="fill-subtle" fontSize="10">
+        <text x={w - pad.r} y={axisY} textAnchor="end" className="fill-subtle" fontSize="10">
           {max.toFixed(0)} sec · {sectorsToAu(max).toFixed(1)} AU
         </text>
 
-        <g transform={`translate(0, ${pad.t + bandH + 40})`}>
-          <text x={8} y={pad.t} fill="currentColor" className="fill-subtle" fontSize="10">
-            flux
-          </text>
-          <line x1={pad.l} x2={w - pad.r} y1={earthY} y2={earthY} stroke="currentColor" className="stroke-ok" strokeDasharray="3 3" opacity={0.6} />
-          <text x={w - pad.r} y={earthY - 4} textAnchor="end" fill="currentColor" className="fill-ok" fontSize="9">
-            1× Earth
-          </text>
-          <polyline fill="none" stroke="currentColor" className="stroke-accent" strokeWidth={2} points={fluxPts.map((p) => `${p.x},${p.y}`).join(" ")} />
-          {related.map((body) => {
-            const f = solarFlux(L, body.distance);
-            const log = Math.log10(Math.max(f, 0.001));
-            const y = pad.t + fluxH - ((log - Math.log10(0.001)) / (Math.log10(20) - Math.log10(0.001))) * fluxH;
-            return (
-              <circle
-                key={`f-${body.name}`}
-                cx={x(body.distance)}
-                cy={Math.max(pad.t, Math.min(pad.t + fluxH, y))}
-                r={3}
-                fill="currentColor"
-                className="fill-fg"
-              />
-            );
-          })}
-        </g>
+        <text x={8} y={fluxY + 10} className="fill-subtle" fontSize="10">
+          flux
+        </text>
+        <line x1={pad.l} x2={w - pad.r} y1={earthY} y2={earthY} className="stroke-ok" strokeDasharray="3 3" opacity={0.6} />
+        <text x={w - pad.r} y={earthY - 4} textAnchor="end" className="fill-ok" fontSize="9">
+          1× Earth
+        </text>
+        <polyline fill="none" className="stroke-accent" strokeWidth={2} points={fluxPts.map((p) => `${p.x},${p.y}`).join(" ")} />
+        {inView.map((body) => {
+          const f = solarFlux(L, body.distance);
+          const log = Math.log10(Math.max(f, 0.001));
+          const y = fluxY + fluxH - ((log - Math.log10(0.001)) / (Math.log10(20) - Math.log10(0.001))) * fluxH;
+          return (
+            <circle
+              key={`f-${body.system}-${body.name}`}
+              cx={x(body.distance)}
+              cy={Math.max(fluxY, Math.min(fluxY + fluxH, y))}
+              r={hover === body.name ? 4 : 2.5}
+              className="fill-fg"
+            />
+          );
+        })}
       </svg>
+
+      {(hidden > 0 || offscale.length > 0) ? (
+        <p className="mt-2 text-xs text-subtle">
+          {hidden > 0 ? `${hidden} labels skipped so names don’t overlap. ` : null}
+          {offscale.length > 0
+            ? `${offscale.length} playfields sit past this star’s outer band (e.g. ${offscale[0]!.name} at ${offscale[0]!.distance.toFixed(0)} sec / ${sectorsToAu(offscale[0]!.distance).toFixed(1)} AU) and are kept off the ruler.`
+            : null}
+        </p>
+      ) : null}
 
       <div className="mt-3 grid gap-3 sm:grid-cols-3">
         <Stat label="Probe" value={`${probe} sec · ${sectorsToAu(probe).toFixed(2)} AU`} />
@@ -265,12 +378,17 @@ export function GalaxyStarChart({
               const z = zoneAtDistance(star, body.distance);
               const f = solarFlux(L, body.distance);
               return (
-                <tr key={`${body.system}-${body.name}`}>
+                <tr
+                  key={`${body.system}-${body.name}`}
+                  className={hover === body.name ? "bg-elevated" : undefined}
+                  onPointerEnter={() => setHover(body.name)}
+                  onPointerLeave={() => setHover(null)}
+                >
                   <td className="py-1.5">{body.name}</td>
                   <td className="py-1.5 text-muted">{body.kind}</td>
                   <td className="py-1.5 font-mono text-xs">{body.distance.toFixed(1)}</td>
                   <td className="py-1.5 font-mono text-xs">{sectorsToAu(body.distance).toFixed(2)}</td>
-                  <td className="py-1.5">{z?.label || "—"}</td>
+                  <td className="py-1.5">{z?.label || (body.distance > max ? "off-scale" : "—")}</td>
                   <td className="py-1.5 font-mono text-xs">{fluxLabel(f)}</td>
                 </tr>
               );

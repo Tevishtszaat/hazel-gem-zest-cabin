@@ -3,13 +3,16 @@ import { describe, it } from "node:test";
 import { parseEcfObjects } from "./ecf.ts";
 import {
   applyZoneDrag,
+  axisMax,
   auToSectors,
   fieldToHex,
   hexToField,
   luminosityOf,
   parseRange,
   parseSectorBodies,
+  overlayBodies,
   parseStarMix,
+  placeBodyLabels,
   physicsHabitableAU,
   solarFlux,
   starZoneSpans,
@@ -64,6 +67,25 @@ describe("galaxy habitable zones", () => {
     assert.equal(akua.distance, 66);
     assert.equal(akua.starClass, "G");
     assert.equal(akua.kind.trim(), "Planet");
+    const star = { kind: "GalaxyConfig", plus: false, name: "G Type Star", fields: { StarClass: "G" } };
+    const overlay = overlayBodies(star, bodies);
+    assert.ok(!overlay.some((b) => b.name === "Ellyon"));
+    const packed = overlayBodies(star, [
+      ...bodies,
+      { system: "Ellyon", starClass: "G", name: "AkuaOrbit", kind: "Space", coords: [66, 1, 0], distance: 66.01 },
+      { system: "Ellyon", starClass: "G", name: "AkuaMoon", kind: "Moon", coords: [67, 0, 0], distance: 67 },
+    ]);
+    const { placed, hidden } = placeBodyLabels(packed, (s) => s * 4, 64, 4);
+    assert.ok(placed.length >= 2);
+    const xs = placed.filter((p) => p.lane === 0).map((p) => p.x);
+    for (let i = 1; i < xs.length; i++) assert.ok(xs[i]! - xs[i - 1]! >= 64);
+    assert.equal(typeof hidden, "number");
+    const scaled = axisMax(
+      { kind: "GalaxyConfig", plus: false, name: "G Type Star", fields: { StarClass: "G", OuterSystem: "76, 132" } },
+      [...packed, { system: "Ellyon", name: "Laboratorio", kind: "Space", coords: [59264, 0, 0], distance: 59264 }],
+    );
+    assert.ok(scaled < 400, `scale should ignore 59264 outlier, got ${scaled}`);
+    assert.ok(scaled >= 132);
   });
 
   it("round-trips region star mix and shared zone handles", () => {

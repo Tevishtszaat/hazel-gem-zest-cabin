@@ -1,4 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { LibraryPage } from "@/components/library/library-page.tsx";
+import { Outlet, createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/library")({ component: LibraryPage });
+export const Route = createFileRoute("/library")({
+  component: function LibraryLayout() {
+    return <Outlet />;
+  },
+});

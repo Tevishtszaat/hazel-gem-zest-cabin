@@ -168,6 +168,7 @@ export function GalaxyEditor() {
         <GalaxyStarChart
           star={star}
           bodies={bodies}
+          starterName={general?.fields.StarterSystemName}
           onPatchStar={(fields) =>
             persist(
               objects.map((obj) => (obj.name === star.name ? { ...obj, fields: { ...obj.fields, ...fields } } : obj)),

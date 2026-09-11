@@ -251,10 +251,56 @@ export function axisMax(star: EcfObject, bodies: SystemBody[] = []): number {
   const spans = starZoneSpans(star);
   const physics = physicsHabitableAU(luminosityOf(star));
   const fromZones = spans.length ? Math.max(...spans.map((s) => s.max)) : 0;
-  const fromBodies = bodies.length ? Math.max(...bodies.map((b) => b.distance)) : 0;
   const fromPhysics = auToSectors(physics.optimisticOuter);
-  return Math.max(fromZones, fromBodies, fromPhysics, 20);
+  const zoneCap = Math.max(fromZones * 1.3, fromPhysics * 1.2, 40);
+  const inView = bodies.map((b) => b.distance).filter((d) => d > 0.5 && d <= zoneCap * 2);
+  const fromBodies = inView.length ? Math.max(...inView) * 1.1 : 0;
+  return Math.max(fromZones, fromPhysics, Math.min(fromBodies || 0, zoneCap * 1.8), 20);
 }
+
+export type StarSystem = { name: string; starClass?: string; bodies: SystemBody[] };
+
+export function groupSystems(bodies: SystemBody[]): StarSystem[] {
+  const map = new Map<string, StarSystem>();
+  for (const body of bodies) {
+    const name = body.system || "System";
+    let sys = map.get(name);
+    if (!sys) {
+      sys = { name, starClass: body.starClass, bodies: [] };
+      map.set(name, sys);
+    }
+    if (body.starClass && !sys.starClass) sys.starClass = body.starClass;
+    sys.bodies.push(body);
+  }
+  return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export function pickDefaultSystem(star: EcfObject, systems: StarSystem[], starterName?: string): string {
+  if (!systems.length) return "";
+  const starter = starterName?.trim().toLowerCase();
+  if (starter) {
+    const hit = systems.find((s) => s.name.toLowerCase() === starter);
+    if (hit) return hit.name;
+  }
+  const klass = (star.fields.StarClass || "").trim().toLowerCase();
+  const outer = starZoneSpans(star).at(-1)?.max ?? 200;
+  const scored = (list: StarSystem[]) =>
+    [...list].sort((a, b) => {
+      const count = (s: StarSystem) => s.bodies.filter((x) => x.distance > 0.5 && x.distance <= outer * 2).length;
+      return count(b) - count(a);
+    });
+  const byClass = systems.filter((s) => (s.starClass || "").toLowerCase() === klass);
+  if (byClass.length) return scored(byClass)[0]!.name;
+  return scored(systems)[0]!.name;
+}
+
+export function kindGroup(kind: string): "star" | "planet" | "moon" | "other" {
+  if (/^(sun|star)$/i.test(kind)) return "star";
+  if (/moon/i.test(kind)) return "moon";
+  if (/planet/i.test(kind)) return "planet";
+  return "other";
+}
+
 
 export function zoneAtDistance(star: EcfObject, sectors: number): ZoneSpan | null {
   return starZoneSpans(star).find((z) => sectors >= z.min && sectors <= z.max) ?? null;
@@ -349,6 +395,61 @@ export function bodiesForStar(star: EcfObject, bodies: SystemBody[]): SystemBody
   const matched = bodies.filter((b) => (b.starClass || "").toLowerCase() === klass.toLowerCase());
   return (matched.length ? matched : bodies).filter((b) => !/^sun|star/i.test(b.kind) || b.distance > 0);
 }
+
+export function overlayBodies(_star: EcfObject, bodies: SystemBody[]): SystemBody[] {
+  const seen = new Set<string>();
+  const out: SystemBody[] = [];
+  for (const body of bodies) {
+    if (body.distance < 0.5) continue;
+    if (kindGroup(body.kind) === "star") continue;
+    const key = `${body.name.toLowerCase()}@${body.distance.toFixed(1)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(body);
+  }
+  return out.sort((a, b) => a.distance - b.distance);
+}
+
+export function clusterTicks(
+  bodies: SystemBody[],
+  xOf: (sectors: number) => number,
+  px = 4,
+): { x: number; bodies: SystemBody[] }[] {
+  const groups: { x: number; bodies: SystemBody[] }[] = [];
+  for (const body of bodies) {
+    const x = xOf(body.distance);
+    const last = groups[groups.length - 1];
+    if (last && Math.abs(x - last.x) < px) last.bodies.push(body);
+    else groups.push({ x, bodies: [body] });
+  }
+  return groups;
+}
+
+
+export type PlacedLabel = { body: SystemBody; x: number; lane: number };
+
+export function placeBodyLabels(
+  bodies: SystemBody[],
+  xOf: (sectors: number) => number,
+  minGap = 64,
+  maxLanes = 4,
+): { placed: PlacedLabel[]; hidden: number } {
+  const lastX = Array.from({ length: maxLanes }, () => -Infinity);
+  const placed: PlacedLabel[] = [];
+  let hidden = 0;
+  for (const body of bodies) {
+    const x = xOf(body.distance);
+    let lane = lastX.findIndex((prev) => x - prev >= minGap);
+    if (lane < 0) {
+      hidden += 1;
+      continue;
+    }
+    lastX[lane] = x;
+    placed.push({ body, x, lane });
+  }
+  return { placed, hidden };
+}
+
 
 export function fluxLabel(flux: number) {
   if (!Number.isFinite(flux)) return "—";
