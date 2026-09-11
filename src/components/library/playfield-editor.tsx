@@ -1,16 +1,9 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button.tsx";
-import { Input, Textarea } from "@/components/ui/input.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
-import {
-  bundlePlayfields,
-  keysForKind,
-  kindLabel,
-  patchYamlField,
-  variantLabel,
-  type PlayfieldKind,
-} from "@/lib/pda/playfield.ts";
+import { PlayfieldDesigner } from "@/components/library/playfield-designer.tsx";
+import { bundlePlayfields, kindLabel, variantLabel, type PlayfieldKind } from "@/lib/pda/playfield.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
 
 const KINDS: PlayfieldKind[] = ["planet", "moon", "orbit", "space", "unknown"];
@@ -101,18 +94,9 @@ export function PlayfieldEditor() {
       </aside>
       <section className="min-h-0 overflow-auto p-6">
         {selected && current ? (
-          <div className="max-w-3xl">
-            <p className="text-xs uppercase tracking-[0.14em] text-accent">{kindLabel(selected.kind)}</p>
-            <h2 className="mt-1 text-xl font-medium tracking-tight">{selected.name}</h2>
-            <p className="mt-1 text-xs text-subtle">
-              {selected.kind === "planet" || selected.kind === "moon"
-                ? "Planet/moon yaml: gravity, atmosphere, biome, temperatures."
-                : selected.kind === "orbit"
-                  ? "Orbit yaml: space playfield that wraps a planet. Usually playfield_dynamic.yaml."
-                  : "Space sector yaml: open space / warp pocket. Usually space_dynamic.yaml."}
-            </p>
+          <div>
             {selected.files.length > 1 ? (
-              <div className="mt-3 flex flex-wrap gap-1">
+              <div className="mb-3 flex flex-wrap gap-1">
                 {selected.files.map((file) => (
                   <button
                     key={file.path}
@@ -126,52 +110,29 @@ export function PlayfieldEditor() {
                 ))}
               </div>
             ) : (
-              <p className="mt-3 text-xs text-subtle">{variantLabel(current.variant)}</p>
+              <p className="mb-3 text-xs text-subtle">{variantLabel(current.variant)}</p>
             )}
+            <PlayfieldDesigner
+              file={current}
+              kind={selected.kind}
+              catalog={catalog}
+              onChange={(text) => persist(current.path, text)}
+            />
             <Separator className="my-4" />
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {keysForKind(selected.kind).map((key) => (
-                <label key={key} className="block space-y-1">
-                  <span className="text-xs uppercase tracking-[0.12em] text-muted">{key}</span>
-                  {key === "Description" ? (
-                    <Textarea
-                      rows={3}
-                      value={current.fields[key] ?? ""}
-                      onChange={(e) => persist(current.path, patchYamlField(current.text, key, e.target.value))}
-                    />
-                  ) : (
-                    <Input
-                      value={current.fields[key] ?? ""}
-                      onChange={(e) => persist(current.path, patchYamlField(current.text, key, e.target.value))}
-                    />
-                  )}
-                </label>
-              ))}
-            </div>
-            <div className="mt-5">
-              <p className="text-xs uppercase tracking-[0.14em] text-muted">Raw {variantLabel(current.variant)}</p>
-              <Textarea
-                className="mt-2 min-h-64 font-mono text-xs"
-                value={current.text}
-                onChange={(e) => persist(current.path, e.target.value)}
-              />
-            </div>
-            <div className="mt-3">
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => {
-                  const blob = new Blob([current.text], { type: "text/yaml;charset=utf-8" });
-                  const a = document.createElement("a");
-                  a.href = URL.createObjectURL(blob);
-                  a.download = current.path.split(/[/\\]/).pop() || "playfield.yaml";
-                  a.click();
-                  URL.revokeObjectURL(a.href);
-                }}
-              >
-                Download this file
-              </Button>
-            </div>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                const blob = new Blob([current.text], { type: "text/yaml;charset=utf-8" });
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(blob);
+                a.download = current.path.split(/[/\\]/).pop() || "playfield.yaml";
+                a.click();
+                URL.revokeObjectURL(a.href);
+              }}
+            >
+              Download this file
+            </Button>
           </div>
         ) : (
           <p className="text-sm text-muted">Select a playfield.</p>
