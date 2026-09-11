@@ -6,6 +6,7 @@ import { BbText } from "@/components/editor/bb-text.tsx";
 import { ItemIcon } from "@/components/editor/pda-image.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Input, Textarea } from "@/components/ui/input.tsx";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
 import {
   blockIdentity,
   classFieldValue,
@@ -388,13 +389,16 @@ export function ObjectBrowser({
   });
   const selected = objects.find((o, i) => objectKey(o, i) === picked) ?? visible[0] ?? objects[0];
   const selectedIndex = selected ? objects.indexOf(selected) : -1;
-  const slideIndex = selected ? visible.indexOf(selected) : 0;
+  const numberedVisible = usesFloatingIds ? visible.filter((o) => blockIdentity(o).kind === "numeric") : visible;
+  const customVisible = usesFloatingIds ? visible.filter((o) => blockIdentity(o).kind === "floating") : [];
+  const slideItems = usesFloatingIds && idFilter === "all" ? numberedVisible : visible;
+  const slideIndex = selected ? slideItems.indexOf(selected) : 0;
   const hasText = Boolean(catalogText(catalog, role));
   const fileName = catalogText(catalog, role)?.path.split(/[\\/]/).pop() || meta.file;
   const kindName = objects[0]?.kind || meta.kind;
 
   const pickAt = (next: number) => {
-    const obj = visible[next];
+    const obj = slideItems[next];
     if (!obj) return;
     setPicked(objectKey(obj, objects.indexOf(obj)));
   };
@@ -563,71 +567,9 @@ export function ObjectBrowser({
             {usesFloatingIds ? ` · ${floats.length} custom · ${unused.total} free numbers` : ""}
           </p>
         </div>
-        {usesFloatingIds && floats.length ? (
-          <div className="border-b border-border p-2">
-            <p className="text-xs uppercase tracking-[0.14em] text-accent">Custom (name ID)</p>
-            <p className="mt-1 text-xs text-subtle">
-              Scenario-added {kindName.toLowerCase()}s with no number. The game uses{" "}
-              <span className="font-mono">+{kindName} Name</span> / <span className="font-mono">{kindName} Name</span>.
-            </p>
-            <div className="mt-2 flex flex-wrap gap-1">
-              {floats.slice(0, 24).map((obj) => {
-                const ident = blockIdentity(obj);
-                return (
-                  <button
-                    key={ident.label}
-                    className="rounded-sm border border-border px-1.5 py-0.5 font-mono text-[11px] text-muted hover:bg-elevated hover:text-fg"
-                    onClick={() => {
-                      setIdFilter("floating");
-                      setPicked(objectKey(obj, objects.indexOf(obj)));
-                    }}
-                    title={obj.plus ? `{ +${kindName} Name: ${obj.name} }` : `{ ${kindName} Name: ${obj.name} }`}
-                  >
-                    {ident.label}
-                  </button>
-                );
-              })}
-              {floats.length > 24 ? <span className="px-1 text-[11px] text-subtle">+{floats.length - 24}</span> : null}
-            </div>
-          </div>
-        ) : null}
-        {usesIds && unused.total ? (
-          <div className="border-b border-border p-2">
-            <p className="text-xs uppercase tracking-[0.14em] text-accent">Empty numeric IDs</p>
-            <p className="mt-1 text-xs text-subtle">
-              {usesFloatingIds
-                ? `Optional. Claim a number, or New ${kindName} to add a custom +${kindName} Name.`
-                : `Claim a free Id to add a new ${kindName.toLowerCase()}.`}
-            </p>
-            <div className="mt-2 flex flex-wrap gap-1">
-              {unused.ranges.slice(0, 8).map((range) => (
-                <button
-                  key={`${range.from}-${range.to}`}
-                  className="rounded-sm border border-border px-1.5 py-0.5 font-mono text-[11px] text-muted hover:bg-elevated hover:text-fg"
-                  onClick={() => claim(range.from)}
-                  title={`${range.count} free · uses ${range.from}`}
-                >
-                  {range.from === range.to ? range.from : `${range.from}–${range.to}`}
-                </button>
-              ))}
-            </div>
-            <div className="mt-2 flex flex-wrap gap-1">
-              {unused.ids.slice(0, 24).map((id) => (
-                <button
-                  key={id}
-                  className="rounded-sm bg-elevated px-1.5 py-0.5 font-mono text-[11px] text-muted hover:text-fg"
-                  onClick={() => claim(id)}
-                >
-                  {id}
-                </button>
-              ))}
-              {unused.total > 24 ? <span className="px-1 text-[11px] text-subtle">+{unused.total - 24}</span> : null}
-            </div>
-          </div>
-        ) : null}
-        {visible.length > 1 ? (
+        {slideItems.length > 1 ? (
           <CatalogScrubber
-            items={visible}
+            items={slideItems}
             index={slideIndex < 0 ? 0 : slideIndex}
             onIndex={pickAt}
             loca={loca}
@@ -670,50 +612,20 @@ export function ObjectBrowser({
               </div>
             ))
           ) : usesFloatingIds && idFilter === "all" && floats.length ? (
-            <>
-              <p className="sticky top-0 z-10 bg-surface px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-accent">
-                Custom
-                <span className="ml-2 text-subtle">{visible.filter((o) => blockIdentity(o).kind === "floating").length}</span>
-              </p>
-              {visible
-                .filter((o) => blockIdentity(o).kind === "floating")
-                .slice(0, listCap)
-                .map((obj) => (
-                  <CatalogRow
-                    key={objectKey(obj, objects.indexOf(obj))}
-                    obj={obj}
-                    index={objects.indexOf(obj)}
-                    label={locaLabel(loca, obj.name, language) || objectLabel(obj)}
-                    selected={selected}
-                    selectedIndex={selectedIndex}
-                    onPick={setPicked}
-                    trailing={
-                      <span className="shrink-0 font-mono text-xs text-accent">{blockIdentity(obj).label}</span>
-                    }
-                  />
-                ))}
-              <p className="sticky top-0 z-10 bg-surface px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-accent">
-                Numbered
-                <span className="ml-2 text-subtle">{visible.filter((o) => blockIdentity(o).kind === "numeric").length}</span>
-              </p>
-              {visible
-                .filter((o) => blockIdentity(o).kind === "numeric")
-                .slice(0, listCap)
-                .map((obj) => (
-                  <CatalogRow
-                    key={objectKey(obj, objects.indexOf(obj))}
-                    obj={obj}
-                    index={objects.indexOf(obj)}
-                    label={locaLabel(loca, obj.name, language) || objectLabel(obj)}
-                    selected={selected}
-                    selectedIndex={selectedIndex}
-                    onPick={setPicked}
-                    trailing={
-                      <span className="shrink-0 font-mono text-xs text-subtle">{blockIdentity(obj).label}</span>
-                    }
-                  />
-                ))}
-            </>
+            numberedVisible.slice(0, listCap).map((obj) => (
+              <CatalogRow
+                key={objectKey(obj, objects.indexOf(obj))}
+                obj={obj}
+                index={objects.indexOf(obj)}
+                label={locaLabel(loca, obj.name, language) || objectLabel(obj)}
+                selected={selected}
+                selectedIndex={selectedIndex}
+                onPick={setPicked}
+                trailing={
+                  <span className="shrink-0 font-mono text-xs text-subtle">{blockIdentity(obj).label}</span>
+                }
+              />
+            ))
           ) : (
             visible.slice(0, listCap).map((obj) => {
               const index = objects.indexOf(obj);
@@ -750,6 +662,72 @@ export function ObjectBrowser({
             })
           )}
         </div>
+        {usesFloatingIds || usesIds ? (
+          <div className="space-y-2 border-t border-border p-2">
+            {usesFloatingIds ? (
+              <div>
+                <p className="mb-1 text-xs uppercase tracking-[0.14em] text-muted">Custom IDs</p>
+                <Select
+                  value={
+                    selected && blockIdentity(selected).kind === "floating"
+                      ? objectKey(selected, selectedIndex)
+                      : "pick"
+                  }
+                  onValueChange={(key) => {
+                    if (key !== "pick") setPicked(key);
+                  }}
+                >
+                  <SelectTrigger className="h-9 w-full min-w-0" aria-label="Custom name IDs">
+                    <SelectValue placeholder={floats.length ? `${floats.length} custom names` : "No custom IDs"} />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-80">
+                    <SelectItem value="pick">
+                      {floats.length ? `${floats.length} custom names` : "No custom IDs"}
+                    </SelectItem>
+                    {floats.map((obj) => {
+                      const index = objects.indexOf(obj);
+                      const key = objectKey(obj, index);
+                      return (
+                        <SelectItem key={key} value={key}>
+                          {blockIdentity(obj).label}
+                          {locaLabel(loca, obj.name, language) ? ` · ${locaLabel(loca, obj.name, language)}` : ""}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : null}
+            {usesIds ? (
+              <div>
+                <p className="mb-1 text-xs uppercase tracking-[0.14em] text-muted">Unused IDs</p>
+                <Select key={unused.next} onValueChange={(value) => claim(Number(value.split(":").pop()))}>
+                  <SelectTrigger className="h-9 w-full min-w-0" aria-label="Unused numeric IDs">
+                    <SelectValue placeholder={unused.total ? `${unused.total} free numbers` : "No unused IDs"} />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-80">
+                    {unused.ranges.map((range) => (
+                      <SelectItem key={`range-${range.from}-${range.to}`} value={`range:${range.from}`}>
+                        {range.from === range.to ? String(range.from) : `${range.from}–${range.to}`}
+                        {` · claim ${range.from}`}
+                      </SelectItem>
+                    ))}
+                    {unused.ids.map((id) => (
+                      <SelectItem key={`id-${id}`} value={`id:${id}`}>
+                        {id}
+                      </SelectItem>
+                    ))}
+                    {!unused.total ? (
+                      <SelectItem value="none" disabled>
+                        None
+                      </SelectItem>
+                    ) : null}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </aside>
       <section className="min-h-0 overflow-auto p-6">
         {selected && selectedIndex >= 0 ? (
