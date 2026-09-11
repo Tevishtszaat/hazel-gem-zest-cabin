@@ -1,12 +1,18 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
+import { Button } from "@/components/ui/button.tsx";
 import type { EcfObject } from "@/lib/pda/ecf.ts";
 import {
   applyZoneDrag,
   axisMax,
   auToSectors,
+  climateLabel,
   clusterTicks,
+  diagnoseOrbits,
   fluxLabel,
+  formatCoords,
+  formatLum,
   groupSystems,
+  inferClimate,
   kindGroup,
   luminosityOf,
   overlayBodies,
@@ -19,9 +25,11 @@ import {
   solarFlux,
   spansToZoneFields,
   starZoneSpans,
+  systemLuminosityWindow,
   zoneAtDistance,
   zoneHandleList,
   zoneWarnings,
+  type OrbitIssue,
   type SystemBody,
   type ZoneHandle,
 } from "@/lib/pda/galaxy.ts";
@@ -36,11 +44,13 @@ export function GalaxyStarChart({
   bodies,
   starterName,
   onPatchStar,
+  onFixOrbits,
 }: {
   star: EcfObject;
   bodies: SystemBody[];
   starterName?: string;
   onPatchStar?: (fields: Record<string, string>) => void;
+  onFixOrbits?: (fixes: { name: string; coords: [number, number, number] }[]) => void;
 }) {
   const L = luminosityOf(star);
   const spans = starZoneSpans(star);
@@ -349,6 +359,7 @@ export function GalaxyStarChart({
         <Stat label="Game zone" value={zone ? `${zone.label} (${zone.hint})` : "Outside defined bands"} />
         <Stat label="Solar vs Earth" value={`${fluxLabel(flux)} · ${solarAdvice(flux)}`} />
       </div>
+      <LuminosityTuner star={star} bodies={related} onPatchStar={onPatchStar} />
       {warnings.length ? (
         <ul className="mt-3 space-y-1 text-xs text-warn">
           {warnings.map((item) => (
@@ -370,6 +381,7 @@ export function GalaxyStarChart({
               <th className="py-1">Sectors</th>
               <th className="py-1">AU</th>
               <th className="py-1">Zone</th>
+              <th className="py-1">Type</th>
               <th className="py-1">Solar</th>
             </tr>
           </thead>
@@ -389,6 +401,9 @@ export function GalaxyStarChart({
                   <td className="py-1.5 font-mono text-xs">{body.distance.toFixed(1)}</td>
                   <td className="py-1.5 font-mono text-xs">{sectorsToAu(body.distance).toFixed(2)}</td>
                   <td className="py-1.5">{z?.label || (body.distance > max ? "off-scale" : "—")}</td>
+                  <td className="py-1.5 text-xs text-muted">
+                    {climateLabel(inferClimate(body.name, body.kind, body.playfieldType))}
+                  </td>
                   <td className="py-1.5 font-mono text-xs">{fluxLabel(f)}</td>
                 </tr>
               );
@@ -400,6 +415,178 @@ export function GalaxyStarChart({
           Import Sectors.yaml to overlay planet distances on this star. Playfield coords are sectors from the local sun.
         </p>
       )}
+      <OrbitDebugger star={star} bodies={related} onFixOrbits={onFixOrbits} />
+    </div>
+  );
+}
+
+function lumToT(value: number, min: number, max: number) {
+  const lo = Math.log10(Math.max(min, 1e-6));
+  const hi = Math.log10(Math.max(max, min * 1.01));
+  return Math.min(1, Math.max(0, (Math.log10(Math.max(value, 1e-6)) - lo) / (hi - lo)));
+}
+
+function tToLum(t: number, min: number, max: number) {
+  const lo = Math.log10(Math.max(min, 1e-6));
+  const hi = Math.log10(Math.max(max, min * 1.01));
+  return 10 ** (lo + t * (hi - lo));
+}
+
+function LuminosityTuner({
+  star,
+  bodies,
+  onPatchStar,
+}: {
+  star: EcfObject;
+  bodies: SystemBody[];
+  onPatchStar?: (fields: Record<string, string>) => void;
+}) {
+  const L = luminosityOf(star);
+  const sys = useMemo(() => systemLuminosityWindow(star, bodies), [star, bodies]);
+  if (!sys) {
+    return (
+      <p className="mt-3 text-xs text-subtle">
+        Import Sectors.yaml to size this star’s Luminosity from planet / moon distance (inverse-square, 1 AU = 10
+        sectors).
+      </p>
+    );
+  }
+  const floor = Math.min(sys.min, L, sys.suggest);
+  const ceil = Math.max(sys.max, sys.suggestMax, L);
+  const setL = (next: number) => {
+    const n = Number(next.toPrecision(4));
+    onPatchStar?.({ Luminosity: String(n) });
+  };
+  return (
+    <div className="mt-4 rounded-sm border border-border bg-bg p-3">
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <p className="text-xs uppercase tracking-[0.14em] text-accent">Luminosity</p>
+          <p className="mt-1 text-xs text-muted">
+            Game rule: flux = L / (AU)² with 1 AU = 10 sectors. Slider stays inside the min–max this system can take.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="secondary" disabled={!onPatchStar} onClick={() => setL(sys.suggest)}>
+            Earth-like {formatLum(sys.suggest)}
+          </Button>
+          <Button size="sm" disabled={!onPatchStar} onClick={() => setL(sys.suggestMax)}>
+            Apply max {formatLum(sys.suggestMax)}
+          </Button>
+        </div>
+      </div>
+      <div className="mt-3 flex items-center gap-2">
+        <span className="w-14 font-mono text-xs text-subtle">{formatLum(floor)}</span>
+        <input
+          type="range"
+          className="catalog-range min-w-0 flex-1"
+          min={0}
+          max={1000}
+          value={Math.round(lumToT(L, floor, ceil) * 1000)}
+          onChange={(e) => setL(tToLum(Number(e.target.value) / 1000, floor, ceil))}
+          aria-label="Star luminosity"
+        />
+        <span className="w-14 text-right font-mono text-xs text-subtle">{formatLum(ceil)}</span>
+        <span className="w-16 text-right font-mono text-sm">{formatLum(L)}</span>
+      </div>
+      <p className="mt-2 text-xs text-muted">
+        Min {formatLum(sys.min)} · suggested max {formatLum(sys.suggestMax)}
+        {sys.conflict ? " · bands conflict — lava and temperate want different L at these distances" : ""}
+      </p>
+      <ul className="mt-2 space-y-1 text-xs text-subtle">
+        {sys.bodies.slice(0, 12).map((row) => (
+          <li key={row.name}>
+            {row.name} · {climateLabel(row.climate)} · {row.distance.toFixed(0)} sec → L {formatLum(row.window.min)}–
+            {formatLum(row.window.max)} (max {formatLum(row.window.suggestMax)}) · now {fluxLabel(row.flux)}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function OrbitDebugger({
+  star,
+  bodies,
+  onFixOrbits,
+}: {
+  star: EcfObject;
+  bodies: SystemBody[];
+  onFixOrbits?: (fixes: { name: string; coords: [number, number, number] }[]) => void;
+}) {
+  const issues = useMemo(() => diagnoseOrbits(star, bodies), [star, bodies]);
+  const [picked, setPicked] = useState<string[]>([]);
+  useEffect(() => {
+    setPicked(issues.map((issue) => issue.key));
+  }, [issues]);
+  if (!issues.length) {
+    return (
+      <p className="mt-4 text-xs text-subtle">
+        Orbit debugger: no off-scale or wrong-zone planets/moons in this system.
+      </p>
+    );
+  }
+  const selected = issues.filter((issue) => picked.includes(issue.key));
+  const apply = (rows: OrbitIssue[]) => {
+    onFixOrbits?.(rows.map((row) => ({ name: row.body.name, coords: row.suggested })));
+  };
+  return (
+    <div className="mt-5 rounded-sm border border-border bg-bg p-3">
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <p className="text-xs uppercase tracking-[0.14em] text-accent">Orbit debugger</p>
+          <p className="mt-1 text-xs text-muted">
+            Snaps lava / arid / temperate / ice / barren worlds into this star’s bands. Moons follow their planet.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="secondary" onClick={() => setPicked(issues.map((i) => i.key))}>
+            Select all
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => setPicked([])}>
+            Select none
+          </Button>
+          <Button size="sm" disabled={!selected.length || !onFixOrbits} onClick={() => apply(selected)}>
+            Apply {selected.length || ""} suggested
+          </Button>
+        </div>
+      </div>
+      <ul className="mt-3 space-y-2">
+        {issues.map((issue) => {
+          const on = picked.includes(issue.key);
+          return (
+            <li key={issue.key} className="flex gap-2 rounded-sm border border-border px-2 py-2">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={on}
+                onChange={() =>
+                  setPicked((cur) => (on ? cur.filter((k) => k !== issue.key) : [...cur, issue.key]))
+                }
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm">
+                  {issue.body.name}{" "}
+                  <span className="text-muted">
+                    · {issue.body.kind} · {climateLabel(issue.climate)}
+                  </span>
+                </p>
+                <p className="mt-0.5 text-xs text-muted">{issue.reason}</p>
+                <p className="mt-1 font-mono text-xs text-subtle">
+                  {formatCoords(issue.body.coords)} ({issue.body.distance.toFixed(0)} sec, {issue.currentZone || "—"})
+                  {" → "}
+                  {formatCoords(issue.suggested)} ({issue.suggestedDistance.toFixed(0)} sec
+                  {issue.expectedZone && issue.expectedZone !== "parent" ? `, ${issue.expectedZone}` : ""}
+                  {issue.expectedZone === "parent" ? ", parent orbit" : ""})
+                </p>
+              </div>
+              <Button size="sm" variant="ghost" disabled={!onFixOrbits} onClick={() => apply([issue])}>
+                Fix
+              </Button>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

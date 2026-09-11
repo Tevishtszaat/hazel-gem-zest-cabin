@@ -2,15 +2,20 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { parseEcfObjects } from "./ecf.ts";
 import {
+  applyOrbitFixes,
   applyZoneDrag,
   axisMax,
   auToSectors,
+  diagnoseOrbits,
   fieldToHex,
   hexToField,
+  luminosityForFlux,
   luminosityOf,
+  luminosityWindowForBody,
+  systemLuminosityWindow,
+  overlayBodies,
   parseRange,
   parseSectorBodies,
-  overlayBodies,
   parseStarMix,
   placeBodyLabels,
   physicsHabitableAU,
@@ -129,5 +134,76 @@ describe("galaxy habitable zones", () => {
     assert.equal(fileMatchesKind("Configuration/GalaxyConfig.ecf", "galaxy"), true);
     assert.equal(fileMatchesKind("Configuration/GalaxyConfig.ecf", "configs"), true);
     assert.equal(fileMatchesKind("Configuration/ItemsConfig.ecf", "galaxy"), false);
+  });
+
+  it("suggests luminosity min/max from planet distance using inverse-square", () => {
+    assert.equal(luminosityForFlux(1, 10).toFixed(2), "1.00");
+    const temp = luminosityWindowForBody("temperate", 10);
+    assert.ok(temp);
+    assert.equal(temp?.suggest.toFixed(2), "1.00");
+    assert.ok((temp?.suggestMax ?? 0) >= 1);
+    assert.ok((temp?.min ?? 1) < 1);
+    const star = parseEcfObjects(`{ GalaxyConfig Name: G Type Star
+  StarClass: G
+  Luminosity: 1
+  HabitableTemperate: "64, 69"
+}
+`)[0]!;
+    const sys = systemLuminosityWindow(star, [
+      { system: "Ellyon", name: "Akua", kind: "Planet", playfieldType: "Temperate", coords: [10, 0, 0], distance: 10 },
+      { system: "Ellyon", name: "Ash", kind: "Planet", playfieldType: "Lava", coords: [5, 0, 0], distance: 5 },
+    ]);
+    assert.ok(sys);
+    assert.equal(sys?.bodies.length, 2);
+    assert.ok((sys?.suggestMax ?? 0) > 0);
+    assert.ok((sys?.max ?? 0) >= (sys?.suggestMax ?? 99) || sys?.conflict);
+  });
+
+  it("diagnoses lava/ice planets and stray moons, then rewrites Sectors.yaml", () => {
+    const star = parseEcfObjects(`{ GalaxyConfig Name: G Type Star
+  StarClass: G
+  InnerSystem: "5, 56"
+  HabitableHot: "57, 63"
+  HabitableTemperate: "64, 69"
+  HabitableCold: "70, 75"
+  OuterSystem: "76, 132"
+}
+`)[0]!;
+    const yaml = `
+- Name: Ellyon
+  StarClass: G
+  Playfields:
+    - ['0, 0, 0', Ellyon, Sun]
+    - ['66, 0, 0', TooCloseLava, Planet, Lava]
+    - ['12, 0, 0', Snowdrift, Planet, Snow]
+    - ['66, 0, 0', Akua, Planet, Temperate]
+    - ['400, 0, 0', AkuaMoon, Moon]
+    - ['59264, 0, 0', Laboratorio, Planet, Barren]
+`;
+    const bodies = parseSectorBodies(yaml);
+    assert.equal(bodies.find((b) => b.name === "TooCloseLava")?.playfieldType, "Lava");
+    const issues = diagnoseOrbits(star, overlayBodies(star, bodies));
+    const lava = issues.find((i) => i.body.name === "TooCloseLava");
+    const snow = issues.find((i) => i.body.name === "Snowdrift");
+    const moon = issues.find((i) => i.body.name === "AkuaMoon");
+    const lab = issues.find((i) => i.body.name === "Laboratorio");
+    const akua = issues.find((i) => i.body.name === "Akua");
+    assert.ok(lava);
+    assert.equal(lava?.expectedZone, "InnerSystem");
+    assert.ok((lava?.suggestedDistance ?? 99) <= 56);
+    assert.ok(snow);
+    assert.equal(snow?.expectedZone, "HabitableCold");
+    assert.ok((snow?.suggestedDistance ?? 0) >= 70);
+    assert.ok(moon);
+    assert.equal(moon?.expectedZone, "parent");
+    assert.ok((moon?.suggestedDistance ?? 0) < 80);
+    assert.ok(lab);
+    assert.equal(lab?.expectedZone, "OuterSystem");
+    assert.equal(akua, undefined);
+    const next = applyOrbitFixes(yaml, issues.map((i) => ({ name: i.body.name, coords: i.suggested })));
+    const moved = parseSectorBodies(next);
+    assert.ok((moved.find((b) => b.name === "TooCloseLava")?.distance ?? 99) <= 56);
+    assert.ok((moved.find((b) => b.name === "Laboratorio")?.distance ?? 0) <= 132);
+    assert.match(next, /TooCloseLava/);
   });
 });

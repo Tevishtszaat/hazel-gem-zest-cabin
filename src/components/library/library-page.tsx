@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AppHeader } from "@/components/app-header.tsx";
@@ -59,7 +60,20 @@ const GROUP_TABS: Record<ConfigGroup, Tab[]> = {
   text: ["localization", "sectors"],
 };
 
-const WORKSPACE: Partial<Record<Tab, "/library/galaxy" | "/library/reputation" | "/library/warfare">> = {
+const WORKSPACE: Partial<
+  Record<
+    Tab,
+    | "/library/galaxy"
+    | "/library/reputation"
+    | "/library/warfare"
+    | "/library/items"
+    | "/library/blocks"
+    | "/library/factions"
+  >
+> = {
+  items: "/library/items",
+  blocks: "/library/blocks",
+  factions: "/library/factions",
   galaxy: "/library/galaxy",
   reputation: "/library/reputation",
   warfare: "/library/warfare",
@@ -82,13 +96,14 @@ function download(name: string, text: string, type: string) {
 
 export function LibraryPage() {
   const catalog = usePdaStore((s) => s.catalog);
-  const [tab, setTab] = useState<Tab>("items");
+  const [tab, setTab] = useState<Tab>("templates");
   const [group, setGroup] = useState<ConfigGroup>("catalog");
   const [compareLeft, setCompareLeft] = useState<string | null>(null);
   const tabs = GROUP_TABS[group];
   const setGroupAndTab = (next: ConfigGroup) => {
     setGroup(next);
-    if (!GROUP_TABS[next].includes(tab)) setTab(GROUP_TABS[next][0]!);
+    const first = GROUP_TABS[next].find((id) => !WORKSPACE[id]) ?? GROUP_TABS[next][0]!;
+    if (!GROUP_TABS[next].includes(tab) || WORKSPACE[tab]) setTab(first);
   };
   const meta = configMeta(tab);
   return (
@@ -140,7 +155,11 @@ export function LibraryPage() {
           })}
       </div>
       <div className="min-h-0 flex-1">
-        {tab === "compare" ? (
+        {WORKSPACE[tab] ? (
+          <p className="p-6 text-sm text-muted">
+            {tabLabel(tab)} opens as its own page so the list and editor can use the full window.
+          </p>
+        ) : tab === "compare" ? (
           <BlockCompare initial={compareLeft} />
         ) : tab === "localization" ? (
           <LocaEditor />
@@ -186,11 +205,13 @@ function CatalogRow({
   trailing: ReactNode;
 }) {
   const key = objectKey(obj, index);
+  const active = selected && objectKey(selected, selectedIndex) === key;
   return (
     <button
+      data-catalog-key={key}
       onClick={() => onPick(key)}
       className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm ${
-        selected && objectKey(selected, selectedIndex) === key ? "bg-elevated" : "hover:bg-elevated/50"
+        active ? "bg-elevated" : "hover:bg-elevated/50"
       }`}
     >
       <ItemIcon name={obj.name} fields={obj.fields} className="size-6 rounded-sm" />
@@ -200,14 +221,109 @@ function CatalogRow({
   );
 }
 
-function ObjectBrowser({
+function CatalogScrubber({
+  items,
+  index,
+  onIndex,
+  loca,
+  language,
+}: {
+  items: EcfObject[];
+  index: number;
+  onIndex: (next: number) => void;
+  loca: CsvTable;
+  language: string;
+}) {
+  if (!items.length) return null;
+  const i = Math.min(Math.max(0, index), items.length - 1);
+  const start = Math.max(0, i - 4);
+  const tiles = items.slice(start, start + 9);
+  return (
+    <div className="border-b border-border p-2">
+      <p className="text-xs uppercase tracking-[0.14em] text-accent">Slider</p>
+      <div className="mt-2 flex items-center gap-2">
+        <Button
+          size="sm"
+          variant="secondary"
+          disabled={i <= 0}
+          onClick={() => onIndex(i - 1)}
+          aria-label="Previous entry"
+        >
+          <ChevronLeft className="size-4" />
+        </Button>
+        <span className="flex-1 text-center font-mono text-xs text-muted">
+          {i + 1} / {items.length}
+        </span>
+        <Button
+          size="sm"
+          variant="secondary"
+          disabled={i >= items.length - 1}
+          onClick={() => onIndex(i + 1)}
+          aria-label="Next entry"
+        >
+          <ChevronRight className="size-4" />
+        </Button>
+      </div>
+      <input
+        type="range"
+        className="catalog-range mt-2 w-full"
+        min={0}
+        max={Math.max(0, items.length - 1)}
+        value={i}
+        onChange={(e) => onIndex(Number(e.target.value))}
+        aria-label="Slide through entries"
+      />
+      <div className="mt-2 max-h-52 space-y-1 overflow-y-auto">
+        {tiles.map((obj, offset) => {
+          const idx = start + offset;
+          const active = idx === i;
+          const color = parseFactionColor(obj.fields.Color);
+          return (
+            <button
+              key={`${obj.kind}-${obj.name}-${idx}`}
+              type="button"
+              onClick={() => onIndex(idx)}
+              className={`flex w-full items-center gap-2 rounded-sm border px-2 py-1 text-left ${
+                active ? "border-accent bg-elevated" : "border-border hover:bg-elevated/50"
+              }`}
+              title={obj.name}
+            >
+              {color ? (
+                <span className="size-6 shrink-0 rounded-sm border border-border" style={{ background: color }} />
+              ) : (
+                <ItemIcon name={obj.name} fields={obj.fields} className="size-6 rounded-sm" />
+              )}
+              <span className="min-w-0 flex-1 truncate text-xs">
+                {locaLabel(loca, obj.name, language) || obj.name}
+              </span>
+              <span className="shrink-0 font-mono text-xs text-subtle">{obj.id || obj.fields.Abbrev || ""}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function parseFactionColor(value?: string) {
+  if (!value) return "";
+  const parts = value.split(/[,\s]+/).map(Number).filter((n) => Number.isFinite(n));
+  if (parts.length < 3) return /^#|[a-z]/i.test(value) ? value : "";
+  const [r, g, b] = parts;
+  const scale = Math.max(r!, g!, b!) <= 1 ? 255 : 1;
+  return `rgb(${Math.round(r! * scale)} ${Math.round(g! * scale)} ${Math.round(b! * scale)})`;
+}
+
+export function ObjectBrowser({
   role,
   title,
   onCompare,
+  listCap = 800,
 }: {
   role: ConfigRole;
   title: string;
   onCompare?: (name: string) => void;
+  listCap?: number;
 }) {
   const meta = configMeta(role)!;
   const catalog = usePdaStore((s) => s.catalog);
@@ -269,9 +385,22 @@ function ObjectBrowser({
   });
   const selected = objects.find((o, i) => objectKey(o, i) === picked) ?? visible[0] ?? objects[0];
   const selectedIndex = selected ? objects.indexOf(selected) : -1;
+  const slideIndex = selected ? visible.indexOf(selected) : 0;
   const hasText = Boolean(catalogText(catalog, role));
   const fileName = catalogText(catalog, role)?.path.split(/[\\/]/).pop() || meta.file;
   const kindName = objects[0]?.kind || meta.kind;
+
+  const pickAt = (next: number) => {
+    const obj = visible[next];
+    if (!obj) return;
+    setPicked(objectKey(obj, objects.indexOf(obj)));
+  };
+
+  useEffect(() => {
+    if (!picked) return;
+    const el = document.querySelector(`[data-catalog-key="${CSS.escape(picked)}"]`);
+    el?.scrollIntoView({ block: "nearest" });
+  }, [picked]);
 
   const persist = (next: EcfObject[]) => {
     setCatalogText(role, stringifyEcfObjects(next), catalogText(catalog, role)?.path || fileName);
@@ -314,7 +443,32 @@ function ObjectBrowser({
   };
 
   return (
-    <div className="grid h-full min-h-0 lg:grid-cols-[280px_minmax(0,1fr)]">
+    <div
+      className="grid h-full min-h-0 lg:grid-cols-[280px_minmax(0,1fr)]"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (
+          e.target instanceof HTMLInputElement ||
+          e.target instanceof HTMLTextAreaElement ||
+          e.target instanceof HTMLSelectElement
+        ) {
+          return;
+        }
+        if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+          e.preventDefault();
+          pickAt(slideIndex - 1);
+        } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+          e.preventDefault();
+          pickAt(slideIndex + 1);
+        } else if (e.key === "Home") {
+          e.preventDefault();
+          pickAt(0);
+        } else if (e.key === "End") {
+          e.preventDefault();
+          pickAt(visible.length - 1);
+        }
+      }}
+    >
       <aside className="flex min-h-0 flex-col border-r border-border">
         <div className="border-b border-border p-2">
           <input
@@ -401,6 +555,7 @@ function ObjectBrowser({
           ) : null}
           <p className="mt-2 text-xs text-subtle">
             {visible.length} / {objects.length}
+            {visible.length > listCap ? ` · showing first ${listCap}, filter to reach the rest` : ""}
             {usesNumericIds ? ` · ${unused.total} unused IDs` : ""}
             {usesFloatingIds ? ` · ${floats.length} custom · ${unused.total} free numbers` : ""}
           </p>
@@ -467,13 +622,22 @@ function ObjectBrowser({
             </div>
           </div>
         ) : null}
+        {visible.length > 1 ? (
+          <CatalogScrubber
+            items={visible}
+            index={slideIndex < 0 ? 0 : slideIndex}
+            onIndex={pickAt}
+            loca={loca}
+            language={language}
+          />
+        ) : null}
         <div className="min-h-0 flex-1 overflow-auto">
           {!objects.length ? (
             <p className="p-4 text-sm text-muted">
               Import {fileName} from the Import page, or create a new {kindName.toLowerCase()} here.
             </p>
           ) : isEntities ? (
-            groupByEntityType(visible.slice(0, 500), byName).map((group) => (
+            groupByEntityType(visible.slice(0, listCap), byName).map((group) => (
               <div key={group.key}>
                 <p className="sticky top-0 z-10 bg-surface px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-accent">
                   {group.key}
@@ -510,7 +674,7 @@ function ObjectBrowser({
               </p>
               {visible
                 .filter((o) => blockIdentity(o).kind === "floating")
-                .slice(0, 400)
+                .slice(0, listCap)
                 .map((obj) => (
                   <CatalogRow
                     key={objectKey(obj, objects.indexOf(obj))}
@@ -531,7 +695,7 @@ function ObjectBrowser({
               </p>
               {visible
                 .filter((o) => blockIdentity(o).kind === "numeric")
-                .slice(0, 400)
+                .slice(0, listCap)
                 .map((obj) => (
                   <CatalogRow
                     key={objectKey(obj, objects.indexOf(obj))}
@@ -548,7 +712,7 @@ function ObjectBrowser({
                 ))}
             </>
           ) : (
-            visible.slice(0, 500).map((obj) => {
+            visible.slice(0, listCap).map((obj) => {
               const index = objects.indexOf(obj);
               const label = locaLabel(loca, obj.name, language) || objectLabel(obj);
               const ident = usesFloatingIds ? blockIdentity(obj) : null;
@@ -592,6 +756,10 @@ function ObjectBrowser({
             label={locaLabel(loca, selected.name, language)}
             thin={!hasText}
             onPatch={(mut) => patch(selectedIndex, mut)}
+            onRemove={() => {
+              persist(objects.filter((_, i) => i !== selectedIndex));
+              setPicked(null);
+            }}
             onCompare={onCompare}
             inherit={isEntities ? (key) => resolvedField(selected, key, byName) : undefined}
           />
@@ -609,6 +777,7 @@ function ObjectDetail({
   label,
   thin,
   onPatch,
+  onRemove,
   onCompare,
   inherit,
 }: {
@@ -617,6 +786,7 @@ function ObjectDetail({
   label: string;
   thin: boolean;
   onPatch: (mut: (obj: EcfObject) => EcfObject) => void;
+  onRemove?: () => void;
   onCompare?: (name: string) => void;
   inherit?: (key: string) => string;
 }) {
@@ -631,7 +801,7 @@ function ObjectDetail({
   const setInputs = (rows: { name: string; count: string }[]) => onPatch((cur) => withTemplateInputs(cur, rows));
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto w-full max-w-6xl">
       <div className="flex items-start gap-4">
         <ItemIcon name={obj.name} fields={obj.fields} className="size-16 rounded-sm" />
         <div className="min-w-0 flex-1">
@@ -671,6 +841,11 @@ function ObjectDetail({
             Compare
           </Button>
         ) : null}
+        {onRemove ? (
+          <Button size="sm" variant="secondary" onClick={onRemove}>
+            Delete
+          </Button>
+        ) : null}
       </div>
       {thin ? (
         <p className="mt-4 text-sm text-muted">
@@ -703,7 +878,7 @@ function ObjectDetail({
               onClick={() => onPatch((cur) => ({ ...cur, plus: !cur.plus }))}
             >
               <span className="truncate">
-                {`{ ${obj.plus ? "+" : ""}${obj.kind}${obj.id ? ` Id: ${obj.id}` : ""}${obj.name ? ` Name: ${obj.name}` : ""} }`}
+                {`{ ${obj.plus ? "+" : ""}${obj.kind}${obj.id ? ` Id: ${obj.id},` : ""}${obj.name ? ` Name: ${obj.name}` : ""} }`}
               </span>
               <span className="ml-2 shrink-0 text-xs uppercase tracking-[0.12em] text-accent">
                 {obj.plus ? `+${obj.kind}` : obj.kind}

@@ -16,7 +16,10 @@ import { Route as ExportRouteImport } from './routes/export'
 import { Route as ImportRouteImport } from './routes/import'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as LibraryIndexRouteImport } from './routes/library.index'
+import { Route as LibraryBlocksRouteImport } from './routes/library.blocks'
+import { Route as LibraryFactionsRouteImport } from './routes/library.factions'
 import { Route as LibraryGalaxyRouteImport } from './routes/library.galaxy'
+import { Route as LibraryItemsRouteImport } from './routes/library.items'
 import { Route as LibraryReputationRouteImport } from './routes/library.reputation'
 import { Route as LibraryWarfareRouteImport } from './routes/library.warfare'
 
@@ -55,9 +58,24 @@ const LibraryIndexRoute = LibraryIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LibraryRoute,
 } as any)
+const LibraryBlocksRoute = LibraryBlocksRouteImport.update({
+  id: '/blocks',
+  path: '/blocks',
+  getParentRoute: () => LibraryRoute,
+} as any)
+const LibraryFactionsRoute = LibraryFactionsRouteImport.update({
+  id: '/factions',
+  path: '/factions',
+  getParentRoute: () => LibraryRoute,
+} as any)
 const LibraryGalaxyRoute = LibraryGalaxyRouteImport.update({
   id: '/galaxy',
   path: '/galaxy',
+  getParentRoute: () => LibraryRoute,
+} as any)
+const LibraryItemsRoute = LibraryItemsRouteImport.update({
+  id: '/items',
+  path: '/items',
   getParentRoute: () => LibraryRoute,
 } as any)
 const LibraryReputationRoute = LibraryReputationRouteImport.update({
@@ -78,7 +96,10 @@ export interface FileRoutesByFullPath {
   '/export': typeof ExportRoute
   '/import': typeof ImportRoute
   '/library': typeof LibraryRouteWithChildren
+  '/library/blocks': typeof LibraryBlocksRoute
+  '/library/factions': typeof LibraryFactionsRoute
   '/library/galaxy': typeof LibraryGalaxyRoute
+  '/library/items': typeof LibraryItemsRoute
   '/library/reputation': typeof LibraryReputationRoute
   '/library/warfare': typeof LibraryWarfareRoute
   '/library/': typeof LibraryIndexRoute
@@ -89,7 +110,10 @@ export interface FileRoutesByTo {
   '/dialogues': typeof DialoguesRoute
   '/export': typeof ExportRoute
   '/import': typeof ImportRoute
+  '/library/blocks': typeof LibraryBlocksRoute
+  '/library/factions': typeof LibraryFactionsRoute
   '/library/galaxy': typeof LibraryGalaxyRoute
+  '/library/items': typeof LibraryItemsRoute
   '/library/reputation': typeof LibraryReputationRoute
   '/library/warfare': typeof LibraryWarfareRoute
   '/library': typeof LibraryIndexRoute
@@ -102,7 +126,10 @@ export interface FileRoutesById {
   '/export': typeof ExportRoute
   '/import': typeof ImportRoute
   '/library': typeof LibraryRouteWithChildren
+  '/library/blocks': typeof LibraryBlocksRoute
+  '/library/factions': typeof LibraryFactionsRoute
   '/library/galaxy': typeof LibraryGalaxyRoute
+  '/library/items': typeof LibraryItemsRoute
   '/library/reputation': typeof LibraryReputationRoute
   '/library/warfare': typeof LibraryWarfareRoute
   '/library/': typeof LibraryIndexRoute
@@ -116,7 +143,10 @@ export interface FileRouteTypes {
     | '/export'
     | '/import'
     | '/library'
+    | '/library/blocks'
+    | '/library/factions'
     | '/library/galaxy'
+    | '/library/items'
     | '/library/reputation'
     | '/library/warfare'
     | '/library/'
@@ -127,7 +157,10 @@ export interface FileRouteTypes {
     | '/dialogues'
     | '/export'
     | '/import'
+    | '/library/blocks'
+    | '/library/factions'
     | '/library/galaxy'
+    | '/library/items'
     | '/library/reputation'
     | '/library/warfare'
     | '/library'
@@ -139,7 +172,10 @@ export interface FileRouteTypes {
     | '/export'
     | '/import'
     | '/library'
+    | '/library/blocks'
+    | '/library/factions'
     | '/library/galaxy'
+    | '/library/items'
     | '/library/reputation'
     | '/library/warfare'
     | '/library/'
@@ -205,11 +241,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LibraryIndexRouteImport
       parentRoute: typeof LibraryRoute
     }
+    '/library/blocks': {
+      id: '/library/blocks'
+      path: '/blocks'
+      fullPath: '/library/blocks'
+      preLoaderRoute: typeof LibraryBlocksRouteImport
+      parentRoute: typeof LibraryRoute
+    }
+    '/library/factions': {
+      id: '/library/factions'
+      path: '/factions'
+      fullPath: '/library/factions'
+      preLoaderRoute: typeof LibraryFactionsRouteImport
+      parentRoute: typeof LibraryRoute
+    }
     '/library/galaxy': {
       id: '/library/galaxy'
       path: '/galaxy'
       fullPath: '/library/galaxy'
       preLoaderRoute: typeof LibraryGalaxyRouteImport
+      parentRoute: typeof LibraryRoute
+    }
+    '/library/items': {
+      id: '/library/items'
+      path: '/items'
+      fullPath: '/library/items'
+      preLoaderRoute: typeof LibraryItemsRouteImport
       parentRoute: typeof LibraryRoute
     }
     '/library/reputation': {
@@ -230,14 +287,20 @@ declare module '@tanstack/react-router' {
 }
 
 interface LibraryRouteChildren {
+  LibraryBlocksRoute: typeof LibraryBlocksRoute
+  LibraryFactionsRoute: typeof LibraryFactionsRoute
   LibraryGalaxyRoute: typeof LibraryGalaxyRoute
+  LibraryItemsRoute: typeof LibraryItemsRoute
   LibraryReputationRoute: typeof LibraryReputationRoute
   LibraryWarfareRoute: typeof LibraryWarfareRoute
   LibraryIndexRoute: typeof LibraryIndexRoute
 }
 
 const LibraryRouteChildren: LibraryRouteChildren = {
+  LibraryBlocksRoute: LibraryBlocksRoute,
+  LibraryFactionsRoute: LibraryFactionsRoute,
   LibraryGalaxyRoute: LibraryGalaxyRoute,
+  LibraryItemsRoute: LibraryItemsRoute,
   LibraryReputationRoute: LibraryReputationRoute,
   LibraryWarfareRoute: LibraryWarfareRoute,
   LibraryIndexRoute: LibraryIndexRoute,

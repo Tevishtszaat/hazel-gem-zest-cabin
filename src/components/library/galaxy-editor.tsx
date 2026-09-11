@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input.tsx";
 import { GALAXY_GENERAL_STATS, TERRITORY_STATS } from "@/lib/pda/config-stats.ts";
 import { stringifyEcfObjects, type EcfObject } from "@/lib/pda/ecf.ts";
 import { catalogText, objectsFor } from "@/lib/pda/library.ts";
-import { parseSectorBodies, STAR_MODELS, STAR_REGION_STATS, STAR_STATS, fieldToHex, hexToField, isStarType, parseStarMix, writeStarMix, type StarMix } from "@/lib/pda/galaxy.ts";
+import { applyOrbitFixes, parseSectorBodies, STAR_MODELS, STAR_REGION_STATS, STAR_STATS, fieldToHex, hexToField, isStarType, parseStarMix, writeStarMix, type StarMix } from "@/lib/pda/galaxy.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
 
 function download(name: string, text: string) {
@@ -174,6 +174,11 @@ export function GalaxyEditor() {
               objects.map((obj) => (obj.name === star.name ? { ...obj, fields: { ...obj.fields, ...fields } } : obj)),
             )
           }
+          onFixOrbits={(fixes) => {
+            const current = catalogText(catalog, "sectors");
+            if (!current?.text) return;
+            setCatalogText("sectors", applyOrbitFixes(current.text, fixes), current.path || "Sectors.yaml");
+          }}
         />
       ) : null}
 

@@ -229,10 +229,132 @@ export function sectorsToAu(sectors: number) {
   return sectors / SECTORS_PER_AU;
 }
 
-/** Relative solar flux vs Earth at 1 AU around Sol. Inverse-square. */
+/** Relative solar flux vs Earth at 1 AU around Sol. Inverse-square. Game: 1 AU = 10 sectors. */
 export function solarFlux(luminosity: number, sectors: number): number {
   const au = Math.max(sectorsToAu(Math.max(sectors, 0.01)), 0.01);
   return luminosity / (au * au);
+}
+
+/** L needed at this distance to hit a given Earth-relative flux. */
+export function luminosityForFlux(flux: number, sectors: number): number {
+  const au = Math.max(sectorsToAu(Math.max(sectors, 0.01)), 0.01);
+  return flux * au * au;
+}
+
+/**
+ * Kopparapu / Eleon-scale flux windows (Earth = 1 at 1 AU, L=1).
+ * Inner/hot/cold match GalaxyConfig generation intent: lava cooks, temperate is Earth-like, outer is dim.
+ */
+export const CLIMATE_FLUX: Record<
+  Exclude<Climate, "unknown">,
+  { min: number; max: number; suggest: number; suggestMax: number }
+> = {
+  lava: { min: 2, max: 16, suggest: 6.5, suggestMax: 10 },
+  hot: { min: 1.11, max: 4, suggest: 1.8, suggestMax: 2.8 },
+  temperate: { min: 0.356, max: 1.107, suggest: 1, suggestMax: 1.107 },
+  cold: { min: 0.12, max: 0.356, suggest: 0.25, suggestMax: 0.356 },
+  outer: { min: 0.008, max: 0.12, suggest: 0.05, suggestMax: 0.12 },
+};
+
+export type LuminosityWindow = {
+  min: number;
+  max: number;
+  suggest: number;
+  suggestMax: number;
+  climate: Climate;
+};
+
+export function climateAtOrbit(star: EcfObject, body: SystemBody): Climate {
+  const inferred = inferClimate(body.name, body.kind, body.playfieldType);
+  if (inferred !== "unknown") return inferred;
+  const zone = zoneAtDistance(star, body.distance);
+  if (zone?.key === "InnerSystem") return "lava";
+  if (zone?.key === "HabitableHot") return "hot";
+  if (zone?.key === "HabitableTemperate") return "temperate";
+  if (zone?.key === "HabitableCold") return "cold";
+  if (zone?.key === "OuterSystem") return "outer";
+  return "unknown";
+}
+
+export function luminosityWindowForBody(climate: Climate, sectors: number): LuminosityWindow | null {
+  if (climate === "unknown") return null;
+  const band = CLIMATE_FLUX[climate];
+  return {
+    min: luminosityForFlux(band.min, sectors),
+    max: luminosityForFlux(band.max, sectors),
+    suggest: luminosityForFlux(band.suggest, sectors),
+    suggestMax: luminosityForFlux(band.suggestMax, sectors),
+    climate,
+  };
+}
+
+export type SystemLuminosity = {
+  min: number;
+  max: number;
+  suggest: number;
+  suggestMax: number;
+  conflict: boolean;
+  bodies: {
+    name: string;
+    kind: string;
+    climate: Climate;
+    distance: number;
+    flux: number;
+    window: LuminosityWindow;
+  }[];
+};
+
+function roundLum(n: number) {
+  if (n >= 10) return Math.round(n * 10) / 10;
+  if (n >= 1) return Math.round(n * 100) / 100;
+  if (n >= 0.01) return Math.round(n * 1000) / 1000;
+  return Number(n.toExponential(2));
+}
+
+export function systemLuminosityWindow(star: EcfObject, bodies: SystemBody[]): SystemLuminosity | null {
+  const L = luminosityOf(star);
+  const rows: SystemLuminosity["bodies"] = [];
+  for (const body of bodies) {
+    if (kindGroup(body.kind) === "star") continue;
+    if (body.distance < 0.5) continue;
+    const climate = climateAtOrbit(star, body);
+    const window = luminosityWindowForBody(climate, body.distance);
+    if (!window) continue;
+    rows.push({
+      name: body.name,
+      kind: body.kind,
+      climate,
+      distance: body.distance,
+      flux: solarFlux(L, body.distance),
+      window,
+    });
+  }
+  if (!rows.length) return null;
+  const habitable = rows.filter((r) => r.climate === "temperate" || r.climate === "cold" || r.climate === "hot");
+  const drivers = habitable.length ? habitable : rows;
+  const min = Math.max(...drivers.map((r) => r.window.min));
+  const max = Math.min(...drivers.map((r) => r.window.max));
+  const suggestMax = Math.min(...drivers.map((r) => r.window.suggestMax));
+  const temperate = rows.filter((r) => r.climate === "temperate");
+  const suggest = temperate.length
+    ? temperate.reduce((s, r) => s + r.window.suggest, 0) / temperate.length
+    : drivers.reduce((s, r) => s + r.window.suggest, 0) / drivers.length;
+  return {
+    min: roundLum(min),
+    max: roundLum(Math.max(max, min)),
+    suggest: roundLum(suggest),
+    suggestMax: roundLum(suggestMax),
+    conflict: max < min,
+    bodies: rows,
+  };
+}
+
+export function formatLum(n: number) {
+  if (!Number.isFinite(n)) return "—";
+  if (n >= 10) return n.toFixed(1);
+  if (n >= 1) return n.toFixed(2);
+  if (n >= 0.01) return n.toFixed(3);
+  return n.toExponential(2);
 }
 
 export type ZoneSpan = { key: StarZoneKey; label: string; hint: string; color: string; min: number; max: number };
@@ -334,6 +456,7 @@ export type SystemBody = {
   starClass?: string;
   name: string;
   kind: string;
+  playfieldType?: string;
   coords: [number, number, number];
   distance: number;
 };
@@ -356,17 +479,20 @@ export function parseSectorBodies(yaml: string): SystemBody[] {
     const system = (nameMatch?.[1] || "System").replace(/['"]/g, "").trim();
     const starClass = classMatch?.[1]?.replace(/['"]/g, "");
     const origin: [number, number, number] = [0, 0, 0];
-    const tupleRe = /\[\s*['"]?\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*['"]?\s*,\s*([^,\]]+),\s*([^,\]]+)/g;
+    const tupleRe =
+      /\[\s*['"]?\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*['"]?\s*,\s*([^,\]]+)\s*,\s*([^,\]]+)(?:\s*,\s*([^,\]]+))?/g;
     let m: RegExpExecArray | null;
     while ((m = tupleRe.exec(block))) {
       const coords: [number, number, number] = [Number(m[1]), Number(m[2]), Number(m[3])];
       const name = m[4]!.replace(/['"]/g, "").trim();
       const kind = m[5]!.replace(/['"]/g, "").trim();
+      const playfieldType = m[6]?.replace(/['"]/g, "").trim();
       bodies.push({
         system,
         starClass,
         name,
         kind,
+        playfieldType,
         coords,
         distance: dist(coords, origin),
       });
@@ -374,7 +500,8 @@ export function parseSectorBodies(yaml: string): SystemBody[] {
   }
   if (bodies.length) return bodies;
 
-  const loose = /\[\s*['"]?\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*['"]?\s*,\s*([^,\]]+),\s*([^,\]]+)/g;
+  const loose =
+    /\[\s*['"]?\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*['"]?\s*,\s*([^,\]]+)\s*,\s*([^,\]]+)(?:\s*,\s*([^,\]]+))?/g;
   let m: RegExpExecArray | null;
   while ((m = loose.exec(yaml))) {
     const coords: [number, number, number] = [Number(m[1]), Number(m[2]), Number(m[3])];
@@ -382,6 +509,7 @@ export function parseSectorBodies(yaml: string): SystemBody[] {
       system: "System",
       name: m[4]!.replace(/['"]/g, "").trim(),
       kind: m[5]!.replace(/['"]/g, "").trim(),
+      playfieldType: m[6]?.replace(/['"]/g, "").trim(),
       coords,
       distance: dist(coords, [0, 0, 0]),
     });
@@ -472,3 +600,202 @@ export function isStarType(obj: EcfObject) {
   if (/galaxyconfig/i.test(obj.kind) && /^general$/i.test(obj.name)) return false;
   return Boolean(obj.fields.StarClass || obj.fields.Luminosity || obj.fields.HabitableTemperate || obj.fields.InnerSystem);
 }
+
+export type Climate = "lava" | "hot" | "temperate" | "cold" | "outer" | "unknown";
+
+const CLIMATE_TO_ZONE: Record<Exclude<Climate, "unknown">, StarZoneKey> = {
+  lava: "InnerSystem",
+  hot: "HabitableHot",
+  temperate: "HabitableTemperate",
+  cold: "HabitableCold",
+  outer: "OuterSystem",
+};
+
+export function inferClimate(name: string, kind: string, playfieldType?: string): Climate {
+  const blob = `${playfieldType || ""} ${kind} ${name}`.toLowerCase();
+  if (/lava|volcan|magma|inferno|molten|scorch/.test(blob)) return "lava";
+  if (/arid|desert|dune|savannah|mesa|badland/.test(blob)) return "hot";
+  if (/snow|ice|frost|tundra|glacier|frozen|arctic/.test(blob)) return "cold";
+  if (/temperate|ocean|jungle|forest|earth|garden|habitable|meadow|swamp/.test(blob)) return "temperate";
+  if (/gas\s*giant|barren|asteroid|dead\b/.test(blob)) return "outer";
+  if (/moon/i.test(kind)) return "unknown";
+  if (/planet/i.test(kind)) return "unknown";
+  return "outer";
+}
+
+export function climateLabel(climate: Climate) {
+  if (climate === "lava") return "Lava / volcanic";
+  if (climate === "hot") return "Hot / arid";
+  if (climate === "temperate") return "Temperate";
+  if (climate === "cold") return "Cold / ice";
+  if (climate === "outer") return "Outer / barren";
+  return "Untyped";
+}
+
+function roundCoord(n: number) {
+  return Math.round(n * 10) / 10;
+}
+
+export function scaleCoords(coords: [number, number, number], target: number): [number, number, number] {
+  const d = dist(coords, [0, 0, 0]);
+  if (d < 0.05) return [roundCoord(target), 0, 0];
+  const s = target / d;
+  return [roundCoord(coords[0] * s), roundCoord(coords[1] * s), roundCoord(coords[2] * s)];
+}
+
+export function zoneMidpoint(star: EcfObject, key: StarZoneKey): number | null {
+  const span = starZoneSpans(star).find((z) => z.key === key);
+  if (!span) return null;
+  return Math.round(mid({ min: span.min, max: span.max }));
+}
+
+function slotInZone(star: EcfObject, key: StarZoneKey, used: number[]): number | null {
+  const span = starZoneSpans(star).find((z) => z.key === key);
+  if (!span) return null;
+  const midPt = Math.round(mid({ min: span.min, max: span.max }));
+  const candidates = [midPt, midPt - 2, midPt + 2, midPt - 4, midPt + 4, span.min + 1, span.max - 1];
+  for (const n of candidates) {
+    if (n < span.min || n > span.max) continue;
+    if (used.some((u) => Math.abs(u - n) < 1.2)) continue;
+    return n;
+  }
+  return midPt;
+}
+
+function nearestPlanet(moon: SystemBody, planets: SystemBody[]): SystemBody | undefined {
+  let best: SystemBody | undefined;
+  let bestD = Infinity;
+  for (const planet of planets) {
+    const d = dist(moon.coords, planet.coords);
+    if (d < bestD) {
+      bestD = d;
+      best = planet;
+    }
+  }
+  return best;
+}
+
+export type OrbitIssue = {
+  key: string;
+  body: SystemBody;
+  climate: Climate;
+  currentZone: string | null;
+  expectedZone: StarZoneKey | "parent" | null;
+  reason: string;
+  suggested: [number, number, number];
+  suggestedDistance: number;
+};
+
+const MOON_MAX_SEP = 10;
+
+export function diagnoseOrbits(star: EcfObject, bodies: SystemBody[]): OrbitIssue[] {
+  const spans = starZoneSpans(star);
+  const outer = spans.find((s) => s.key === "OuterSystem")?.max ?? spans.at(-1)?.max ?? 0;
+  const planets = bodies.filter((b) => kindGroup(b.kind) === "planet");
+  const used: number[] = [];
+  const relocated = new Map<string, SystemBody>();
+  const issues: OrbitIssue[] = [];
+
+  const consider = (body: SystemBody, expected: StarZoneKey | "parent" | null, parent?: SystemBody) => {
+    const climate = inferClimate(body.name, body.kind, body.playfieldType);
+    const zone = zoneAtDistance(star, body.distance);
+    const off = outer > 0 && body.distance > outer * 1.15;
+    const none = !zone && !off;
+    const moon = kindGroup(body.kind) === "moon";
+    let reason = "";
+    let targetKey: StarZoneKey | "parent" | null = expected;
+
+    if (moon && parent && dist(body.coords, parent.coords) > MOON_MAX_SEP) {
+      reason = `Moon sits ${dist(body.coords, parent.coords).toFixed(0)} sectors from ${parent.name}; keep it in that planet’s pocket.`;
+      targetKey = "parent";
+    } else if (moon && expected === "parent") {
+      return;
+    } else if (off) {
+      reason = `Off-scale at ${body.distance.toFixed(0)} sectors (outer band ends ~${outer}).`;
+    } else if (expected && expected !== "parent" && zone?.key && zone.key !== expected) {
+      reason = `${climateLabel(climate)} ${body.kind.toLowerCase()} is in the ${zone.label} band.`;
+    } else if (expected && expected !== "parent" && none) {
+      reason = `Outside every band for this star.`;
+    } else if (!expected && off) {
+      reason = `Off-scale at ${body.distance.toFixed(0)} sectors.`;
+    } else {
+      return;
+    }
+
+    let suggested: [number, number, number];
+    let suggestedDistance: number;
+    if (targetKey === "parent" && parent) {
+      const base = parent.distance || 1;
+      const nest = base + 3;
+      suggested = scaleCoords(parent.coords, nest);
+      if (suggested[0] === parent.coords[0] && suggested[1] === parent.coords[1] && suggested[2] === parent.coords[2]) {
+        suggested = [roundCoord(parent.coords[0] + 3), parent.coords[1], parent.coords[2]];
+      }
+      suggestedDistance = dist(suggested, [0, 0, 0]);
+    } else {
+      const key = (targetKey && targetKey !== "parent" ? targetKey : null) || (off ? "OuterSystem" : zone?.key) || "HabitableTemperate";
+      const slot = slotInZone(star, key, used) ?? zoneMidpoint(star, key) ?? Math.max(outer * 0.85, 20);
+      suggested = scaleCoords(body.coords, slot);
+      suggestedDistance = dist(suggested, [0, 0, 0]);
+      used.push(suggestedDistance);
+    }
+
+    issues.push({
+      key: `${body.system}:${body.name}:${body.distance.toFixed(1)}`,
+      body,
+      climate,
+      currentZone: zone?.label ?? (off ? "off-scale" : null),
+      expectedZone: targetKey,
+      reason,
+      suggested,
+      suggestedDistance,
+    });
+    relocated.set(body.name, { ...body, coords: suggested, distance: suggestedDistance });
+  };
+
+  for (const planet of planets) {
+    const climate = inferClimate(planet.name, planet.kind, planet.playfieldType);
+    const expected = climate === "unknown" ? null : CLIMATE_TO_ZONE[climate];
+    consider(planet, expected);
+  }
+
+  for (const body of bodies) {
+    if (kindGroup(body.kind) === "planet" || kindGroup(body.kind) === "star") continue;
+    const climate = inferClimate(body.name, body.kind, body.playfieldType);
+    const parentOrig = kindGroup(body.kind) === "moon" ? nearestPlanet(body, planets) : undefined;
+    const parent = parentOrig ? (relocated.get(parentOrig.name) ?? parentOrig) : undefined;
+    if (kindGroup(body.kind) === "moon" && (climate === "unknown" || parent)) {
+      consider(body, climate === "unknown" ? "parent" : CLIMATE_TO_ZONE[climate], parent);
+    } else {
+      const expected = climate === "unknown" ? null : CLIMATE_TO_ZONE[climate];
+      consider(body, expected);
+    }
+  }
+
+  return issues;
+}
+
+function fmtCoord(n: number) {
+  return Number.isInteger(n) ? String(n) : String(roundCoord(n));
+}
+
+export function formatCoords(coords: [number, number, number]) {
+  return `${fmtCoord(coords[0])}, ${fmtCoord(coords[1])}, ${fmtCoord(coords[2])}`;
+}
+
+export function applyOrbitFixes(
+  yaml: string,
+  fixes: { name: string; coords: [number, number, number] }[],
+): string {
+  let out = yaml;
+  for (const fix of fixes) {
+    const name = fix.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const coord = formatCoords(fix.coords);
+    const re = new RegExp(
+      `(\\[[\\s'"]*)-?[\\d.]+\\s*,\\s*-?[\\d.]+\\s*,\\s*-?[\\d.]+([\\s'"]*,\\s*['"]?${name}\\b)`,
+    );
+    if (re.test(out)) out = out.replace(re, `$1${coord}$2`);
+  }
+  return out;
+}
+
