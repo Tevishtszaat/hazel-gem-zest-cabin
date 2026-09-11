@@ -88,6 +88,10 @@ async function flush(name: string, value: string) {
   dropLegacyLocal();
 }
 
+function catalogTextKey(text: CatalogText) {
+  return text.role === "playfieldYaml" ? `playfieldYaml:${text.path}` : text.role;
+}
+
 export async function putCatalogTexts(texts: CatalogText[]): Promise<void> {
   if (typeof indexedDB === "undefined" || !texts.length) return;
   const db = await openPdaDb();
@@ -99,7 +103,7 @@ export async function putCatalogTexts(texts: CatalogText[]): Promise<void> {
         const tx = db.transaction(TEXT_STORE, "readwrite");
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject(tx.error);
-        tx.objectStore(TEXT_STORE).put(text, text.role);
+        tx.objectStore(TEXT_STORE).put(text, catalogTextKey(text));
       });
     } catch (err) {
       console.warn(`Could not persist ${text.role} (${text.text.length} bytes)`, err);

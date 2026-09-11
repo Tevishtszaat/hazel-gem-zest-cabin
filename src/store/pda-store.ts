@@ -233,12 +233,17 @@ export const usePdaStore = create<PdaState>()(
       setCatalogText: (role, text, path) =>
         set((s) => {
           const texts = [...(s.catalog.texts ?? [])];
-          const i = texts.findIndex((t) => t.role === role);
+          const i =
+            role === "playfieldYaml" && path
+              ? texts.findIndex((t) => t.role === role && t.path === path)
+              : texts.findIndex((t) => t.role === role);
           if (i >= 0) texts[i] = { ...texts[i]!, text, path: path || texts[i]!.path };
           else texts.push({ role, path: path || role, text });
           void putCatalogTexts([texts[i >= 0 ? i : texts.length - 1]!]);
           const files = [...s.catalog.files];
-          if (!files.some((f) => f.role === role)) files.push({ role, path: path || role, count: 1 });
+          if (!files.some((f) => f.role === role && (!path || f.path === path))) {
+            files.push({ role, path: path || role, count: 1 });
+          }
           return { catalog: { ...s.catalog, texts, files, indexedAt: Date.now() } };
         }),
       patchChapter: (id, patch) =>

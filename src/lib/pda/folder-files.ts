@@ -71,7 +71,7 @@ export async function filesFromDataTransfer(dt: DataTransfer): Promise<File[]> {
 }
 
 export function sourceReadMode(role: string | null): "text" | "blob" | "path" {
-  if (role === "poi" || role === "playfieldYaml") return "path";
+  if (role === "poi") return "path";
   if (role === "picture" || role === "itemPicture") return "blob";
   if (!role) return "path";
   return "text";
@@ -104,7 +104,8 @@ export async function sourcesFromFiles(
     let source: ScenarioSource = { path };
     if (mode === "blob") source = { path, blob: file };
     else if (mode === "text" && file.size <= 25_000_000) {
-      source = { path, text: await file.text() };
+      if (role === "playfieldYaml" && file.size > 2_000_000) source = { path };
+      else source = { path, text: await file.text() };
     }
     done += 1;
     onProgress?.(done, picked.length, path);

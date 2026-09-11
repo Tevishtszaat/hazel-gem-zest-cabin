@@ -42,7 +42,7 @@ import type { CsvTable } from "@/lib/pda/types.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
 import { warmImageCache } from "@/lib/pda/image-store.ts";
 
-type Tab = ConfigRole | "compare" | "localization";
+type Tab = ConfigRole | "compare" | "localization" | "playfields";
 
 const GROUPS: { id: ConfigGroup; label: string }[] = [
   { id: "catalog", label: "Catalog" },
@@ -54,7 +54,7 @@ const GROUPS: { id: ConfigGroup; label: string }[] = [
 
 const GROUP_TABS: Record<ConfigGroup, Tab[]> = {
   catalog: ["items", "blocks", "templates", "tokens", "compare"],
-  world: ["factions", "eclass", "egroups", "reputation", "warfare", "galaxy"],
+  world: ["factions", "playfields", "eclass", "egroups", "reputation", "warfare", "galaxy"],
   loot: ["containers", "lootgroups", "traders"],
   defs: ["materials", "statuseffects", "globaldefs", "blockgroups", "blockshapes", "animations", "baiconfig"],
   text: ["localization", "sectors"],
@@ -69,11 +69,13 @@ const WORKSPACE: Partial<
     | "/library/items"
     | "/library/blocks"
     | "/library/factions"
+    | "/library/playfields"
   >
 > = {
   items: "/library/items",
   blocks: "/library/blocks",
   factions: "/library/factions",
+  playfields: "/library/playfields",
   galaxy: "/library/galaxy",
   reputation: "/library/reputation",
   warfare: "/library/warfare",
@@ -82,6 +84,7 @@ const WORKSPACE: Partial<
 function tabLabel(id: Tab) {
   if (id === "compare") return "Compare";
   if (id === "localization") return "Localization";
+  if (id === "playfields") return "Playfields";
   return configMeta(id)?.label || id;
 }
 

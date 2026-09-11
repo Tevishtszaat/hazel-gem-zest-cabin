@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import { Button } from "@/components/ui/button.tsx";
+import { Slider } from "@/components/ui/slider.tsx";
 import type { EcfObject } from "@/lib/pda/ecf.ts";
 import {
   applyZoneDrag,
@@ -477,13 +478,12 @@ function LuminosityTuner({
       </div>
       <div className="mt-3 flex items-center gap-2">
         <span className="w-14 font-mono text-xs text-subtle">{formatLum(floor)}</span>
-        <input
-          type="range"
-          className="catalog-range min-w-0 flex-1"
+        <Slider
           min={0}
           max={1000}
-          value={Math.round(lumToT(L, floor, ceil) * 1000)}
-          onChange={(e) => setL(tToLum(Number(e.target.value) / 1000, floor, ceil))}
+          step={1}
+          value={[Math.round(lumToT(L, floor, ceil) * 1000)]}
+          onValueChange={(vals) => setL(tToLum((vals[0] ?? 0) / 1000, floor, ceil))}
           aria-label="Star luminosity"
         />
         <span className="w-14 text-right font-mono text-xs text-subtle">{formatLum(ceil)}</span>

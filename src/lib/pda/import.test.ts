@@ -91,8 +91,8 @@ describe("csv merge", () => {
 });
 
 describe("import read modes", () => {
-  it("does not read playfield yaml or prefab bytes during a scenario index", () => {
-    assert.equal(sourceReadMode("playfieldYaml"), "path");
+  it("reads playfield yaml as text so the editor can patch planet/orbit/space files", () => {
+    assert.equal(sourceReadMode("playfieldYaml"), "text");
     assert.equal(sourceReadMode("poi"), "path");
     assert.equal(sourceReadMode("itemPicture"), "blob");
     assert.equal(sourceReadMode("picture"), "blob");

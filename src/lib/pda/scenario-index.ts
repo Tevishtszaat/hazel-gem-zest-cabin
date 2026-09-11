@@ -2,6 +2,7 @@ import * as yaml from "js-yaml";
 import { parseCsv } from "./csv.ts";
 import { extractEcfRecords } from "./ecf.ts";
 import { configMetaByFile, CONFIG_TEXT_ROLES } from "./config-roles.ts";
+import { isPlayfieldBasename } from "./playfield.ts";
 import type { ImportFiles } from "./yaml-import.ts";
 
 export type CatalogKind =
@@ -126,6 +127,7 @@ export function classifyScenarioPath(path: string, hint?: string): string | null
     return "sectors";
   }
   if (/\.ya?ml$/.test(base) && /^sectors?[-_.]/i.test(base)) return "sectors";
+  if (isPlayfieldBasename(base)) return "playfieldYaml";
   if (base === "playfield.yaml" || base === "playfield.yml") return "playfieldYaml";
   if (base === "config.ecf" || base === "config_example.ecf") return null;
   const meta = configMetaByFile(base);
@@ -176,6 +178,12 @@ export function collectCatalogTexts(files: ScenarioSource[], hint?: string): Cat
     }
     if (role && (CONFIG_TEXT_ROLES.has(role) || role === "ecf" || role === "pdaYaml" || role === "pdaCsv")) {
       consider(role, file);
+    } else if (role === "playfieldYaml" && file.text) {
+      byRole.set(`playfieldYaml:${normalizePath(file.path)}`, {
+        role: "playfieldYaml",
+        path: normalizePath(file.path),
+        text: file.text,
+      });
     } else if (file.text && looksLikeSectorsYaml(file.text) && /\.ya?ml$/i.test(file.path) && !/playfield/i.test(file.path)) {
       consider("sectors", file);
     }
@@ -192,9 +200,11 @@ export function catalogLoadSummary(catalog: ScenarioCatalog) {
   if (!has("items")) missing.push("ItemsConfig.ecf");
   if (!has("blocks")) missing.push("BlocksConfig.ecf");
   if (!has("localization")) missing.push("Localization.csv");
+  const playfields = (catalog.texts ?? []).filter((t) => t.role === "playfieldYaml" && t.text).length;
   const loaded = (catalog.texts ?? [])
-    .filter((t) => t.text)
+    .filter((t) => t.text && t.role !== "playfieldYaml")
     .map((t) => `${t.path.split("/").pop()} (${Math.max(1, Math.round(t.text.length / 1024))} KB)`);
+  if (playfields) loaded.push(`${playfields} playfield yaml`);
   return { missing, loaded };
 }
 
@@ -317,7 +327,6 @@ export function indexScenario(files: ScenarioSource[], hint?: string): IndexedSc
         addEntry(entries, seen, { kind: "playfield", name: folder, source });
         count = 1;
       }
-      if (file.text) count += parseSectors(file.text, source, entries, seen);
     } else if (role === "sectors" && file.text) {
       count = parseSectors(file.text, source, entries, seen);
     } else if (role === "localization" && file.text) {
@@ -346,7 +355,7 @@ export function indexScenario(files: ScenarioSource[], hint?: string): IndexedSc
       }
     }
 
-    if (file.text && (CONFIG_TEXT_ROLES.has(role) || role === "ecf" || role === "pdaYaml" || role === "pdaCsv")) {
+    if (file.text && (CONFIG_TEXT_ROLES.has(role) || role === "ecf" || role === "pdaYaml" || role === "pdaCsv" || role === "playfieldYaml")) {
       texts.push({ role, path: normalizePath(file.path), text: file.text });
     }
 
@@ -470,6 +479,12 @@ export function mergeCatalog(base: ScenarioCatalog, extra: ScenarioCatalog): Sce
   const texts = [...(base.texts ?? [])];
   for (const text of extra.texts ?? []) {
     if (!text.text) continue;
+    if (text.role === "playfieldYaml") {
+      const i = texts.findIndex((t) => t.role === "playfieldYaml" && t.path === text.path);
+      if (i >= 0) texts[i] = text;
+      else texts.push(text);
+      continue;
+    }
     const i = texts.findIndex((t) => t.role === text.role);
     if (i >= 0) {
       const cur = texts[i]!;

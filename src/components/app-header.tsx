@@ -1,12 +1,16 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { Bug, Download, Library, MessageSquareText, ScrollText, Upload } from "lucide-react";
 import { APP_MARK, APP_SHORT, APP_SUBTITLE } from "@/lib/brand.ts";
 import { useProblems } from "@/lib/pda/use-problems.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
+import { Badge } from "@/components/ui/badge.tsx";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
+import { Tooltip } from "@/components/ui/tooltip.tsx";
 
 export function AppHeader() {
   const project = usePdaStore((s) => s.project);
   const setLanguage = usePdaStore((s) => s.setLanguage);
-  const languages = project.csv.languages;
+  const languages = project.csv.languages.length ? project.csv.languages : [project.language || "English"];
 
   return (
     <header className="border-b border-border bg-surface">
@@ -21,18 +25,21 @@ export function AppHeader() {
           </div>
         </div>
 
-        <label className="ml-auto flex min-w-0 items-center gap-2 text-xs text-muted">
-          PDA Language
-          <select
-            className="h-8 max-w-36 rounded-sm border border-border bg-bg px-2 text-sm text-fg sm:max-w-none"
-            value={project.language}
-            onChange={(e) => setLanguage(e.target.value)}
-          >
-            {(languages.length ? languages : [project.language || "English"]).map((lang) => (
-              <option key={lang}>{lang}</option>
-            ))}
-          </select>
-        </label>
+        <div className="ml-auto flex min-w-0 items-center gap-2 text-xs text-muted">
+          <span className="hidden sm:inline">PDA Language</span>
+          <Select value={project.language} onValueChange={setLanguage}>
+            <SelectTrigger aria-label="PDA language">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {languages.map((lang) => (
+                <SelectItem key={lang} value={lang}>
+                  {lang}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <AppNav />
     </header>
@@ -43,33 +50,34 @@ function AppNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { stats } = useProblems();
   const items = [
-    { to: "/" as const, label: "PDA" },
-    { to: "/dialogues" as const, label: "Dialogues" },
-    { to: "/import" as const, label: "Import" },
-    { to: "/library" as const, label: "Library" },
-    { to: "/export" as const, label: "Export" },
-    { to: "/debug" as const, label: "Debug" },
+    { to: "/" as const, label: "PDA", icon: ScrollText },
+    { to: "/dialogues" as const, label: "Dialogues", icon: MessageSquareText },
+    { to: "/import" as const, label: "Import", icon: Upload },
+    { to: "/library" as const, label: "Library", icon: Library },
+    { to: "/export" as const, label: "Export", icon: Download },
+    { to: "/debug" as const, label: "Debug", icon: Bug },
   ];
   return (
     <nav className="grid grid-cols-3 border-t border-border sm:grid-cols-6">
       {items.map((item) => {
         const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+        const Icon = item.icon;
         return (
-          <Link
-            key={item.to}
-            to={item.to}
-            className={`relative flex h-9 min-w-0 items-center justify-center gap-1 px-1 text-xs tracking-wide sm:gap-2 sm:text-sm ${
-              active ? "bg-elevated text-fg" : "text-muted hover:bg-elevated/40 hover:text-fg"
-            }`}
-          >
-            {item.label}
-            {item.to === "/debug" && stats.total ? (
-              <span className={`tabular-nums text-xs ${stats.errors ? "text-danger" : "text-warn"}`}>
-                {stats.total}
-              </span>
-            ) : null}
-            {active ? <span className="absolute inset-x-0 bottom-0 h-px bg-accent" /> : null}
-          </Link>
+          <Tooltip key={item.to} content={item.label}>
+            <Link
+              to={item.to}
+              className={`relative flex h-10 min-w-0 items-center justify-center gap-1.5 px-1 text-xs tracking-wide sm:h-9 sm:text-sm ${
+                active ? "bg-elevated text-fg" : "text-muted hover:bg-elevated/40 hover:text-fg"
+              }`}
+            >
+              <Icon className="size-3.5 shrink-0" />
+              <span className="hidden sm:inline">{item.label}</span>
+              {item.to === "/debug" && stats.total ? (
+                <Badge tone={stats.errors ? "danger" : "warn"}>{stats.total}</Badge>
+              ) : null}
+              {active ? <span className="absolute inset-x-0 bottom-0 h-px bg-accent" /> : null}
+            </Link>
+          </Tooltip>
         );
       })}
     </nav>
