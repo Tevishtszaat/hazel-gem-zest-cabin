@@ -34,6 +34,7 @@ export function DebugPage() {
   const { issues, stats, busy, raw, ignoredCount } = useProblems({
     includeLength: showLength || filter === "ignored",
     includeIgnored: filter === "ignored",
+    source: file,
   });
 
   const visible = issues.filter((issue) => {
@@ -115,30 +116,26 @@ export function DebugPage() {
         <div className="mb-5">
           <h1 className="text-2xl font-medium tracking-tight">Debug</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted">
-            One debugger per file kind — PDA plus Items, Blocks, Dialogues, Playfields, Galaxy, and the rest. Ignore parks
-            an issue so it stops counting.
+            Pick a file tab to scan that config in the background. All files / PDA stays on the mission tree so the page
+            stays responsive.
             {busy ? " Rechecking in the background…" : ""}
           </p>
         </div>
 
         <div className="mb-3 flex flex-wrap gap-1.5">
           {FILE_DEBUG_TABS.map((tab) => {
-            const count = issues.filter((i) => {
-              const source = i.source ?? "pda";
-              const ignored = ignoredProblems.includes(problemIgnoreKey(i));
-              if (ignored && filter !== "ignored") return false;
-              return tab.id === "all" || source === tab.id;
-            }).length;
+            const active = file === tab.id;
+            const count = active ? issues.filter((i) => !ignoredProblems.includes(problemIgnoreKey(i))).length : 0;
             return (
               <button
                 key={tab.id}
                 onClick={() => setFile(tab.id)}
                 className={`h-8 rounded-sm px-3 text-xs ${
-                  file === tab.id ? "bg-elevated text-fg" : "text-muted hover:text-fg"
+                  active ? "bg-elevated text-fg" : "text-muted hover:text-fg"
                 }`}
               >
                 {tab.label}
-                {count ? <span className="ml-1 text-subtle">{count}</span> : null}
+                {active && count ? <span className="ml-1 text-subtle">{count}</span> : null}
               </button>
             );
           })}

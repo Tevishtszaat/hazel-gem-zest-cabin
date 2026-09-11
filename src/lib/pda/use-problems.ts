@@ -1,16 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
-import { validateOffthread } from "./offload.ts";
+import { validateFilesOffthread, validateOffthread } from "./offload.ts";
 import { problemIgnoreKey, visibleProblems } from "./problems.ts";
 import { problemStats, type Problem } from "./validate.ts";
-import { validateCatalog } from "./validate-files.ts";
+import type { FileDebugId } from "./validate-files.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
 import { useBusyStore } from "@/store/busy-store.ts";
 
 const emptyStats = problemStats([]);
 
-export function useProblems(opts?: { includeLength?: boolean; includeIgnored?: boolean }) {
+export function useProblems(opts?: {
+  includeLength?: boolean;
+  includeIgnored?: boolean;
+  source?: FileDebugId | "pda";
+}) {
+  const source = opts?.source ?? "pda";
   const project = usePdaStore((s) => s.project);
   const catalog = usePdaStore((s) => s.catalog);
+  const indexedAt = catalog.indexedAt;
   const ignoredProblems = usePdaStore((s) => s.ignoredProblems);
   const loading = useBusyStore((s) => s.load);
   const [raw, setRaw] = useState<Problem[]>([]);
@@ -21,29 +27,27 @@ export function useProblems(opts?: { includeLength?: boolean; includeIgnored?: b
     let cancelled = false;
     setBusy(true);
     const timer = window.setTimeout(() => {
-      void Promise.all([
-        validateOffthread(project, catalog),
-        Promise.resolve().then(() => {
-          try {
-            return validateCatalog(catalog);
-          } catch {
-            return [] as Problem[];
-          }
-        }),
-      ])
-        .then(([result, fileIssues]) => {
+      const job =
+        source === "pda" || source === "all"
+          ? validateOffthread(project, catalog)
+          : validateFilesOffthread(catalog, source);
+      void job
+        .then((result) => {
           if (cancelled) return;
-          setRaw([...(result.issues || []), ...fileIssues]);
+          setRaw(result.issues || []);
+        })
+        .catch(() => {
+          if (!cancelled) setRaw([]);
         })
         .finally(() => {
           if (!cancelled) setBusy(false);
         });
-    }, 280);
+    }, 220);
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [project, catalog, loading]);
+  }, [project, indexedAt, loading, source]);
 
   const issues = useMemo(
     () => visibleProblems(raw, ignoredProblems, opts),

@@ -1,10 +1,11 @@
 import type { ImportKind } from "./import-kinds.ts";
 import { indexScenario, type ScenarioCatalog, type ScenarioSource } from "./scenario-index.ts";
 import { problemStats, validateProject, type Problem } from "./validate.ts";
+import { validateCatalog, type FileDebugId } from "./validate-files.ts";
 import { importPda, type ImportFiles } from "./yaml-import.ts";
 import type { PdaProject } from "./types.ts";
 
-export type HeavyOp = "index" | "importPda" | "validate";
+export type HeavyOp = "index" | "importPda" | "validate" | "validateFiles";
 
 export type HeavyPayload = {
   files?: ScenarioSource[];
@@ -12,6 +13,7 @@ export type HeavyPayload = {
   importFiles?: ImportFiles;
   project?: PdaProject;
   catalog?: ScenarioCatalog;
+  source?: FileDebugId | "pda";
 };
 
 export type ValidateResult = {
@@ -43,6 +45,11 @@ export function runHeavy(op: HeavyOp, payload: HeavyPayload) {
   }
   if (op === "validate") {
     const issues = validateProject(payload.project!, payload.catalog);
+    return { issues, stats: problemStats(issues) } satisfies ValidateResult;
+  }
+  if (op === "validateFiles") {
+    const source = payload.source || "pda";
+    const issues = validateCatalog(payload.catalog, source);
     return { issues, stats: problemStats(issues) } satisfies ValidateResult;
   }
   throw new Error(`Unknown heavy op ${op}`);

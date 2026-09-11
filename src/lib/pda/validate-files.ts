@@ -66,27 +66,68 @@ export function applyYamlReplace(text: string, from: string, to: string) {
   return text.replace(new RegExp(escaped), to);
 }
 
-export function validateCatalog(catalog: ScenarioCatalog | undefined): Problem[] {
+export function validateCatalog(catalog: ScenarioCatalog | undefined, source: FileDebugId | "pda" = "all"): Problem[] {
   if (!catalogLoaded(catalog) || !catalog) return [];
+  if (source === "pda") return [];
   const issues: Problem[] = [];
   let n = 0;
   const push = (problem: Omit<Problem, "key">) => {
     n += 1;
-    if (issues.filter((i) => i.source === problem.source).length >= 120) return;
+    if (issues.filter((i) => i.source === problem.source).length >= 80) return;
     issues.push({ key: `${problem.source}:${problem.code}:${problem.path}:${n}`, ...problem });
   };
 
-  for (const role of ECF_ROLES) {
-    const objects = objectsFor(catalog, role);
-    if (!objects.length) continue;
-    validateEcfRole(catalog, role, objects, push);
+  if (source === "all") return issues;
+
+  if (ECF_ROLES.includes(source as (typeof ECF_ROLES)[number])) {
+    const objects = objectsFor(catalog, source as (typeof ECF_ROLES)[number]);
+    if (objects.length) validateEcfRole(catalog, source as (typeof ECF_ROLES)[number], objects, push);
+    return issues;
   }
-  validateDialogues(catalog, push);
-  validatePlayfields(catalog, push);
-  validateGalaxy(catalog, push);
-  validateLocalization(catalog, push);
+  if (source === "dialogues") validateDialogues(catalog, push);
+  else if (source === "playfields") validatePlayfields(catalog, push);
+  else if (source === "galaxy") validateGalaxy(catalog, push);
+  else if (source === "sectors") validateGalaxy(catalog, push);
+  else if (source === "localization") validateLocalization(catalog, push);
   return issues;
 }
+
+export function slimCatalogForSource(catalog: ScenarioCatalog, source: FileDebugId | "pda"): ScenarioCatalog {
+  const roles = TEXT_ROLES[source] ?? [];
+  let texts = (catalog.texts ?? []).filter((t) => roles.includes(t.role));
+  if (source === "playfields") {
+    texts = texts.filter((t) => (t.text?.length || 0) < 1_500_000).slice(0, 40);
+  }
+  return {
+    folderName: catalog.folderName,
+    files: catalog.files,
+    indexedAt: catalog.indexedAt,
+    entries: catalog.entries.map((e) => ({
+      kind: e.kind,
+      name: e.name,
+      label: e.label,
+      poiGroup: e.poiGroup,
+      poiFile: e.poiFile,
+      source: e.source,
+    })),
+    texts,
+  };
+}
+
+const TEXT_ROLES: Record<string, string[]> = {
+  items: ["items", "localization"],
+  blocks: ["blocks"],
+  templates: ["templates"],
+  tokens: ["tokens", "localization"],
+  factions: ["factions"],
+  dialogues: ["dialogues", "dialoguesCsv"],
+  playfields: ["playfieldYaml"],
+  galaxy: ["galaxy", "sectors"],
+  sectors: ["sectors"],
+  localization: ["localization"],
+  pda: ["localization"],
+  all: [],
+};
 
 function validateEcfRole(
   catalog: ScenarioCatalog,
@@ -100,6 +141,18 @@ function validateEcfRole(
   const unused = unusedNumericIds(used);
   const byId = new Map<string, string[]>();
   const byName = new Map<string, number>();
+  const nameSet = new Set(objects.map((o) => o.name.toLowerCase()));
+  const pictures = new Set(
+    catalog.entries
+      .filter((e) => e.kind === "picture")
+      .flatMap((e) => {
+        const base = e.name.toLowerCase();
+        return [base, base.replace(/\.(png|jpe?g|webp|gif)$/i, "")];
+      }),
+  );
+  const itemNames = new Set(
+    catalog.entries.filter((e) => e.kind === "item" || e.kind === "block").map((e) => e.name.toLowerCase()),
+  );
 
   for (const obj of objects) {
     const name = obj.name?.trim() || "";
@@ -127,9 +180,10 @@ function validateEcfRole(
     }
 
     const icon = obj.fields.CustomIcon || obj.fields.UnlockIcon;
-    if (icon && catalog.entries.some((e) => e.kind === "picture")) {
-      if (!resolveCatalogToken(catalog, icon, ["picture"])) {
-        const suggestions = suggestionsFor(catalog, ["picture"], icon, 3).map((e) => e.name);
+    if (icon && pictures.size) {
+      const stem = icon.replace(/\.(png|jpe?g|webp|gif)$/i, "").toLowerCase();
+      const hit = pictures.has(icon.toLowerCase()) || pictures.has(stem);
+      if (!hit) {
         push({
           id: null,
           kind: "file",
@@ -139,24 +193,17 @@ function validateEcfRole(
           code: "icon",
           message: `${name} CustomIcon “${icon}” is not in imported ItemIcons.`,
           path: `${name}.CustomIcon`,
-          recommend: suggestions.length ? "fix" : "review",
+          recommend: "review",
           field: "CustomIcon",
           value: icon,
-          suggestions,
-          fixes: suggestions.slice(0, 2).map((s) => ({
-            type: "ecf-set" as const,
-            role,
-            name,
-            field: "CustomIcon",
-            value: s.replace(/\.(png|jpe?g|webp|gif)$/i, ""),
-            label: `Use ${s}`,
-          })),
+          suggestions: [],
+          fixes: [],
         });
       }
     }
 
     const ref = obj.fields.Ref;
-    if (ref && kinds.length && !resolveCatalogToken(catalog, ref, kinds)) {
+    if (ref && !nameSet.has(ref.toLowerCase()) && kinds.length) {
       const suggestions = suggestionsFor(catalog, kinds, ref, 3).map((e) => e.name);
       push({
         id: null,
@@ -186,7 +233,7 @@ function validateEcfRole(
       const child = obj.children?.find((c) => /input/i.test(c.name)) ?? obj.children?.[0];
       for (const [ingredient] of Object.entries(child?.fields ?? {})) {
         if (!ingredient) continue;
-        if (resolveCatalogToken(catalog, ingredient, ["item", "block"])) continue;
+        if (itemNames.has(ingredient.toLowerCase())) continue;
         const suggestions = suggestionsFor(catalog, ["item", "block"], ingredient, 3).map((e) => e.name);
         push({
           id: null,
@@ -200,27 +247,6 @@ function validateEcfRole(
           recommend: suggestions.length ? "fix" : "review",
           value: ingredient,
           suggestions,
-          fixes: [],
-        });
-      }
-    }
-
-    if ((role === "items" || role === "tokens") && catalog.texts.some((t) => t.role === "localization")) {
-      const loca = localizationTable(catalog);
-      const keys = [name, `Items_${name}`, `Item_${name}`, `Token_${name}`];
-      const has = keys.some((k) => loca.rows[k] && Object.values(loca.rows[k]!).some(Boolean));
-      if (!has && loca.languages.length) {
-        push({
-          id: null,
-          kind: "file",
-          source: role,
-          href: hrefFor(role),
-          level: "warning",
-          code: "loca",
-          message: `${name} has no Localization.csv English name.`,
-          path: `${name}`,
-          recommend: "review",
-          suggestions: [],
           fixes: [],
         });
       }

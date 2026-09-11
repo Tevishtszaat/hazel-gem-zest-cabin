@@ -3,6 +3,7 @@ import type { ImportKind } from "./import-kinds.ts";
 import { collectCatalogTexts, type IndexedScenario, type ScenarioCatalog, type ScenarioSource } from "./scenario-index.ts";
 import type { PdaProject } from "./types.ts";
 import type { ImportFiles } from "./yaml-import.ts";
+import { slimCatalogForSource, type FileDebugId } from "./validate-files.ts";
 import { beginBusy, endBusy } from "@/store/busy-store.ts";
 
 type Req = { id: number; op: HeavyOp; payload: HeavyPayload };
@@ -66,4 +67,8 @@ export function importPdaOffthread(files: ImportFiles) {
 
 export function validateOffthread(project: PdaProject, catalog: ScenarioCatalog) {
   return call<ValidateResult>("validate", { project, catalog: slimCatalog(catalog) });
+}
+
+export function validateFilesOffthread(catalog: ScenarioCatalog, source: FileDebugId | "pda") {
+  return call<ValidateResult>("validateFiles", { catalog: slimCatalogForSource(catalog, source), source });
 }

@@ -26,7 +26,7 @@ describe("file-kind debug", () => {
         { kind: "item" as const, name: "Beta", source: "items" },
       ],
     };
-    const issues = validateCatalog(catalog);
+    const issues = validateCatalog(catalog, "items");
     const dup = issues.find((i) => i.code === "duplicate-id" && i.source === "items");
     assert.ok(dup);
     assert.equal(dup?.fixes[0]?.type, "ecf-set");
