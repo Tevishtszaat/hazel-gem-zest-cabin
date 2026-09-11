@@ -1,9 +1,12 @@
 import { FileUp, FolderOpen, LoaderCircle } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button.tsx";
+import { ImportProgressPanel } from "@/components/import/import-progress-panel.tsx";
 import { filesFromDataTransfer, loadTutorialSources, sourcesFromFiles } from "@/lib/pda/folder-files.ts";
-import { catalogCounts } from "@/lib/pda/scenario-index.ts";
+import { areaForRole, fileMatchesKind } from "@/lib/pda/import-kinds.ts";
+import { classifyScenarioPath } from "@/lib/pda/scenario-index.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
+import { useImportProgress } from "@/store/import-progress.ts";
 
 async function readPair(fileList: FileList | File[]) {
   const files = [...fileList];
@@ -36,11 +39,23 @@ function looksLikeFolder(files: File[]) {
   });
 }
 
+function tallyScenario(files: File[]) {
+  const totals: Partial<Record<string, number>> = {};
+  for (const file of files) {
+    const path = (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name;
+    if (!fileMatchesKind(path, "scenario")) continue;
+    totals.scenario = (totals.scenario || 0) + 1;
+    const area = areaForRole(classifyScenarioPath(path, "scenario"));
+    if (area) totals[area] = (totals[area] || 0) + 1;
+  }
+  return totals;
+}
+
 export function ImportDialog() {
   const open = usePdaStore((s) => s.importOpen);
   const setOpen = usePdaStore((s) => s.setImportOpen);
   const importFiles = usePdaStore((s) => s.importFiles);
-  const importScenario = usePdaStore((s) => s.importScenario);
+  const ingest = usePdaStore((s) => s.ingestSources);
   const reset = usePdaStore((s) => s.reset);
   const folderRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -62,43 +77,48 @@ export function ImportDialog() {
       setProgress(null);
       try {
         await work();
-        setOpen(false);
+        useImportProgress.getState().finish();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Import failed.");
       } finally {
         setBusy(false);
-        setProgress(null);
       }
     },
-    [setOpen],
+    [],
   );
 
   const ingestFiles = useCallback(
     async (files: File[]) => {
       if (!files.length) throw new Error("No files selected.");
       if (looksLikeFolder(files) || files.length > 4) {
-        const sources = await sourcesFromFiles(files, (done, total, path) => {
-          setProgress(`Reading ${done}/${total} · ${path.split("/").pop()}`);
-        });
-        if (!sources.length) throw new Error("That folder had no PDA, ECF, sectors, or prefab files.");
-        importScenario(sources);
-        const catalog = usePdaStore.getState().catalog;
-        const n = catalogCounts(catalog);
-        setProgress(
-          `${catalog.folderName || "Scenario"} · ${n.item} items · ${n.block} blocks · ${n.playfield} playfields · ${n.poi} POIs`,
+        const totals = tallyScenario(files);
+        useImportProgress.getState().reset(totals);
+        const sources = await sourcesFromFiles(
+          files,
+          (done, total, path) => {
+            setProgress(`Reading ${done}/${total} · ${path.split("/").pop()}`);
+            const prog = useImportProgress.getState();
+            prog.tick("scenario");
+            const area = areaForRole(classifyScenarioPath(path, "scenario"));
+            if (area) prog.tick(area);
+          },
+          "scenario",
         );
+        if (!sources.length) throw new Error("That folder had no PDA, ECF, sectors, or prefab files.");
+        const message = await ingest("scenario", sources);
+        setProgress(message);
         return;
       }
       importFiles(await readPair(files));
     },
-    [importFiles, importScenario],
+    [importFiles, ingest],
   );
 
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-bg/70 p-4">
-      <div className="w-full max-w-lg rounded-xl border border-border bg-surface p-5 shadow-2xl">
+      <div className="max-h-[90dvh] w-full max-w-lg overflow-auto rounded-xl border border-border bg-surface p-5 shadow-2xl">
         <h2 className="font-medium text-lg tracking-tight">Load a scenario</h2>
         <p className="mt-1 text-sm text-muted">
           Drop the whole scenario folder — Axis indexes <span className="text-fg">PDA.yaml</span>,{" "}
@@ -140,6 +160,7 @@ export function ImportDialog() {
           />
         </label>
 
+        {busy ? <div className="mt-4"><ImportProgressPanel /></div> : null}
         {progress ? <p className="mt-3 text-xs text-muted">{progress}</p> : null}
         {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
 
@@ -166,7 +187,7 @@ export function ImportDialog() {
             onClick={() =>
               void run(async () => {
                 setProgress("Loading bundled tutorial + configs…");
-                importScenario(await loadTutorialSources());
+                await ingest("scenario", await loadTutorialSources());
               })
             }
           >
@@ -175,13 +196,13 @@ export function ImportDialog() {
           <Button variant="ghost" disabled={busy} onClick={() => reset()}>
             Start empty
           </Button>
-          <Button variant="ghost" className="ml-auto" onClick={() => setOpen(false)}>
+          <Button variant="ghost" className="ml-auto" disabled={busy} onClick={() => setOpen(false)}>
             Close
           </Button>
         </div>
         <p className="mt-3 text-xs text-subtle">
-          Choose folder walks Configuration, Extras/PDA, Sectors, Playfields, and Prefabs. Binary blueprints are indexed
-          by filename only.
+          Choose folder walks Configuration, Extras/PDA, Sectors, Playfields, and Prefabs. Bars below fill per area —
+          wait until they turn green.
         </p>
       </div>
     </div>

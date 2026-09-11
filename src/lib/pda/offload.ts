@@ -36,10 +36,12 @@ function getWorker() {
   return worker;
 }
 
-function call<T>(op: HeavyOp, payload: HeavyPayload): Promise<T> {
-  beginBusy("think");
+function call<T>(op: HeavyOp, payload: HeavyPayload, markBusy = true): Promise<T> {
+  if (markBusy) beginBusy("think");
   const w = getWorker();
-  const done = (run: Promise<T>) => run.finally(() => endBusy("think"));
+  const done = (run: Promise<T>) => run.finally(() => {
+    if (markBusy) endBusy("think");
+  });
   if (!w) return done(Promise.resolve(runHeavy(op, payload) as T));
   const id = ++seq;
   return done(
@@ -74,9 +76,9 @@ export function importPdaOffthread(files: ImportFiles) {
 }
 
 export function validateOffthread(project: PdaProject, catalog: ScenarioCatalog) {
-  return call<ValidateResult>("validate", { project, catalog: slimCatalog(catalog) });
+  return call<ValidateResult>("validate", { project, catalog: slimCatalog(catalog) }, false);
 }
 
 export function validateFilesOffthread(catalog: ScenarioCatalog, source: FileDebugId | "pda") {
-  return call<ValidateResult>("validateFiles", { catalog: slimCatalogForSource(catalog, source), source });
+  return call<ValidateResult>("validateFiles", { catalog: slimCatalogForSource(catalog, source), source }, false);
 }

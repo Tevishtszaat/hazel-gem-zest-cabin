@@ -22,6 +22,7 @@ import {
   suggestionsFor,
   type ScenarioCatalog,
 } from "./scenario-index.ts";
+import { scanTextSyntax } from "./validate-syntax.ts";
 import type { Problem, ProblemFix } from "./validate.ts";
 
 export const FILE_DEBUG_TABS = [
@@ -40,6 +41,8 @@ export const FILE_DEBUG_TABS = [
 ] as const;
 
 export type FileDebugId = (typeof FILE_DEBUG_TABS)[number]["id"];
+
+export const FILE_SCAN_ORDER = FILE_DEBUG_TABS.map((tab) => tab.id).filter((id) => id !== "all");
 
 const HREF: Record<string, string> = Object.fromEntries(FILE_DEBUG_TABS.map((t) => [t.id, t.href]));
 
@@ -67,8 +70,8 @@ export function applyYamlReplace(text: string, from: string, to: string) {
 }
 
 export function validateCatalog(catalog: ScenarioCatalog | undefined, source: FileDebugId | "pda" = "all"): Problem[] {
-  if (!catalogLoaded(catalog) || !catalog) return [];
-  if (source === "pda") return [];
+  if (!catalog) return [];
+  if (!catalogLoaded(catalog) && !(catalog.texts?.length)) return [];
   const issues: Problem[] = [];
   let n = 0;
   const push = (problem: Omit<Problem, "key">) => {
@@ -77,14 +80,38 @@ export function validateCatalog(catalog: ScenarioCatalog | undefined, source: Fi
     issues.push({ key: `${problem.source}:${problem.code}:${problem.path}:${n}`, ...problem });
   };
 
+  if (source === "pda") {
+    validateSyntax(catalog, "pda", push);
+    return issues;
+  }
   if (source === "all") return issues;
+
+  validateSyntax(catalog, source, push);
 
   if (ECF_ROLES.includes(source as (typeof ECF_ROLES)[number])) {
     const objects = objectsFor(catalog, source as (typeof ECF_ROLES)[number]);
     if (objects.length) validateEcfRole(catalog, source as (typeof ECF_ROLES)[number], objects, push);
     return issues;
   }
-  if (source === "dialogues") validateDialogues(catalog, push);
+  if (source === "dialogues") {
+    try {
+      validateDialogues(catalog, push);
+    } catch (err) {
+      push({
+        id: null,
+        kind: "file",
+        source: "dialogues",
+        href: "/dialogues",
+        level: "error",
+        code: "syntax",
+        message: `Dialogues.ecf could not be parsed: ${err instanceof Error ? err.message : "parse failed"}`,
+        path: "Dialogues.ecf",
+        recommend: "review",
+        suggestions: [],
+        fixes: [],
+      });
+    }
+  }
   else if (source === "playfields") validatePlayfields(catalog, push);
   else if (source === "galaxy") validateGalaxy(catalog, push);
   else if (source === "sectors") validateGalaxy(catalog, push);
@@ -125,9 +152,21 @@ const TEXT_ROLES: Record<string, string[]> = {
   galaxy: ["galaxy", "sectors"],
   sectors: ["sectors"],
   localization: ["localization"],
-  pda: ["localization"],
+  pda: ["pdaYaml", "pdaCsv"],
   all: [],
 };
+
+function validateSyntax(
+  catalog: ScenarioCatalog,
+  source: FileDebugId | "pda",
+  push: (p: Omit<Problem, "key">) => void,
+) {
+  const roles = TEXT_ROLES[source] ?? [];
+  for (const text of catalog.texts ?? []) {
+    if (!text.text || !roles.includes(text.role)) continue;
+    scanTextSyntax(text.role, text.path, text.text, push);
+  }
+}
 
 function validateEcfRole(
   catalog: ScenarioCatalog,

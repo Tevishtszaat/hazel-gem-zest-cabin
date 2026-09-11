@@ -116,25 +116,27 @@ export function DebugPage() {
         <div className="mb-5">
           <h1 className="text-2xl font-medium tracking-tight">Debug</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted">
-            Pick a file tab to scan that config in the background. All files / PDA stays on the mission tree so the page
-            stays responsive.
-            {busy ? " Rechecking in the background…" : ""}
+            Scans PDA, dialogues, and each config for broken syntax (unclosed blocks, bad YAML/CSV) plus the usual
+            missing names and duplicate IDs. All files fills in as each area finishes so the page stays responsive.
+            {busy ? " Scanning in the background…" : ""}
           </p>
         </div>
 
         <div className="mb-3 flex flex-wrap gap-1.5">
           {FILE_DEBUG_TABS.map((tab) => {
             const active = file === tab.id;
+            const scanning = scan?.file === tab.id || (tab.id === "all" && Boolean(scan));
             const count = active ? issues.filter((i) => !ignoredProblems.includes(problemIgnoreKey(i))).length : 0;
             return (
               <button
                 key={tab.id}
                 onClick={() => setFile(tab.id)}
                 className={`h-8 rounded-sm px-3 text-xs ${
-                  active ? "bg-elevated text-fg" : "text-muted hover:text-fg"
+                  active ? "bg-elevated text-fg" : scanning ? "text-accent" : "text-muted hover:text-fg"
                 }`}
               >
                 {tab.label}
+                {scanning && !active ? <span className="ml-1 text-subtle">…</span> : null}
                 {active && count ? <span className="ml-1 text-subtle">{count}</span> : null}
               </button>
             );

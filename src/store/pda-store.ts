@@ -4,8 +4,10 @@ import { durableStorage, putCatalogTexts, loadCatalogTexts, clearCatalogTexts } 
 import { stringifyCsv, csvLookup } from "@/lib/pda/csv.ts";
 import { blankProject, applyCsvText, newAction, newChapter, newTask, type ImportFiles } from "@/lib/pda/yaml-import.ts";
 import { classifyScenarioPath, dropCatalogGroup, emptyCatalog, mergeCatalog, catalogLoadSummary, type ScenarioCatalog, type ScenarioSource } from "@/lib/pda/scenario-index.ts";
+import { areaForRole } from "@/lib/pda/import-kinds.ts";
 import { importPdaOffthread, indexScenarioOffthread } from "@/lib/pda/offload.ts";
 import { beginBusy, endBusy, setBusyDetail } from "@/store/busy-store.ts";
+import { useImportProgress } from "@/store/import-progress.ts";
 import { clearImages, putImages, warmImageCache, type ImageSet } from "@/lib/pda/image-store.ts";
 import type { ImportKind } from "@/lib/pda/import-kinds.ts";
 import { catalogText } from "@/lib/pda/library.ts";
@@ -159,14 +161,22 @@ export const usePdaStore = create<PdaState>()(
         try {
           if (!files.length) throw new Error("No matching files in that drop.");
           setBusyDetail(`Indexing ${files.length} files…`, 8);
+          useImportProgress.getState().boostAll(72);
           const indexed = await indexScenarioOffthread(files, kind);
+          useImportProgress.getState().boostAll(78);
           const catalog = mergeCatalog(get().catalog, indexed.catalog);
           const texts = catalog.texts ?? [];
           if (texts.length) {
             setBusyDetail(`Saving ${texts.length} configs…`, 30);
             try {
               await putCatalogTexts(texts, (done, total) => {
+                const pct = 78 + Math.round((done / Math.max(1, total)) * 12);
                 setBusyDetail(`Saving configs ${done}/${total}`, 30 + Math.round((done / Math.max(1, total)) * 25));
+                const text = texts[done - 1];
+                const area = text ? areaForRole(text.role) : null;
+                const prog = useImportProgress.getState();
+                prog.boostAll(pct);
+                if (area) prog.boost(area, Math.min(94, pct + 4));
               });
             } catch (err) {
               console.warn("Could not persist catalog texts", err);
@@ -190,8 +200,13 @@ export const usePdaStore = create<PdaState>()(
                 blob: file.blob!,
                 set: imageSetFor(file.path, kind),
               })),
-              (done, total) =>
-                setBusyDetail(`Storing icons ${done}/${total}`, 60 + Math.round((done / Math.max(1, total)) * 25)),
+              (done, total) => {
+                const pct = 88 + Math.round((done / Math.max(1, total)) * 10);
+                setBusyDetail(`Storing icons ${done}/${total}`, 60 + Math.round((done / Math.max(1, total)) * 25));
+                const prog = useImportProgress.getState();
+                prog.boost("itemImages", pct);
+                prog.boost("pdaImages", pct);
+              },
             );
           };
 

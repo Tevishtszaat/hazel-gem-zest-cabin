@@ -23,6 +23,7 @@ import { classifyScenarioPath, catalogCounts, catalogLoaded } from "@/lib/pda/sc
 import { usePdaStore } from "@/store/pda-store.ts";
 import { beginBusy, endBusy, setBusyDetail, useBusyStore } from "@/store/busy-store.ts";
 import { useImportProgress, type AreaSnap } from "@/store/import-progress.ts";
+import { AreaBar, ImportProgressPanel } from "@/components/import/import-progress-panel.tsx";
 
 const ICONS: Record<ImportKind, ReactNode> = {
   scenario: <FolderOpen className="size-5" />,
@@ -55,27 +56,6 @@ function tallyAreas(files: File[], kind: ImportKind) {
     }
   }
   return totals;
-}
-
-function AreaBar({ snap }: { snap?: AreaSnap }) {
-  if (!snap) return null;
-  const pct = snap.total ? Math.round((snap.done / snap.total) * 100) : snap.phase === "done" ? 100 : 0;
-  const fill =
-    snap.phase === "done" ? "area-bar-fill is-done" : snap.phase === "queued" ? "area-bar-fill is-queued" : "area-bar-fill";
-  const label =
-    snap.phase === "done"
-      ? "Done"
-      : snap.phase === "queued"
-        ? `Queued ${snap.total}`
-        : `${snap.done}/${snap.total}`;
-  return (
-    <div className="mt-2">
-      <div className="h-2 overflow-hidden rounded-full bg-elevated">
-        <div className={`h-full rounded-full ${fill}`} style={{ width: `${Math.max(snap.phase === "queued" ? 12 : 4, pct)}%` }} />
-      </div>
-      <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-muted">{label}</p>
-    </div>
-  );
 }
 
 function slotCount(kind: ImportKind, files: { role: string; count: number }[], pictures: { pda: number; item: number }) {
@@ -254,6 +234,8 @@ export function ImportPage() {
 
         <LoadedStrip />
 
+        <ImportProgressPanel />
+
         <div
           className="mb-4 rounded-lg border border-dashed border-border p-4 text-sm text-muted"
           onDragOver={(e) => e.preventDefault()}
@@ -391,7 +373,7 @@ function SlotCard(props: {
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium">{props.title}</p>
         <p className="mt-0.5 text-xs leading-relaxed text-muted">{props.hint}</p>
-        <AreaBar snap={props.progress} />
+        <AreaBar snap={props.progress} compact />
       </div>
       {props.busy && !props.progress ? (
         <LoaderCircle className="size-4 shrink-0 animate-spin text-muted" />
