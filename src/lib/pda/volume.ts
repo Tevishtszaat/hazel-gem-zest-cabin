@@ -340,6 +340,15 @@ export function readGalaxyVolume(general: EcfObject | null | undefined): GalaxyV
   return { inner, outer: Math.max(outer, 1), sectorsPerLy, regions, territories, nebulas };
 }
 
+export const STAR_CLASS_LEGEND = [
+  { label: "O / B stars", color: "#9ecbff" },
+  { label: "A / F stars", color: "#f4f7ff" },
+  { label: "G stars", color: "#ffe29a" },
+  { label: "K stars", color: "#ffb15a" },
+  { label: "M stars", color: "#ff6d4a" },
+  { label: "Other stars", color: "#fff4cf" },
+];
+
 export function starTint(starClass: string, color: string) {
   if (color) return cssColor(color, "#ffe7a3");
   const letter = starClass.trim().charAt(0).toUpperCase();

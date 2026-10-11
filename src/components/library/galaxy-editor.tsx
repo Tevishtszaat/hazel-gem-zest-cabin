@@ -10,7 +10,7 @@ import { noteForField } from "@/lib/pda/field-notes.ts";
 import { catalogText, objectsFor } from "@/lib/pda/library.ts";
 import { applyOrbitFixes, parseSectorBodies, STAR_MODELS, STAR_REGION_STATS, STAR_STATS, fieldToHex, hexToField, isStarType, parseStarMix, writeStarMix, type StarMix } from "@/lib/pda/galaxy.ts";
 import { VolumeViewport } from "@/components/library/volume-view.tsx";
-import { parseVolumeSystems, readGalaxyVolume } from "@/lib/pda/volume.ts";
+import { parseVolumeSystems, readGalaxyVolume, STAR_CLASS_LEGEND, type GalaxyVolume } from "@/lib/pda/volume.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
 
 function download(name: string, text: string) {
@@ -168,6 +168,7 @@ export function GalaxyEditor() {
   const [nebulaKey, setNebulaKey] = useState(nebulaKeys[0] || "");
   const nebula = nebulaKeys.includes(nebulaKey) ? nebulaKey : nebulaKeys[0] || "";
   const extraStar = star ? Object.keys(star.fields).filter((k) => !STAR_STATS.includes(k)) : [];
+  const [volumeTab, setVolumeTab] = useState<"galaxy" | "regions" | "territories" | "all">("galaxy");
   const volumeSystems = useMemo(() => parseVolumeSystems(sectorText?.text || ""), [sectorText?.text]);
   const galaxyVolume = useMemo(() => readGalaxyVolume(general), [general]);
 
@@ -213,12 +214,38 @@ export function GalaxyEditor() {
         </p>
       ) : null}
 
-      <div className="mt-4 h-[520px]">
-        <VolumeViewport space="galaxy" galaxy={galaxyVolume} systems={volumeSystems} />
+      <div className="mt-4 flex flex-wrap gap-2">
+        {(
+          [
+            ["galaxy", "Galaxy"],
+            ["regions", "Regions"],
+            ["territories", "Territories"],
+            ["all", "All"],
+          ] as const
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            onClick={() => setVolumeTab(id)}
+            className={`h-8 rounded-md border px-3 text-sm ${volumeTab === id ? "border-accent bg-accent/15 text-fg" : "border-border text-muted hover:text-fg"}`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      <div className="mt-2 flex h-[520px] gap-3">
+        <div className="min-w-0 flex-1">
+          <VolumeViewport space="galaxy" layer={volumeTab} galaxy={galaxyVolume} systems={volumeSystems} />
+        </div>
+        <VolumeLegend tab={volumeTab} galaxy={galaxyVolume} />
       </div>
       <p className="mt-2 text-xs text-subtle">
-        Outside view, in light years. The disk is the galaxy radius, rings are star regions, colored spheres are
-        territories, and the glow is nebula color. Scroll in to read a region. Bright points are stars from Sectors.yaml.{" "}
+        {volumeTab === "regions"
+          ? "Star regions only. Nested shells are RadiusMinMax from the galactic center, in light years."
+          : volumeTab === "territories"
+            ? "Faction spheres only. Each territory is Center and Radius in light years."
+            : volumeTab === "all"
+              ? "Galaxy disk, star regions, and territories together."
+              : "Galaxy radius and nebula color, with Sectors.yaml stars as the bright points."}{" "}
         <Link to="/library/sectors" className="text-accent hover:underline">
           Open the sectors volume
         </Link>{" "}
@@ -690,4 +717,105 @@ function RegionEditor({
     </div>
   );
 }
+
+function stopColor(stop: [number, number, number]) {
+  const c = (n: number) => Math.round(Math.max(0, Math.min(1, n)) * 255);
+  return `rgb(${c(stop[0])}, ${c(stop[1])}, ${c(stop[2])})`;
+}
+
+function Swatch({ color, ring }: { color: string; ring?: boolean }) {
+  return (
+    <span
+      className="mt-0.5 inline-block h-2.5 w-2.5 shrink-0 rounded-full border"
+      style={{ background: ring ? "transparent" : color, borderColor: color }}
+    />
+  );
+}
+
+function VolumeLegend({ tab, galaxy }: { tab: "galaxy" | "regions" | "territories" | "all"; galaxy: GalaxyVolume }) {
+  const showGalaxy = tab === "galaxy" || tab === "all";
+  const showRegions = tab === "regions" || tab === "all";
+  const showTerritories = tab === "territories" || tab === "all";
+  return (
+    <aside className="w-56 shrink-0 overflow-auto rounded-md border border-border bg-surface/50 p-3">
+      <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted">Legend</p>
+      {showGalaxy ? (
+        <section className="mt-3">
+          <p className="text-[10px] uppercase tracking-[0.12em] text-subtle">Galaxy</p>
+          <ul className="mt-1.5 space-y-1.5">
+            <li className="flex items-start gap-2 text-xs">
+              <Swatch ring color="rgba(150,186,255,0.95)" />
+              <span>Outer radius</span>
+            </li>
+            {galaxy.inner > 1 ? (
+              <li className="flex items-start gap-2 text-xs">
+                <Swatch ring color="rgba(255,220,160,0.95)" />
+                <span>Inner radius</span>
+              </li>
+            ) : null}
+            {galaxy.nebulas.slice(0, 8).map((nebula) => (
+              <li key={nebula.key} className="flex items-start gap-2 text-xs">
+                <Swatch color={stopColor(nebula.stops[0] || [1, 1, 1])} />
+                <span className="truncate">{nebula.key}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-[10px] uppercase tracking-[0.12em] text-subtle">Star class</p>
+          <ul className="mt-1.5 space-y-1.5">
+            {STAR_CLASS_LEGEND.map((item) => (
+              <li key={item.label} className="flex items-center gap-2 text-xs">
+                <Swatch color={item.color} />
+                <span>{item.label}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-1.5 text-[10px] leading-4 text-subtle">A star Color field overrides the class tint.</p>
+        </section>
+      ) : null}
+      {showRegions ? (
+        <section className="mt-3">
+          <p className="text-[10px] uppercase tracking-[0.12em] text-subtle">Regions</p>
+          <ul className="mt-1.5 space-y-1.5">
+            {galaxy.regions.length ? (
+              galaxy.regions.map((region) => (
+                <li key={region.id} className="flex items-start gap-2 text-xs">
+                  <Swatch ring color={region.color} />
+                  <span className="min-w-0">
+                    <span className="block truncate">{region.name}</span>
+                    <span className="text-[10px] text-subtle">
+                      {region.inner}–{region.outer} LY
+                    </span>
+                  </span>
+                </li>
+              ))
+            ) : (
+              <li className="text-xs text-subtle">No star regions in this file.</li>
+            )}
+          </ul>
+        </section>
+      ) : null}
+      {showTerritories ? (
+        <section className="mt-3">
+          <p className="text-[10px] uppercase tracking-[0.12em] text-subtle">Territories</p>
+          <ul className="mt-1.5 space-y-1.5">
+            {galaxy.territories.length ? (
+              galaxy.territories.map((territory) => (
+                <li key={territory.id} className="flex items-start gap-2 text-xs">
+                  <Swatch ring color={territory.color} />
+                  <span className="min-w-0">
+                    <span className="block truncate">{territory.faction}</span>
+                    <span className="text-[10px] text-subtle">{territory.id}</span>
+                  </span>
+                </li>
+              ))
+            ) : (
+              <li className="text-xs text-subtle">No territories in this file.</li>
+            )}
+          </ul>
+        </section>
+      ) : null}
+    </aside>
+  );
+}
+
 

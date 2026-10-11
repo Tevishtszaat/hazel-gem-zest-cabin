@@ -78,6 +78,7 @@ export function VolumeViewport({
   focusBody,
   zones,
   onPick,
+  layer = "all",
 }: {
   space: "galaxy" | "system";
   galaxy: GalaxyVolume | null;
@@ -86,6 +87,7 @@ export function VolumeViewport({
   focusBody?: string;
   zones?: ZoneRing[];
   onPick?: (pick: { system: string; body?: string }) => void;
+  layer?: "galaxy" | "regions" | "territories" | "all";
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -152,71 +154,99 @@ export function VolumeViewport({
       ctx.globalAlpha = 1;
 
       if (space === "galaxy") {
+        const showGalaxy = layer === "galaxy" || layer === "all";
+        const showRegions = layer === "regions" || layer === "all";
+        const showTerritories = layer === "territories" || layer === "all";
         const outer = galaxy?.outer || 1000;
         const yScale = 0.22;
-        shell(ctx, cam, w, h, outer, yScale, "rgba(150,186,255,0.85)", 0.35);
-        if ((galaxy?.inner || 0) > 1) shell(ctx, cam, w, h, galaxy!.inner, yScale, "rgba(255,220,160,0.8)", 0.28);
-        for (const region of galaxy?.regions || []) {
-          if (region.outer <= 0) continue;
-          shell(ctx, cam, w, h, region.outer, region.shape === "elliptical" ? 0.22 : 1, region.color, 0.45);
+        if (showGalaxy) {
+          shell(ctx, cam, w, h, outer, yScale, "rgba(150,186,255,0.85)", 0.35);
+          if ((galaxy?.inner || 0) > 1) shell(ctx, cam, w, h, galaxy!.inner, yScale, "rgba(255,220,160,0.8)", 0.28);
+        } else {
+          shell(ctx, cam, w, h, outer, yScale, "rgba(150,186,255,0.45)", 0.12);
         }
-        const nebulas = (galaxy?.nebulas || []).slice(0, 8);
-        nebulas.forEach((nebula, i) => {
-          const angle = (i / nebulas.length) * Math.PI * 2;
-          const r = outer * (0.35 + (i % 3) * 0.15);
-          const at = project([Math.cos(angle) * r, outer * 0.02, Math.sin(angle) * r], cam, w, h);
-          const stop = nebula.stops[0];
-          if (!at || !stop) return;
-          const radius = Math.max(40, Math.min(w, h) * 0.16);
-          const g = ctx.createRadialGradient(at.x, at.y, 0, at.x, at.y, radius);
-          const red = Math.round(Math.min(1, stop[0]) * 255);
-          const green = Math.round(Math.min(1, stop[1]) * 255);
-          const blue = Math.round(Math.min(1, stop[2]) * 255);
-          g.addColorStop(0, `rgba(${red}, ${green}, ${blue}, 0.28)`);
-          g.addColorStop(1, "rgba(0,0,0,0)");
-          ctx.fillStyle = g;
-          ctx.beginPath();
-          ctx.arc(at.x, at.y, radius, 0, Math.PI * 2);
-          ctx.fill();
-        });
-        for (const territory of galaxy?.territories || []) {
-          const center = territory.center;
-          shell(ctx, { ...cam, target: [cam.target[0] - center[0], cam.target[1] - center[1], cam.target[2] - center[2]] }, w, h, territory.radius, 1, territory.color, 0.55);
-          const at = project(center, cam, w, h);
-          if (!at) continue;
-          ctx.fillStyle = territory.color;
-          ctx.beginPath();
-          ctx.arc(at.x, at.y, 3.2, 0, Math.PI * 2);
-          ctx.fill();
-          if (territory.radius > 0 && cam.dist < (galaxy?.outer || 1000) * 1.4) {
-            ctx.font = "11px sans-serif";
-            ctx.fillText(territory.faction, at.x + 6, at.y - 6);
+        if (showRegions) {
+          const regionLabels: { x: number; y: number; text: string }[] = [];
+          for (const region of galaxy?.regions || []) {
+            if (region.outer <= 0) continue;
+            shell(ctx, cam, w, h, region.outer, region.shape === "elliptical" ? 0.22 : 1, region.color, layer === "regions" ? 0.8 : 0.45);
+            const at = project([region.outer, 0, 0], cam, w, h);
+            if (at) regionLabels.push({ x: at.x, y: at.y, text: region.name });
+          }
+          ctx.font = "11px sans-serif";
+          ctx.fillStyle = "#f4f7ff";
+          const drawn: { x: number; y: number }[] = [];
+          for (const item of regionLabels) {
+            if (drawn.some((prev) => Math.hypot(prev.x - item.x, prev.y - item.y) < 16)) continue;
+            if (drawn.length >= 16) break;
+            ctx.fillText(item.text, item.x + 6, item.y - 4);
+            drawn.push(item);
           }
         }
-        const projected = systems
-          .map((item) => {
-            const at = project(item.ly, cam, w, h);
-            return at ? { item, at } : null;
-          })
-          .filter((item): item is { item: VolumeSystem; at: { x: number; y: number; depth: number } } => Boolean(item))
-          .sort((a, b) => b.at.depth - a.at.depth);
-        for (const { item, at } of projected) {
-          const tint = starTint(item.starClass, item.color);
-          const focused = item.name === focusSystem;
-          ctx.fillStyle = tint;
-          ctx.shadowColor = tint;
-          ctx.shadowBlur = focused ? 16 : 8;
-          ctx.beginPath();
-          ctx.arc(at.x, at.y, focused ? 4.5 : 2.2, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.shadowBlur = 0;
-          hits.push({ id: item.name, x: at.x, y: at.y, depth: at.depth, label: item.name });
+        if (showGalaxy) {
+          const nebulas = (galaxy?.nebulas || []).slice(0, 8);
+          nebulas.forEach((nebula, i) => {
+            const angle = (i / nebulas.length) * Math.PI * 2;
+            const r = outer * (0.35 + (i % 3) * 0.15);
+            const at = project([Math.cos(angle) * r, outer * 0.02, Math.sin(angle) * r], cam, w, h);
+            const stop = nebula.stops[0];
+            if (!at || !stop) return;
+            const radius = Math.max(40, Math.min(w, h) * 0.16);
+            const g = ctx.createRadialGradient(at.x, at.y, 0, at.x, at.y, radius);
+            const red = Math.round(Math.min(1, stop[0]) * 255);
+            const green = Math.round(Math.min(1, stop[1]) * 255);
+            const blue = Math.round(Math.min(1, stop[2]) * 255);
+            g.addColorStop(0, `rgba(${red}, ${green}, ${blue}, 0.28)`);
+            g.addColorStop(1, "rgba(0,0,0,0)");
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(at.x, at.y, radius, 0, Math.PI * 2);
+            ctx.fill();
+          });
         }
-        const label = projected.find((item) => item.item.name === focusSystem);
-        if (label) {
-          ctx.fillStyle = "#f4f7ff";
-          ctx.font = "12px sans-serif";
-          ctx.fillText(label.item.name, label.at.x + 8, label.at.y - 8);
+        if (showTerritories) {
+          const drawn: { x: number; y: number }[] = [];
+          for (const territory of galaxy?.territories || []) {
+            const center = territory.center;
+            shell(ctx, { ...cam, target: [cam.target[0] - center[0], cam.target[1] - center[1], cam.target[2] - center[2]] }, w, h, territory.radius, 1, territory.color, layer === "territories" ? 0.9 : 0.55);
+            const at = project(center, cam, w, h);
+            if (!at) continue;
+            ctx.fillStyle = territory.color;
+            ctx.beginPath();
+            ctx.arc(at.x, at.y, 3.2, 0, Math.PI * 2);
+            ctx.fill();
+            if (drawn.some((prev) => Math.hypot(prev.x - at.x, prev.y - at.y) < 14)) continue;
+            ctx.font = "11px sans-serif";
+            ctx.fillText(territory.faction, at.x + 6, at.y - 6);
+            drawn.push(at);
+          }
+        }
+        if (showGalaxy || layer === "all") {
+          const projected = systems
+            .map((item) => {
+              const at = project(item.ly, cam, w, h);
+              return at ? { item, at } : null;
+            })
+            .filter((item): item is { item: VolumeSystem; at: { x: number; y: number; depth: number } } => Boolean(item))
+            .sort((a, b) => b.at.depth - a.at.depth);
+          for (const { item, at } of projected) {
+            const tint = starTint(item.starClass, item.color);
+            const focused = item.name === focusSystem;
+            ctx.fillStyle = tint;
+            ctx.shadowColor = tint;
+            ctx.shadowBlur = focused ? 16 : 8;
+            ctx.beginPath();
+            ctx.arc(at.x, at.y, focused ? 4.5 : 2.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            hits.push({ id: item.name, x: at.x, y: at.y, depth: at.depth, label: item.name });
+          }
+          const label = projected.find((item) => item.item.name === focusSystem);
+          if (label) {
+            ctx.fillStyle = "#f4f7ff";
+            ctx.font = "12px sans-serif";
+            ctx.fillText(label.item.name, label.at.x + 8, label.at.y - 8);
+          }
         }
       } else if (system) {
         const rings = zones?.length ? zones : ZONE_FALLBACK;
@@ -301,7 +331,7 @@ export function VolumeViewport({
       wrap.removeEventListener("wheel", onWheel);
       wrap.removeEventListener("volume-cam", requestDraw);
     };
-  }, [space, galaxy, systems, system, focusSystem, focusBody, zones, frameKey]);
+  }, [space, galaxy, systems, system, focusSystem, focusBody, zones, frameKey, layer]);
 
   return (
     <div
@@ -344,7 +374,17 @@ export function VolumeViewport({
     >
       <canvas ref={canvasRef} />
       <div className="pointer-events-none absolute left-3 top-3 text-[11px] uppercase tracking-[0.14em] text-[#9eb0d0]">
-        {space === "galaxy" ? "Outside the volume · light years" : focusBody ? `Planet view · ${focusBody}` : `Star view · ${focusSystem || "system"}`}
+        {space === "galaxy"
+          ? layer === "regions"
+            ? "Region view · star regions"
+            : layer === "territories"
+              ? "Territory view · faction spheres"
+              : layer === "all"
+                ? "Combined · galaxy, regions, territories"
+                : "Galaxy view · light years"
+          : focusBody
+            ? `Planet view · ${focusBody}`
+            : `Star view · ${focusSystem || "system"}`}
         <span className="mt-1 block normal-case tracking-normal text-[#7f8eab]">Drag to orbit. Scroll to zoom. Click a point to go closer.</span>
       </div>
     </div>
