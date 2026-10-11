@@ -715,7 +715,8 @@ export function diagnoseOrbits(star: EcfObject, bodies: SystemBody[]): OrbitIssu
     } else if (expected && expected !== "parent" && zone?.key && zone.key !== expected) {
       reason = `${climateLabel(climate)} ${body.kind.toLowerCase()} is in the ${zone.label} band.`;
     } else if (expected && expected !== "parent" && none) {
-      reason = `Outside every band for this star.`;
+      const label = STAR_ZONES.find((z) => z.key === expected)?.label ?? expected;
+      reason = `Outside every band for this star. ${climateLabel(climate)} bodies belong in the ${label} band.`;
     } else if (!expected && off) {
       reason = `Off-scale at ${body.distance.toFixed(0)} sectors.`;
     } else {
@@ -797,5 +798,16 @@ export function applyOrbitFixes(
     if (re.test(out)) out = out.replace(re, `$1${coord}$2`);
   }
   return out;
+}
+
+export function renameSectorBody(yaml: string, from: string, to: string): string {
+  const name = from.trim();
+  const next = to.trim();
+  if (!name || !next || name === next) return yaml;
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(
+    `(\\[[\\s'"]*-?[\\d.]+\\s*,\\s*-?[\\d.]+\\s*,\\s*-?[\\d.]+[\\s'"]*,\\s*['"]?)${escaped}(['"]?(?=\\s*,))`,
+  );
+  return yaml.replace(re, `$1${next}$2`);
 }
 

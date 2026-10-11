@@ -103,6 +103,7 @@ export function ImportDialog() {
             if (area) prog.tick(area);
           },
           "scenario",
+          usePdaStore.getState().catalog.folderName,
         );
         if (!sources.length) throw new Error("That folder had no PDA, ECF, sectors, or prefab files.");
         const message = await ingest("scenario", sources);

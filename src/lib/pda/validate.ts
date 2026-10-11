@@ -22,7 +22,10 @@ export type ProblemFix =
   | { type: "delete"; label: string }
   | { type: "ecf-set"; role: string; name: string; field: string; value: string; label: string }
   | { type: "yaml-replace"; role: string; path: string; from: string; to: string; label: string }
-  | { type: "csv-pad"; role: string; path: string; line: number; label: string };
+  | { type: "csv-pad"; role: string; path: string; line: number; label: string }
+  | { type: "orbit-move"; role: string; path: string; name: string; coords: [number, number, number]; label: string }
+  | { type: "loca-english"; role: string; path: string; key: string; label: string }
+  | { type: "sector-rename"; role: string; path: string; from: string; to: string; label: string };
 
 export type Problem = {
   key: string;
@@ -42,7 +45,9 @@ export type Problem = {
 };
 
 function kindPresent(catalog: ScenarioCatalog, kinds: CatalogKind[]) {
-  return kinds.some((kind) => catalog.entries.some((e) => e.kind === kind));
+  return kinds.some(
+    (kind) => catalog.entries.some((e) => e.kind === kind) || (catalog.game ?? []).some((e) => e.kind === kind),
+  );
 }
 
 function unknownIn(catalog: ScenarioCatalog, value: string, kinds: CatalogKind[]) {

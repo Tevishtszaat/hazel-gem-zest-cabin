@@ -39,8 +39,6 @@ export function DebugPage() {
 
   const visible = issues.filter((issue) => {
     const ignored = ignoredProblems.includes(problemIgnoreKey(issue));
-    const source = issue.source ?? "pda";
-    if (file !== "all" && source !== file) return false;
     if (filter === "ignored") return ignored;
     if (ignored) return false;
     if (filter === "error" && issue.level !== "error") return false;
@@ -60,7 +58,14 @@ export function DebugPage() {
   const selectedKeys = visible.filter((issue) => picked[issue.key]).map((issue) => problemIgnoreKey(issue));
 
   const apply = (issue: Problem, fix: ProblemFix) => {
-    if (fix.type === "ecf-set" || fix.type === "yaml-replace" || fix.type === "csv-pad") {
+    if (
+      fix.type === "ecf-set" ||
+      fix.type === "yaml-replace" ||
+      fix.type === "csv-pad" ||
+      fix.type === "orbit-move" ||
+      fix.type === "loca-english" ||
+      fix.type === "sector-rename"
+    ) {
       applyFileFix(fix);
     } else if (issue.id) {
       if (fix.type === "delete") applyBulk([], [issue.id]);
@@ -78,7 +83,15 @@ export function DebugPage() {
     for (const issue of list) {
       const fix = preferredFix(issue);
       if (!fix) continue;
-      if (fix.type === "ecf-set" || fix.type === "yaml-replace" || fix.type === "csv-pad") applyFileFix(fix);
+      if (
+        fix.type === "ecf-set" ||
+        fix.type === "yaml-replace" ||
+        fix.type === "csv-pad" ||
+        fix.type === "orbit-move" ||
+        fix.type === "loca-english" ||
+        fix.type === "sector-rename"
+      )
+        applyFileFix(fix);
       else if (issue.id) patches.push({ id: issue.id, patch: fixToPatch(fix) });
     }
     if (patches.length) applyBulk(patches);

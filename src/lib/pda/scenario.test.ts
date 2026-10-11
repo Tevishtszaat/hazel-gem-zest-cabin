@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, it } from "node:test";
 import { extractEcfRecords } from "./ecf.ts";
-import { classifyScenarioPath, collectCatalogTexts, indexScenario, lookupCatalog, mergeCatalog, suggestionsFor } from "./scenario-index.ts";
+import { classifyScenarioPath, collectCatalogTexts, indexScenario, lookupCatalog, mergeCatalog, partitionContent, resolveCatalogToken, suggestionsFor } from "./scenario-index.ts";
 import { importPda } from "./yaml-import.ts";
 import { validateProject } from "./validate.ts";
 
@@ -185,6 +185,34 @@ describe("scenario folder index", () => {
     const farm = indexed.catalog.entries.find((e) => e.name === "BA_CivilFarm");
     assert.equal(farm?.poiGroup, "CivilSettlement");
     assert.equal(farm?.label, "Farm");
+  });
+
+  it("uses main-game names only when the open scenario does not define them", () => {
+    const split = partitionContent(
+      [
+        { path: "Content/Scenarios/Ascension-Reborn/Configuration/BlocksConfig.ecf", text: "{ Block Name: CustomCore }\n" },
+        { path: "Content/Scenarios/Creative/Configuration/BlocksConfig.ecf", text: "{ Block Name: IgnoreMe }\n" },
+        { path: "Content/Configuration/BlocksConfig.ecf", text: "{ Block Name: ConcreteBlocks }\n{ Block Name: CustomCore }\n" },
+        { path: "Content/Playfields/Akua/playfield.yaml" },
+      ],
+      "Ascension-Reborn",
+    );
+    assert.deepEqual(split.ignored, ["Creative"]);
+    assert.equal(split.scenario.length, 1);
+    assert.equal(split.game.length, 2);
+    const scenario = indexScenario(split.scenario);
+    const game = indexScenario(split.game);
+    const catalog = {
+      ...scenario.catalog,
+      game: game.catalog.entries,
+    };
+    const own = scenario.catalog.entries.find((entry) => entry.name === "CustomCore");
+    assert.equal(resolveCatalogToken(catalog, "CustomCore", ["block"])?.entry, own);
+    assert.ok(resolveCatalogToken(catalog, "ConcreteBlocks", ["block"]));
+    assert.equal(resolveCatalogToken(catalog, "IgnoreMe", ["block"]), null);
+    assert.ok(resolveCatalogToken(catalog, "Akua", ["playfield"]));
+    const merged = mergeCatalog(catalog, indexScenario([{ path: "S/Prefabs/Outpost.epb" }]).catalog);
+    assert.ok(merged.game?.some((entry) => entry.name === "ConcreteBlocks"));
   });
 
   it("keeps Sectors.yaml as catalog text even when the worker would strip bodies", () => {

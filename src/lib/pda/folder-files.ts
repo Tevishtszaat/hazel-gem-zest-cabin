@@ -1,6 +1,6 @@
 import { fileMatchesKind, type ImportKind } from "./import-kinds.ts";
 import { parseEpbHeader } from "./epb.ts";
-import { classifyScenarioPath, normalizePath, type ScenarioSource } from "./scenario-index.ts";
+import { classifyScenarioPath, isOtherScenarioPath, chooseScenarioFolder, normalizePath, scenarioFolderOf, type ScenarioSource } from "./scenario-index.ts";
 
 type DirReader = {
   readEntries: (ok: (entries: FsEntry[]) => void, err?: (e: DOMException) => void) => void;
@@ -95,22 +95,31 @@ export async function sourcesFromFiles(
   files: File[],
   onProgress?: (done: number, total: number, path: string) => void,
   kind: ImportKind = "scenario",
+  activeScenario = "",
 ): Promise<ScenarioSource[]> {
-  const picked = files.filter((file) => fileMatchesKind(relativeOf(file), kind));
+  const active = chooseScenarioFolder(files.map(relativeOf), activeScenario);
+  const picked = files.filter((file) => {
+    const path = relativeOf(file);
+    if (isOtherScenarioPath(path, active)) return false;
+    return fileMatchesKind(path, kind);
+  });
   let done = 0;
   const sources = await poolMap(picked, 10, async (file) => {
     const path = normalizePath(relativeOf(file));
     const role = classifyScenarioPath(path, kind);
+    const gameFile = !scenarioFolderOf(path);
     const mode = sourceReadMode(role);
     let source: ScenarioSource = { path };
-    if (role === "poi") {
+    if (gameFile && (role === "wallpaper" || role === "playfieldYaml")) {
+      source = { path };
+    } else if (role === "poi") {
       try {
         const buf = new Uint8Array(await file.slice(0, 65536).arrayBuffer());
         source = { path, meta: parseEpbHeader(buf, path) };
       } catch {
         source = { path };
       }
-    } else if (mode === "blob") source = { path, blob: file };
+    } else if (mode === "blob") source = gameFile ? { path } : { path, blob: file };
     else if (mode === "text" && file.size <= 25_000_000) {
       if (role === "playfieldYaml" && file.size > 2_000_000) source = { path };
       else source = { path, text: await file.text() };

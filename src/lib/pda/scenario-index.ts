@@ -45,6 +45,8 @@ export type ScenarioCatalog = {
   entries: CatalogEntry[];
   texts: CatalogText[];
   indexedAt: number;
+  /** Main-game names used only when the open scenario does not define them. */
+  game?: CatalogEntry[];
 };
 
 export type ScenarioSource = {
@@ -131,6 +133,59 @@ export function catalogLoaded(catalog: ScenarioCatalog | undefined | null): bool
 
 export function normalizePath(path: string): string {
   return path.replace(/\\/g, "/").replace(/^\/+/, "");
+}
+
+export function scenarioFolderOf(path: string): string | null {
+  const match = normalizePath(path).match(/(?:^|\/)scenarios\/([^/]+)\//i);
+  return match?.[1] ?? null;
+}
+
+export function chooseScenarioFolder(paths: string[], preferred = ""): string {
+  const names = new Set<string>();
+  for (const path of paths) {
+    const name = scenarioFolderOf(path);
+    if (name) names.add(name);
+  }
+  if (!names.size) return "";
+  const hit = preferred && [...names].find((name) => name.toLowerCase() === preferred.toLowerCase());
+  if (hit) return hit;
+  if (names.size === 1) return [...names][0]!;
+  return "";
+}
+
+export function isOtherScenarioPath(path: string, active: string): boolean {
+  const name = scenarioFolderOf(path);
+  if (!name) return false;
+  if (!active) return true;
+  return name.toLowerCase() !== active.toLowerCase();
+}
+
+export function partitionContent(files: ScenarioSource[], preferred = ""): {
+  scenario: ScenarioSource[];
+  game: ScenarioSource[];
+  ignored: string[];
+  active: string;
+} {
+  const active = chooseScenarioFolder(
+    files.map((file) => file.path),
+    preferred,
+  );
+  const names = new Set<string>();
+  for (const file of files) {
+    const name = scenarioFolderOf(file.path);
+    if (name) names.add(name);
+  }
+  if (!names.size) return { scenario: files, game: [], ignored: [], active: preferred };
+  const scenario: ScenarioSource[] = [];
+  const game: ScenarioSource[] = [];
+  const ignored = new Set<string>();
+  for (const file of files) {
+    const name = scenarioFolderOf(file.path);
+    if (!name) game.push(file);
+    else if (active && name.toLowerCase() === active.toLowerCase()) scenario.push(file);
+    else ignored.add(name);
+  }
+  return { scenario, game, ignored: [...ignored], active };
 }
 
 export function classifyScenarioPath(path: string, hint?: string): string | null {
@@ -380,13 +435,14 @@ type CatalogIndex = {
 
 let catalogIndex: CatalogIndex | null = null;
 let catalogIndexRef: ScenarioCatalog | null = null;
+let gameIndexCache: CatalogIndex | null = null;
+let gameIndexRef: CatalogEntry[] | null = null;
 
 function putMap(map: Map<string, CatalogEntry>, key: string, entry: CatalogEntry) {
   if (key && !map.has(key)) map.set(key, entry);
 }
 
-export function getCatalogIndex(catalog: ScenarioCatalog): CatalogIndex {
-  if (catalogIndex && catalogIndexRef === catalog) return catalogIndex;
+function indexEntries(entries: CatalogEntry[], loca: { key: string; name: string; label: string }[] = []): CatalogIndex {
   const byKind = new Map<CatalogKind, CatalogEntry[]>();
   const name = new Map<string, CatalogEntry>();
   const label = new Map<string, CatalogEntry>();
@@ -394,7 +450,7 @@ export function getCatalogIndex(catalog: ScenarioCatalog): CatalogIndex {
   const group = new Map<string, CatalogEntry>();
   const packedName = new Map<string, CatalogEntry>();
   const packedLabel = new Map<string, CatalogEntry>();
-  for (const entry of catalog.entries) {
+  for (const entry of entries) {
     const list = byKind.get(entry.kind);
     if (list) list.push(entry);
     else byKind.set(entry.kind, [entry]);
@@ -409,52 +465,40 @@ export function getCatalogIndex(catalog: ScenarioCatalog): CatalogIndex {
   const locaLabel = new Map<string, { name: string; label: string }>();
   const locaKey = new Map<string, { name: string; label: string }>();
   const locaPacked = new Map<string, { name: string; label: string }>();
-  for (const row of localizationLabels(catalog)) {
+  for (const row of loca) {
     const rec = { name: row.name, label: row.label };
     if (!locaLabel.has(row.label.toLowerCase())) locaLabel.set(row.label.toLowerCase(), rec);
     if (!locaKey.has(row.key.toLowerCase())) locaKey.set(row.key.toLowerCase(), rec);
     const packed = compactToken(row.label) || compactToken(row.name) || compactToken(row.key);
     if (packed && !locaPacked.has(packed)) locaPacked.set(packed, rec);
   }
-  catalogIndex = { byKind, name, label, file, group, packedName, packedLabel, locaLabel, locaKey, locaPacked };
+  return { byKind, name, label, file, group, packedName, packedLabel, locaLabel, locaKey, locaPacked };
+}
+
+export function getCatalogIndex(catalog: ScenarioCatalog): CatalogIndex {
+  if (catalogIndex && catalogIndexRef === catalog) return catalogIndex;
+  catalogIndex = indexEntries(catalog.entries, localizationLabels(catalog));
   catalogIndexRef = catalog;
   return catalogIndex;
 }
 
-export function localizationLabels(catalog: ScenarioCatalog | undefined): { key: string; name: string; label: string }[] {
-  if (!catalog) return [];
-  const text = (catalog.texts ?? []).find((t) => t.role === "localization" && t.text)?.text ?? "";
-  const cached = locaByCatalog.get(catalog);
-  if (cached && cached.text === text) return cached.rows;
-  const rows: { key: string; name: string; label: string }[] = [];
-  if (text) {
-    const table = parseCsv(text);
-    const lang = table.languages.includes("English") ? "English" : table.languages[0];
-    if (lang) {
-      for (const [key, rec] of Object.entries(table.rows)) {
-        const label = rec[lang]?.trim();
-        if (!label) continue;
-        const name = key.replace(/^(items?_|blocks?_|tokens?_|factions?_)/i, "");
-        rows.push({ key, name, label });
-      }
-    }
-  }
-  for (const entry of catalog.entries) {
-    if (entry.label) rows.push({ key: entry.name, name: entry.name, label: entry.label });
-  }
-  locaByCatalog.set(catalog, { text, rows });
-  return rows;
+function getGameIndex(catalog: ScenarioCatalog): CatalogIndex | null {
+  const entries = catalog.game;
+  if (!entries?.length) return null;
+  if (gameIndexCache && gameIndexRef === entries) return gameIndexCache;
+  gameIndexCache = indexEntries(entries);
+  gameIndexRef = entries;
+  return gameIndexCache;
 }
 
-export function resolveCatalogToken(
-  catalog: ScenarioCatalog,
+function lookupIndex(
+  index: CatalogIndex,
   token: string,
   kinds: CatalogKind[],
 ): { entry: CatalogEntry; via: "name" | "label" | "file" | "group" } | null {
   const needle = token.trim().toLowerCase();
   const packed = compactToken(token);
   if (!needle) return null;
-  const index = getCatalogIndex(catalog);
   const pick = (map: Map<string, CatalogEntry>) => {
     for (const kind of kinds) {
       const hit = map.get(`${kind}:${needle}`);
@@ -498,6 +542,43 @@ export function resolveCatalogToken(
     }
   }
   return null;
+}
+
+export function resolveCatalogToken(
+  catalog: ScenarioCatalog,
+  token: string,
+  kinds: CatalogKind[],
+): { entry: CatalogEntry; via: "name" | "label" | "file" | "group" } | null {
+  const own = lookupIndex(getCatalogIndex(catalog), token, kinds);
+  if (own) return own;
+  const game = getGameIndex(catalog);
+  if (!game) return null;
+  return lookupIndex(game, token, kinds);
+}
+
+export function localizationLabels(catalog: ScenarioCatalog | undefined): { key: string; name: string; label: string }[] {
+  if (!catalog) return [];
+  const text = (catalog.texts ?? []).find((t) => t.role === "localization" && t.text)?.text ?? "";
+  const cached = locaByCatalog.get(catalog);
+  if (cached && cached.text === text) return cached.rows;
+  const rows: { key: string; name: string; label: string }[] = [];
+  if (text) {
+    const table = parseCsv(text);
+    const lang = table.languages.includes("English") ? "English" : table.languages[0];
+    if (lang) {
+      for (const [key, rec] of Object.entries(table.rows)) {
+        const label = rec[lang]?.trim();
+        if (!label) continue;
+        const name = key.replace(/^(items?_|blocks?_|tokens?_|factions?_)/i, "");
+        rows.push({ key, name, label });
+      }
+    }
+  }
+  for (const entry of catalog.entries) {
+    if (entry.label) rows.push({ key: entry.name, name: entry.name, label: entry.label });
+  }
+  locaByCatalog.set(catalog, { text, rows });
+  return rows;
 }
 
 export function stampLocalization(catalog: ScenarioCatalog): ScenarioCatalog {
@@ -708,7 +789,18 @@ export function suggestionsFor(
     if (score) scored.push({ entry, score });
   }
   scored.sort((a, b) => b.score - a.score || a.entry.name.localeCompare(b.entry.name));
-  return scored.slice(0, limit).map((x) => x.entry);
+  const picked = scored.slice(0, limit).map((row) => row.entry);
+  if (picked.length >= limit || !catalog.game?.length) return picked;
+  const seen = new Set(picked.map((entry) => `${entry.kind}:${entry.name.toLowerCase()}`));
+  const rest = suggestionsFor({ ...catalog, entries: catalog.game, game: undefined }, kinds, query, limit);
+  for (const entry of rest) {
+    const key = `${entry.kind}:${entry.name.toLowerCase()}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    picked.push(entry);
+    if (picked.length >= limit) break;
+  }
+  return picked;
 }
 
 export function mergeCatalog(base: ScenarioCatalog, extra: ScenarioCatalog): ScenarioCatalog {
@@ -757,6 +849,7 @@ export function mergeCatalog(base: ScenarioCatalog, extra: ScenarioCatalog): Sce
     files,
     entries,
     texts,
+    game: extra.game ?? base.game,
     indexedAt: Date.now(),
   };
 }

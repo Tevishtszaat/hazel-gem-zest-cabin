@@ -184,12 +184,13 @@ export function ImportPage() {
           }
         },
         kind,
+        catalog.folderName,
       );
       if (!sources.length) throw new Error("Nothing in that drop matched this slot.");
       setBusyDetail("Indexing scenario…", 22);
       return ingest(kind, sources);
     },
-    [ingest, resetAreas, tickArea],
+    [ingest, resetAreas, tickArea, catalog.folderName],
   );
 
   return (

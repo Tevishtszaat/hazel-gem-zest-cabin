@@ -2,27 +2,32 @@ import { unusedNumericIds } from "./config-stats.ts";
 import { CONFIG_METAS } from "./config-roles.ts";
 import { parseEcfObjects, stringifyEcfObjects, type EcfObject } from "./ecf.ts";
 import {
+  catalogText,
   dialogueDocFor,
   localizationTable,
   objectsFor,
 } from "./library.ts";
 import {
   diagnoseOrbits,
+  formatCoords,
   groupSystems,
   isStarType,
   overlayBodies,
   parseSectorBodies,
   parseStarMix,
+  STAR_ZONES,
 } from "./galaxy.ts";
 import { bundlePlayfields } from "./playfield.ts";
 import { preflightPlayfield as preflightLists } from "./playfield-design.ts";
 import {
   catalogLoaded,
+  compactToken,
   ENGINE_FACTIONS,
   resolveCatalogToken,
   suggestionsFor,
   type ScenarioCatalog,
 } from "./scenario-index.ts";
+import { suggestEnglishText } from "./csv.ts";
 import { scanTextSyntax } from "./validate-syntax.ts";
 import type { Problem, ProblemFix } from "./validate.ts";
 
@@ -183,7 +188,7 @@ function validateEcfRole(
   const byName = new Map<string, number>();
   const nameSet = new Set(objects.map((o) => o.name.toLowerCase()));
   const pictures = new Set(
-    catalog.entries
+    [...catalog.entries, ...(catalog.game ?? [])]
       .filter((e) => e.kind === "picture")
       .flatMap((e) => {
         const base = e.name.toLowerCase();
@@ -191,7 +196,9 @@ function validateEcfRole(
       }),
   );
   const itemNames = new Set(
-    catalog.entries.filter((e) => e.kind === "item" || e.kind === "block").map((e) => e.name.toLowerCase()),
+    [...catalog.entries, ...(catalog.game ?? [])]
+      .filter((e) => e.kind === "item" || e.kind === "block")
+      .map((e) => e.name.toLowerCase()),
   );
 
   for (const obj of objects) {
@@ -483,6 +490,31 @@ function validatePlayfields(catalog: ScenarioCatalog, push: (p: Omit<Problem, "k
   }
 }
 
+function playfieldChoices(catalog: ScenarioCatalog, query: string, limit = 3): string[] {
+  const q = query.trim().toLowerCase();
+  const cq = compactToken(q);
+  const scored: { name: string; score: number }[] = [];
+  const seen = new Set<string>();
+  for (const entry of [...catalog.entries, ...(catalog.game ?? [])]) {
+    if (entry.kind !== "playfield") continue;
+    const name = entry.name.trim();
+    const key = name.toLowerCase();
+    if (!name || seen.has(key) || key === q) continue;
+    seen.add(key);
+    const cn = compactToken(name);
+    let score = 0;
+    if (cn && cq && cn === cq) score = 90;
+    else if (cq.length >= 4 && cn.length >= 4 && (cn.includes(cq) || cq.includes(cn))) {
+      const shorter = Math.min(cq.length, cn.length);
+      const longer = Math.max(cq.length, cn.length);
+      if (shorter / longer >= 0.62) score = 70;
+    }
+    if (score) scored.push({ name, score });
+  }
+  scored.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
+  return scored.slice(0, limit).map((row) => row.name);
+}
+
 function validateGalaxy(catalog: ScenarioCatalog, push: (p: Omit<Problem, "key">) => void) {
   const stars = objectsFor(catalog, "galaxy").filter((o) => isStarType(o));
   const sectorText = catalog.texts.find((t) => t.role === "sectors")?.text || "";
@@ -516,6 +548,11 @@ function validateGalaxy(catalog: ScenarioCatalog, push: (p: Omit<Problem, "key">
     if (!system) continue;
     const issues = diagnoseOrbits(star, overlayBodies(star, system.bodies));
     for (const issue of issues.slice(0, 20)) {
+      const zone =
+        issue.expectedZone === "parent"
+          ? "its planet"
+          : (STAR_ZONES.find((z) => z.key === issue.expectedZone)?.label ?? "its band");
+      const coord = formatCoords(issue.suggested);
       push({
         id: null,
         kind: "file",
@@ -525,24 +562,36 @@ function validateGalaxy(catalog: ScenarioCatalog, push: (p: Omit<Problem, "key">
         code: "orbit",
         message: `${system.name}: ${issue.body.name} — ${issue.reason}`,
         path: `${system.name} · ${issue.body.name}`,
-        recommend: "review",
-        suggestions: [],
-        fixes: [],
+        recommend: "fix",
+        suggestions: [`${zone} at ${issue.suggestedDistance.toFixed(0)} sectors`],
+        value: coord,
+        fixes: [
+          {
+            type: "orbit-move",
+            role: "sectors",
+            path: catalog.texts.find((t) => t.role === "sectors")?.path || "Sectors.yaml",
+            name: issue.body.name,
+            coords: issue.suggested,
+            label: `Move to ${zone} (${coord})`,
+          },
+        ],
       });
     }
   }
-  const playfields = new Set(catalog.entries.filter((e) => e.kind === "playfield").map((e) => e.name.toLowerCase()));
+  const playfields = new Set(
+    [...catalog.entries, ...(catalog.game ?? [])].filter((e) => e.kind === "playfield").map((e) => e.name.toLowerCase()),
+  );
   if (playfields.size) {
-    let missing = 0;
-    const sample: string[] = [];
+    const sectorPath = catalog.texts.find((t) => t.role === "sectors")?.path || "Sectors.yaml";
+    const missing: string[] = [];
     for (const body of bodies) {
       const folder = (body.name || "").trim();
       if (!folder || /sun|star|asteroid/i.test(body.kind || "")) continue;
       if (playfields.has(folder.toLowerCase())) continue;
-      missing += 1;
-      if (sample.length < 4) sample.push(folder);
+      missing.push(folder);
     }
-    if (missing) {
+    for (const folder of missing.slice(0, 16)) {
+      const choices = playfieldChoices(catalog, folder, 3);
       push({
         id: null,
         kind: "file",
@@ -550,10 +599,35 @@ function validateGalaxy(catalog: ScenarioCatalog, push: (p: Omit<Problem, "key">
         href: "/library/playfields",
         level: "warning",
         code: "playfield-missing",
-        message: `${missing} Sectors.yaml bodies have no Playfields folder${sample.length ? ` (e.g. ${sample.join(", ")})` : ""}.`,
+        message: choices.length
+          ? `${folder} is in Sectors.yaml but there is no Playfields folder with that name.`
+          : `${folder} is in Sectors.yaml but no Playfields folder is close to that name.`,
+        path: `Sectors.yaml · ${folder}`,
+        recommend: choices.length ? "fix" : "review",
+        suggestions: choices,
+        value: folder,
+        fixes: choices.map((name) => ({
+          type: "sector-rename" as const,
+          role: "sectors",
+          path: sectorPath,
+          from: folder,
+          to: name,
+          label: `Use ${name}`,
+        })),
+      });
+    }
+    if (missing.length > 16) {
+      push({
+        id: null,
+        kind: "file",
+        source: "sectors",
+        href: "/library/playfields",
+        level: "warning",
+        code: "playfield-missing",
+        message: `${missing.length} Sectors.yaml bodies have no Playfields folder.`,
         path: "Sectors.yaml",
         recommend: "review",
-        suggestions: sample,
+        suggestions: [],
         fixes: [],
       });
     }
@@ -562,28 +636,20 @@ function validateGalaxy(catalog: ScenarioCatalog, push: (p: Omit<Problem, "key">
 
 function validateLocalization(catalog: ScenarioCatalog, push: (p: Omit<Problem, "key">) => void) {
   const table = localizationTable(catalog);
-  if (!Object.keys(table.rows).length) return;
-  let empty = 0;
-  for (const [key, rec] of Object.entries(table.rows)) {
-    const en = (rec.English || rec[table.languages[0] || "English"] || "").trim();
-    if (!en) empty += 1;
-    if (empty === 1) {
-      push({
-        id: null,
-        kind: "file",
-        source: "localization",
-        href: "/library",
-        level: "warning",
-        code: "empty-loca",
-        message: `Localization key “${key}” has no English text.`,
-        path: key,
-        recommend: "review",
-        suggestions: [],
-        fixes: [],
-      });
-    }
+  const keys = Object.keys(table.rows);
+  if (!keys.length) return;
+  const file = catalogText(catalog, "localization");
+  const path = file?.path || "Localization.csv";
+  const languages = table.languages.length ? table.languages : ["English"];
+  const empty: { key: string; text: string; from: string }[] = [];
+  for (const key of keys) {
+    const rec = table.rows[key] ?? {};
+    const en = (rec.English || rec.english || "").trim();
+    if (en) continue;
+    empty.push({ key, ...suggestEnglishText(key, rec, languages) });
   }
-  if (empty > 1) {
+  for (const row of empty.slice(0, 40)) {
+    const from = row.from === "key" ? `the key “${row.text}”` : `${row.from} text`;
     push({
       id: null,
       kind: "file",
@@ -591,11 +657,43 @@ function validateLocalization(catalog: ScenarioCatalog, push: (p: Omit<Problem, 
       href: "/library",
       level: "warning",
       code: "empty-loca",
-      message: `${empty} Localization.csv keys have no English text.`,
+      message: `Localization key “${row.key}” has no English text. Suggested ${from}: “${row.text}”.`,
+      path: row.key,
+      recommend: "fix",
+      suggestions: [row.text],
+      value: row.text,
+      fixes: [
+        {
+          type: "loca-english",
+          role: "localization",
+          path,
+          key: row.key,
+          label: row.from === "key" ? `Use “${row.text}”` : `Copy ${row.from} into English`,
+        },
+      ],
+    });
+  }
+  if (empty.length > 1) {
+    push({
+      id: null,
+      kind: "file",
+      source: "localization",
+      href: "/library",
+      level: "warning",
+      code: "empty-loca",
+      message: `${empty.length} Localization.csv keys have no English text.`,
       path: "Localization.csv",
-      recommend: "review",
-      suggestions: [],
-      fixes: [],
+      recommend: "fix",
+      suggestions: empty.slice(0, 4).map((row) => row.text),
+      fixes: [
+        {
+          type: "loca-english",
+          role: "localization",
+          path,
+          key: "",
+          label: "Fill every empty English cell",
+        },
+      ],
     });
   }
 }

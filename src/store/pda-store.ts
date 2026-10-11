@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { durableStorage, putCatalogTexts, loadCatalogTexts, clearCatalogTexts } from "@/lib/pda/idb-storage.ts";
-import { stringifyCsv, csvLookup } from "@/lib/pda/csv.ts";
+import { stringifyCsv, csvLookup, fillLocalizationEnglish } from "@/lib/pda/csv.ts";
 import { blankProject, applyCsvText, newAction, newChapter, newTask, type ImportFiles } from "@/lib/pda/yaml-import.ts";
-import { classifyScenarioPath, dropCatalogGroup, emptyCatalog, mergeCatalog, catalogLoadSummary, type ScenarioCatalog, type ScenarioSource } from "@/lib/pda/scenario-index.ts";
+import { classifyScenarioPath, dropCatalogGroup, emptyCatalog, mergeCatalog, catalogLoadSummary, partitionContent, type ScenarioCatalog, type ScenarioSource } from "@/lib/pda/scenario-index.ts";
 import { areaForRole } from "@/lib/pda/import-kinds.ts";
 import { importPdaOffthread, indexScenarioOffthread } from "@/lib/pda/offload.ts";
 import { beginBusy, endBusy, setBusyDetail } from "@/store/busy-store.ts";
@@ -12,6 +12,7 @@ import { clearImages, putImages, warmImageCache, type ImageSet } from "@/lib/pda
 import type { ImportKind } from "@/lib/pda/import-kinds.ts";
 import { catalogText } from "@/lib/pda/library.ts";
 import { applyEcfFix, applyYamlReplace } from "@/lib/pda/validate-files.ts";
+import { applyOrbitFixes, renameSectorBody } from "@/lib/pda/galaxy.ts";
 import { padCsvColumns } from "@/lib/pda/validate-syntax.ts";
 import type { ProblemFix } from "@/lib/pda/validate.ts";
 import type { ChapterNode, PdaProject } from "@/lib/pda/types.ts";
@@ -163,9 +164,23 @@ export const usePdaStore = create<PdaState>()(
           if (!files.length) throw new Error("No matching files in that drop.");
           setBusyDetail(`Indexing ${files.length} files…`, 8);
           useImportProgress.getState().boostAll(72);
-          const indexed = await indexScenarioOffthread(files, kind);
+          const split = partitionContent(files, get().catalog.folderName);
+          const scenarioFiles = split.scenario;
+          const indexed = scenarioFiles.length
+            ? await indexScenarioOffthread(scenarioFiles, kind)
+            : { catalog: emptyCatalog() };
           useImportProgress.getState().boostAll(78);
-          const catalog = mergeCatalog(get().catalog, indexed.catalog);
+          let catalog = scenarioFiles.length ? mergeCatalog(get().catalog, indexed.catalog) : get().catalog;
+          if (split.active) catalog = { ...catalog, folderName: split.active };
+          if (split.game.length) {
+            setBusyDetail(`Indexing main game reference…`, 40);
+            const gameIndexed = await indexScenarioOffthread(split.game, "scenario");
+            catalog = {
+              ...catalog,
+              game: gameIndexed.catalog.entries.filter((entry) => entry.kind !== "picture" || entry.group === "item"),
+              indexedAt: Date.now(),
+            };
+          }
           const texts = catalog.texts ?? [];
           if (texts.length) {
             setBusyDetail(`Saving ${texts.length} configs…`, 30);
@@ -184,11 +199,11 @@ export const usePdaStore = create<PdaState>()(
             }
           }
 
-          const imageFiles = files.filter((file) => {
+          const imageFiles = scenarioFiles.filter((file) => {
             const role = classifyScenarioPath(file.path, kind);
             return (role === "picture" || role === "itemPicture") && file.blob;
           });
-          const wallpaperFiles = files.filter(
+          const wallpaperFiles = scenarioFiles.filter(
             (file) => classifyScenarioPath(file.path, kind) === "wallpaper" && file.blob,
           );
 
@@ -268,10 +283,12 @@ export const usePdaStore = create<PdaState>()(
           }
           const added = indexed.catalog.files.length;
           const pics = imageFiles.length;
+          const gameNote = catalog.game?.length ? ` · main game reference ${catalog.game.length} names` : "";
+          const ignoredNote = split.ignored.length ? ` · ignored other scenarios: ${split.ignored.slice(0, 6).join(", ")}` : "";
           setBusyDetail("Import finished", 100);
           return importReport(
             catalog,
-            `Indexed ${added} file${added === 1 ? "" : "s"}${pics ? ` · ${pics} images stored` : ""}.`,
+            `Indexed ${added} file${added === 1 ? "" : "s"}${pics ? ` · ${pics} images stored` : ""}${gameNote}${ignoredNote}.`,
           );
         } finally {
           endBusy("load");
@@ -478,6 +495,34 @@ export const usePdaStore = create<PdaState>()(
             texts.find((t) => t.role === fix.role && t.path === fix.path) ?? texts.find((t) => t.role === fix.role);
           if (!current?.text) return;
           get().setCatalogText(fix.role, padCsvColumns(current.text, fix.line), current.path);
+          return;
+        }
+        if (fix.type === "orbit-move") {
+          const texts = get().catalog.texts ?? [];
+          const current =
+            texts.find((t) => t.role === fix.role && t.path === fix.path) ?? texts.find((t) => t.role === fix.role);
+          if (!current?.text) return;
+          get().setCatalogText(
+            fix.role,
+            applyOrbitFixes(current.text, [{ name: fix.name, coords: fix.coords }]),
+            current.path,
+          );
+          return;
+        }
+        if (fix.type === "loca-english") {
+          const texts = get().catalog.texts ?? [];
+          const current =
+            texts.find((t) => t.role === fix.role && t.path === fix.path) ?? texts.find((t) => t.role === fix.role);
+          if (!current?.text) return;
+          get().setCatalogText(fix.role, fillLocalizationEnglish(current.text, fix.key), current.path);
+          return;
+        }
+        if (fix.type === "sector-rename") {
+          const texts = get().catalog.texts ?? [];
+          const current =
+            texts.find((t) => t.role === fix.role && t.path === fix.path) ?? texts.find((t) => t.role === fix.role);
+          if (!current?.text) return;
+          get().setCatalogText(fix.role, renameSectorBody(current.text, fix.from, fix.to), current.path);
         }
       },
       ignoreProblems: (keys) =>
@@ -557,6 +602,13 @@ export const usePdaStore = create<PdaState>()(
           indexedAt: s.catalog.indexedAt,
           entries: [] as typeof s.catalog.entries,
           texts: [] as typeof s.catalog.texts,
+          game: (s.catalog.game ?? []).map((entry) => ({
+            kind: entry.kind,
+            name: entry.name,
+            label: entry.label,
+            poiGroup: entry.poiGroup,
+            poiFile: entry.poiFile,
+          })),
         },
         selected: s.selected,
         collapsed: s.collapsed,
