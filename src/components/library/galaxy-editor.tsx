@@ -79,7 +79,7 @@ export function GalaxyEditor() {
   };
 
   const addTerritory = () => {
-    const n = territories.length + 1;
+    const n = nextChildNumber(territories, "Territory_");
     patchGeneral((cur) => ({
       ...cur,
       children: [
@@ -91,7 +91,7 @@ export function GalaxyEditor() {
   };
 
   const addRegion = () => {
-    const n = regions.length + 1;
+    const n = nextChildNumber(regions, "StarRegion_");
     patchGeneral((cur) => ({
       ...cur,
       children: [
@@ -100,11 +100,25 @@ export function GalaxyEditor() {
           kind: "Child",
           plus: false,
           name: `StarRegion_${n}`,
-          fields: { Name: `Region ${n}`, Shape: "Sphere", RadiusMinMax: "0, 20", TotalSpawnCount: "10", UseDefaultStarDef: "true" },
+          fields: {
+            Name: `Region ${n}`,
+            Shape: "Sphere",
+            RadiusMinMax: "0, 20",
+            TotalSpawnCount: "10",
+            UseDefaultStarDef: "false",
+            NebulaSpawnCount: "0",
+          },
         },
       ],
     }));
     setRegionName(`StarRegion_${n}`);
+  };
+
+  const addNebula = () => {
+    const n = nebulaKeys.reduce((max, key) => Math.max(max, Number(key.replace(/\D/g, "")) || 0), 0) + 1;
+    const key = `NebulaColors${n}`;
+    patchGeneral((cur) => ({ ...cur, fields: { ...cur.fields, [key]: "1, 0.5, 0.2" } }));
+    setNebulaKey(key);
   };
 
   const addStar = () => {
@@ -142,7 +156,14 @@ export function GalaxyEditor() {
     setStarName(obj.name);
   };
 
-  const extraGeneral = Object.keys(general?.fields ?? {}).filter((k) => !GALAXY_GENERAL_STATS.includes(k));
+  const extraGeneral = Object.keys(general?.fields ?? {}).filter(
+    (key) => !GALAXY_GENERAL_STATS.includes(key) && !/^NebulaColors\d+$/i.test(key),
+  );
+  const nebulaKeys = Object.keys(general?.fields ?? {})
+    .filter((key) => /^NebulaColors\d+$/i.test(key))
+    .sort((a, b) => Number(a.replace(/\D/g, "")) - Number(b.replace(/\D/g, "")));
+  const [nebulaKey, setNebulaKey] = useState(nebulaKeys[0] || "");
+  const nebula = nebulaKeys.includes(nebulaKey) ? nebulaKey : nebulaKeys[0] || "";
   const extraStar = star ? Object.keys(star.fields).filter((k) => !STAR_STATS.includes(k)) : [];
 
   return (
@@ -156,6 +177,9 @@ export function GalaxyEditor() {
         </Button>
         <Button size="sm" variant="secondary" onClick={addTerritory}>
           Add territory
+        </Button>
+        <Button size="sm" variant="secondary" onClick={addNebula}>
+          Add nebula
         </Button>
         <Button
           size="sm"
@@ -299,7 +323,9 @@ export function GalaxyEditor() {
 
       <h2 className="mt-8 text-xs font-medium uppercase tracking-[0.14em] text-accent">General</h2>
       <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {[...GALAXY_GENERAL_STATS, ...extraGeneral].map((key) => (
+        {[...GALAXY_GENERAL_STATS, ...extraGeneral]
+          .filter((key) => !/^NebulaColors\d+$/i.test(key))
+          .map((key) => (
           <Field key={key} label={key} area="general">
             <Input
               value={general?.fields[key] ?? ""}
@@ -308,6 +334,52 @@ export function GalaxyEditor() {
           </Field>
         ))}
       </div>
+
+      <h2 className="mt-8 text-xs font-medium uppercase tracking-[0.14em] text-accent">Nebulas</h2>
+      <p className="mt-1 text-xs text-subtle">
+        NebulaColors1 and up are color lists. A region’s NebulaColorIndex points at one of these.
+      </p>
+      {nebula ? (
+        <div className="mt-2 max-w-4xl">
+          <select
+            className="h-10 w-full max-w-xl rounded-sm border border-border bg-bg px-2 text-sm"
+            value={nebula}
+            onChange={(e) => setNebulaKey(e.target.value)}
+          >
+            {nebulaKeys.map((key) => (
+              <option key={key} value={key}>
+                {key}
+              </option>
+            ))}
+          </select>
+          <div className="mt-3">
+            <Field label={nebula} note="Red, green, blue groups from 0 to 1. Several groups make a gradient. Example: 1, 0.3, 0,  0.8, 0, 0">
+              <textarea
+                className="min-h-20 w-full rounded-sm border border-border bg-bg px-2 py-1.5 font-mono text-sm"
+                value={general?.fields[nebula] ?? ""}
+                onChange={(e) => patchGeneral((cur) => ({ ...cur, fields: { ...cur.fields, [nebula]: e.target.value } }))}
+              />
+            </Field>
+            <Button
+              className="mt-2"
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                patchGeneral((cur) => {
+                  const fields = { ...cur.fields };
+                  delete fields[nebula];
+                  return { ...cur, fields };
+                });
+                setNebulaKey(nebulaKeys.find((key) => key !== nebula) || "");
+              }}
+            >
+              Remove nebula
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <p className="mt-2 text-sm text-muted">No nebula colors yet. Add one to paint the galaxy.</p>
+      )}
 
       <h2 className="mt-8 text-xs font-medium uppercase tracking-[0.14em] text-accent">Star regions</h2>
       <p className="mt-1 text-xs text-subtle">
@@ -378,20 +450,28 @@ export function GalaxyEditor() {
                 ))}
               </div>
               <div className="mt-3">
-                <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
+                <p className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.12em] text-muted">
                   Other factions
                   <FieldNote
                     label="Other factions"
-                    note="Other_n names. Extra factions that can still appear in this sphere, more often near the center and less toward the edge."
+                    note="Other_1 through Other_10. Each value is Faction, chance at the center, chance at the edge. Example: Zirax, 0.8, 0.1"
                   />
                 </p>
-                <p className="mt-2 text-sm text-muted">
-                  {Object.entries(territory.fields)
-                    .filter(([key]) => /^Other_/i.test(key))
-                    .map(([, value]) => value.split(",")[0].trim())
-                    .filter(Boolean)
-                    .join(", ") || "None"}
-                </p>
+                <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                  {Object.keys(territory.fields)
+                    .filter((key) => /^Other_\d+$/i.test(key))
+                    .sort((a, b) => Number(a.slice(6)) - Number(b.slice(6)))
+                    .map((key) => (
+                      <Field key={key} label={key} note="Faction name, then center chance, then edge chance. Example: Polaris, 0.5, 0.1">
+                        <Input
+                          value={territory.fields[key] ?? ""}
+                          onChange={(e) =>
+                            patchChild(territory.name, (cur) => ({ ...cur, fields: { ...cur.fields, [key]: e.target.value } }))
+                          }
+                        />
+                      </Field>
+                    ))}
+                </div>
                 <Input
                   className="mt-2 h-8 max-w-xs"
                   placeholder="Add faction, then Enter"
@@ -413,6 +493,11 @@ export function GalaxyEditor() {
       )}
     </div>
   );
+}
+
+function nextChildNumber(rows: EcfObject[], prefix: string) {
+  const used = rows.map((row) => Number(row.name.slice(prefix.length))).filter((n) => Number.isFinite(n));
+  return (used.length ? Math.max(...used) : 0) + 1;
 }
 
 function childLabel(row: EcfObject, display: string | undefined) {

@@ -57,6 +57,7 @@ export const STAR_MODELS = [
   "SunRedGiant",
   "SunRedDwarf",
   "SunNeutron",
+  "SunGeneric",
   "BlackHole",
 ] as const;
 

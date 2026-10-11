@@ -20,7 +20,8 @@ const ID_FIELD = /\bId:\s*(\d+)/;
 const PROP = /^\s*([A-Za-z_][A-Za-z0-9_]*|\d+)\s*:\s*(.*)$/;
 
 export function stripEcfComments(text: string): string {
-  return text.replace(/\/\*[\s\S]*?\*\//g, "\n").replace(/^\s*#.*$/gm, "");
+  const normalized = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  return normalized.replace(/\/\*[\s\S]*?\*\//g, "\n").replace(/^\s*#.*$/gm, "");
 }
 
 function unquote(value: string) {
@@ -98,7 +99,8 @@ export function parseEcfObjects(text: string): EcfObject[] {
     if (!stack.length && done.kind.toLowerCase() !== "child") roots.push(done);
   };
 
-  for (const line of lines) {
+  for (const rawLine of lines) {
+    const line = rawLine.replace(/\r/g, "");
     const opener = parseOpen(line);
     if (opener && /^\s*\{/.test(line)) {
       const parent = stack[stack.length - 1];

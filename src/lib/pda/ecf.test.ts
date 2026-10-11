@@ -181,6 +181,15 @@ describe("templates and unused ids", () => {
     assert.match(back, /Territory_1/);
     assert.match(back, /Zirax/);
 
+    const windows = parseEcfObjects(
+      "{ GalaxyConfig, Name: General\r\n  # StarCount comment\r\n  StarCount: \"56000, 73000\"\r\n  NebulaColors4: \"0, 1, 0\"\r\n  { Child StarRegion_1\r\n    # note\r\n    Name: \"The Center\"\r\n    NebulaSpawnCount: 5\r\n  }\r\n  { Child Territory_2\r\n    Faction: Polaris\r\n    Other_1: \"Zirax, 0.5, 0.1\"\r\n  }\r\n}\r\n",
+    );
+    assert.equal(windows[0]?.name, "General");
+    assert.equal(windows[0]?.fields.NebulaColors4, "0, 1, 0");
+    assert.equal(windows[0]?.children?.[0]?.name, "StarRegion_1");
+    assert.equal(windows[0]?.children?.[0]?.fields.Name, "The Center");
+    assert.equal(windows[0]?.children?.[1]?.fields.Faction, "Polaris");
+
     const rep = parseEcfObjects(`{ Reputation Name: "Human:1"
   Zirax: 8500
   Talon: 16500
