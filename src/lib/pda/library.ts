@@ -22,12 +22,13 @@ export function catalogText(catalog: ScenarioCatalog, role: string) {
 const parsedByRole = new Map<string, { text: string; objects: EcfObject[] }>();
 
 export function objectsFor(catalog: ScenarioCatalog, role: ConfigRole): EcfObject[] {
-  const text = catalogText(catalog, role)?.text;
-  if (text) {
+  const hits = (catalog.texts ?? []).filter((t) => t.role === role && t.text);
+  if (hits.length) {
+    const sig = hits.map((t) => `${t.path}:${t.text.length}`).join("|");
     const hit = parsedByRole.get(role);
-    if (hit && hit.text === text) return hit.objects;
-    const objects = parseEcfObjects(text);
-    parsedByRole.set(role, { text, objects });
+    if (hit && hit.text === sig) return hit.objects;
+    const objects = hits.flatMap((t) => parseEcfObjects(t.text));
+    parsedByRole.set(role, { text: sig, objects });
     return objects;
   }
   const meta = configMeta(role);

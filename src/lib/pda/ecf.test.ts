@@ -49,6 +49,24 @@ describe("templates and unused ids", () => {
     assert.match(stringifyEcfObjects([item!]), /Child 0/);
   });
 
+  it("keeps later factions when a description contains braces", () => {
+    const text = `{ Faction Name: Talon
+  Description: "uses {braces} in text"
+  Abbrev: TLN
+}
+{ Faction Name: Polaris
+  Abbrev: POL
+}
+`;
+    const rows = extractEcfRecords(text);
+    assert.deepEqual(
+      rows.map((r) => r.name),
+      ["Talon", "Polaris"],
+    );
+    assert.equal(rows[0]?.abbrev, "TLN");
+    assert.equal(parseEcfObjects(text).length, 2);
+  });
+
   it("lists empty item and block ids so they can be claimed", () => {
     const unused = unusedNumericIds([3, 63, 100]);
     assert.ok(unused.ids.includes(1));

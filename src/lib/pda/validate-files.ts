@@ -241,6 +241,36 @@ function validateEcfRole(
       }
     }
 
+    const factionField = obj.fields.Faction || obj.fields.faction;
+    if (factionField && role !== "factions" && catalog.entries.some((e) => e.kind === "faction")) {
+      for (const token of factionField.split(/[,|]/).map((part) => part.trim()).filter(Boolean)) {
+        if (resolveCatalogToken(catalog, token, ["faction"])) continue;
+        const suggestions = suggestionsFor(catalog, ["faction"], token, 3).map((e) => e.name);
+        push({
+          id: null,
+          kind: "file",
+          source: role,
+          href: hrefFor(role),
+          level: "warning",
+          code: "faction",
+          message: `${name} Faction “${token}” is not in Factions.ecf.`,
+          path: `${name}.Faction`,
+          recommend: suggestions.length ? "fix" : "review",
+          field: "Faction",
+          value: token,
+          suggestions,
+          fixes: suggestions.slice(0, 2).map((s) => ({
+            type: "ecf-set" as const,
+            role,
+            name,
+            field: "Faction",
+            value: s,
+            label: `Use ${s}`,
+          })),
+        });
+      }
+    }
+
     const ref = obj.fields.Ref;
     if (ref && !nameSet.has(ref.toLowerCase()) && kinds.length) {
       const suggestions = suggestionsFor(catalog, kinds, ref, 3).map((e) => e.name);

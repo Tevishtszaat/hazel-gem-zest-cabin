@@ -335,6 +335,12 @@ export function ObjectBrowser({
   const loca = useMemo(() => localizationTable(catalog), [catalog]);
   const language = usePdaStore((s) => s.project.language) || "English";
   const objects = useMemo(() => objectsFor(catalog, role), [catalog, role]);
+  const objectIndex = useMemo(() => {
+    const map = new Map<EcfObject, number>();
+    objects.forEach((obj, index) => map.set(obj, index));
+    return map;
+  }, [objects]);
+  const indexOf = (obj: EcfObject | undefined) => (obj ? (objectIndex.get(obj) ?? -1) : -1);
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState<string | null>(null);
   const [idFilter, setIdFilter] = useState<"all" | "missing" | "numeric" | "floating">("all");
@@ -370,25 +376,29 @@ export function ObjectBrowser({
   const usesFloatingIds = role === "blocks" || role === "items";
   const usesNumericIds = meta.idMode === "required";
   const usesIds = usesNumericIds || usesFloatingIds;
-  const visible = objects.filter((obj, index) => {
-    const ident = usesFloatingIds ? blockIdentity(obj) : null;
-    if (idFilter === "missing" && obj.id) return false;
-    if (idFilter === "numeric" && ident?.kind !== "numeric") return false;
-    if (idFilter === "floating" && ident?.kind !== "floating") return false;
-    if (cat !== "all" && obj.fields.Category !== cat) return false;
-    if (isEntities && !matchesClassFilter(obj, classFilter, byName)) return false;
-    if (!q) return true;
-    const label = locaLabel(loca, obj.name, language);
-    const idText = ident?.label ?? obj.id ?? objectLabel(obj);
-    const classText = isEntities
-      ? ENTITY_CLASS_KEYS.map((key) => classFieldValue(obj, key, byName)).join(" ")
-      : "";
-    return `${objectLabel(obj)} ${obj.name} ${idText} ${label} ${obj.fields.Category ?? ""} ${classText} ${index}`
-      .toLowerCase()
-      .includes(q);
-  });
+  const visible = useMemo(
+    () =>
+      objects.filter((obj, index) => {
+        const ident = usesFloatingIds ? blockIdentity(obj) : null;
+        if (idFilter === "missing" && obj.id) return false;
+        if (idFilter === "numeric" && ident?.kind !== "numeric") return false;
+        if (idFilter === "floating" && ident?.kind !== "floating") return false;
+        if (cat !== "all" && obj.fields.Category !== cat) return false;
+        if (isEntities && !matchesClassFilter(obj, classFilter, byName)) return false;
+        if (!q) return true;
+        const label = locaLabel(loca, obj.name, language);
+        const idText = ident?.label ?? obj.id ?? objectLabel(obj);
+        const classText = isEntities
+          ? ENTITY_CLASS_KEYS.map((key) => classFieldValue(obj, key, byName)).join(" ")
+          : "";
+        return `${objectLabel(obj)} ${obj.name} ${idText} ${label} ${obj.fields.Category ?? ""} ${classText} ${index}`
+          .toLowerCase()
+          .includes(q);
+      }),
+    [objects, usesFloatingIds, idFilter, cat, isEntities, classFilter, byName, q, loca, language],
+  );
   const selected = objects.find((o, i) => objectKey(o, i) === picked) ?? visible[0] ?? objects[0];
-  const selectedIndex = selected ? objects.indexOf(selected) : -1;
+  const selectedIndex = selected ? indexOf(selected) : -1;
   const numberedVisible = usesFloatingIds ? visible.filter((o) => blockIdentity(o).kind === "numeric") : visible;
   const customVisible = usesFloatingIds ? visible.filter((o) => blockIdentity(o).kind === "floating") : [];
   const slideItems = usesFloatingIds && idFilter === "all" ? numberedVisible : visible;
@@ -400,7 +410,7 @@ export function ObjectBrowser({
   const pickAt = (next: number) => {
     const obj = slideItems[next];
     if (!obj) return;
-    setPicked(objectKey(obj, objects.indexOf(obj)));
+    setPicked(objectKey(obj, indexOf(obj)));
   };
 
   useEffect(() => {
@@ -589,7 +599,7 @@ export function ObjectBrowser({
                   <span className="ml-2 text-subtle">{group.rows.length}</span>
                 </p>
                 {group.rows.map((obj) => {
-                  const index = objects.indexOf(obj);
+                  const index = indexOf(obj);
                   const label = locaLabel(loca, obj.name, language) || objectLabel(obj);
                   const key = objectKey(obj, index);
                   const line = entityClassLine(obj, byName);
@@ -614,9 +624,9 @@ export function ObjectBrowser({
           ) : usesFloatingIds && idFilter === "all" && floats.length ? (
             numberedVisible.slice(0, listCap).map((obj) => (
               <CatalogRow
-                key={objectKey(obj, objects.indexOf(obj))}
+                key={objectKey(obj, indexOf(obj))}
                 obj={obj}
-                index={objects.indexOf(obj)}
+                index={indexOf(obj)}
                 label={locaLabel(loca, obj.name, language) || objectLabel(obj)}
                 selected={selected}
                 selectedIndex={selectedIndex}
@@ -628,7 +638,7 @@ export function ObjectBrowser({
             ))
           ) : (
             visible.slice(0, listCap).map((obj) => {
-              const index = objects.indexOf(obj);
+              const index = indexOf(obj);
               const label = locaLabel(loca, obj.name, language) || objectLabel(obj);
               const ident = usesFloatingIds ? blockIdentity(obj) : null;
               return (
@@ -685,7 +695,7 @@ export function ObjectBrowser({
                       {floats.length ? `${floats.length} custom names` : "No custom IDs"}
                     </SelectItem>
                     {floats.map((obj) => {
-                      const index = objects.indexOf(obj);
+                      const index = indexOf(obj);
                       const key = objectKey(obj, index);
                       return (
                         <SelectItem key={key} value={key}>

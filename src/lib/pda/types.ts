@@ -122,7 +122,7 @@ export const CHECKS = [
   { id: "BlocksRemoved", hint: "Names: structure; Types: block" },
   { id: "BlockDestroyed", hint: "Optional POI name + block type" },
   { id: "NearPoi", hint: "Names: POI group or filename" },
-  { id: "NearUnit", hint: "Names: [POI, Unit]" },
+  { id: "NearUnit", hint: "Names: POI spawn or group, then the device’s control-panel name" },
   { id: "NearResource", hint: "Types: resource" },
   { id: "PoiDiscovered", hint: "Types / POI identifier" },
   { id: "ResourceDiscovered", hint: "Names: resource" },

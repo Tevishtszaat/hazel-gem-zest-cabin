@@ -2,6 +2,7 @@ export type EcfRecord = {
   kind: string;
   name: string;
   id?: string;
+  abbrev?: string;
 };
 
 export type EcfObject = {
@@ -63,6 +64,30 @@ function parseOpen(line: string): EcfObject | null {
   return obj;
 }
 
+function braceCounts(line: string) {
+  let inS = false;
+  let inD = false;
+  let open = 0;
+  let close = 0;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inD) {
+      if (ch === "\\" && line[i + 1] === '"') i += 1;
+      else if (ch === '"') inD = false;
+      continue;
+    }
+    if (inS) {
+      if (ch === "'") inS = false;
+      continue;
+    }
+    if (ch === '"') inD = true;
+    else if (ch === "'") inS = true;
+    else if (ch === "{") open += 1;
+    else if (ch === "}") close += 1;
+  }
+  return { open, close };
+}
+
 export function parseEcfObjects(text: string): EcfObject[] {
   const lines = stripEcfComments(text).split(/\r?\n/);
   const roots: EcfObject[] = [];
@@ -82,9 +107,8 @@ export function parseEcfObjects(text: string): EcfObject[] {
         parent.children.push(opener);
       }
       stack.push(opener);
-      const opens = (line.match(/\{/g) || []).length;
-      const closes = (line.match(/\}/g) || []).length;
-      if (closes >= opens) pushDone(stack.pop());
+      const { open, close } = braceCounts(line);
+      if (close >= open) pushDone(stack.pop());
       continue;
     }
     const current = stack[stack.length - 1];
@@ -103,9 +127,8 @@ export function parseEcfObjects(text: string): EcfObject[] {
         else current.fields[key] = value;
       }
     }
-    const opens = (line.match(/\{/g) || []).length;
-    const closes = (line.match(/\}/g) || []).length;
-    for (let i = 0; i < Math.max(0, closes - opens); i++) pushDone(stack.pop());
+    const { open, close } = braceCounts(line);
+    for (let i = 0; i < Math.max(0, close - open); i++) pushDone(stack.pop());
   }
   while (stack.length) pushDone(stack.pop());
   return roots;
@@ -114,14 +137,19 @@ export function parseEcfObjects(text: string): EcfObject[] {
 export function extractEcfRecords(text: string): EcfRecord[] {
   const seen = new Set<string>();
   const out: EcfRecord[] = [];
-  for (const obj of parseEcfObjects(text)) {
-    const name = obj.name || obj.id;
-    if (!name) continue;
-    const key = `${obj.kind}:${name}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push({ kind: obj.kind, name, id: obj.id });
-  }
+  const walk = (obj: EcfObject) => {
+    const name = (obj.name || obj.id || "").trim();
+    if (name && obj.kind.toLowerCase() !== "child") {
+      const key = `${obj.kind}:${name}`.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        const abbrev = (obj.fields.Abbrev || obj.fields.abbrev || "").replace(/^["']|["']$/g, "").trim();
+        out.push({ kind: obj.kind, name, id: obj.id, abbrev: abbrev || undefined });
+      }
+    }
+    for (const child of obj.children ?? []) walk(child);
+  };
+  for (const obj of parseEcfObjects(text)) walk(obj);
   return out;
 }
 

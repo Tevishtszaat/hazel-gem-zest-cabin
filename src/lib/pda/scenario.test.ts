@@ -123,6 +123,27 @@ describe("scenario folder index", () => {
     assert.equal(unknown.filter((i) => i.message.includes("AlienBug01")).length, 0);
   });
 
+  it("indexes factions.ecf from the scenario folder, including abbreviations", () => {
+    const indexed = indexScenario([
+      {
+        path: "Ascension/factions.ecf",
+        text: `{ Faction Name: Talon
+  Description: "notes {with} braces"
+  Abbrev: TLN
+}
+{ Faction Name: Polaris
+  Abbrev: POL
+}
+`,
+      },
+    ]);
+    assert.equal(indexed.catalog.texts.filter((t) => t.role === "factions").length, 1);
+    assert.ok(lookupCatalog(indexed.catalog, "Talon"));
+    assert.ok(lookupCatalog(indexed.catalog, "Polaris"));
+    assert.equal(lookupCatalog(indexed.catalog, "TLN")?.label, "Talon");
+    assert.equal(lookupCatalog(indexed.catalog, "POL")?.kind, "faction");
+  });
+
   it("merges a second import without dropping the first catalog", () => {
     const a = indexScenario([{ path: "S/Configuration/Factions.ecf", text: "{ Faction Name: Talon\n}\n" }]);
     const b = indexScenario([{ path: "S/Prefabs/Outpost.epb" }]);

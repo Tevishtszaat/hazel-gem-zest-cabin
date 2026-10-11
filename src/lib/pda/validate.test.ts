@@ -16,6 +16,82 @@ function catalog(names: { kind: ScenarioCatalog["entries"][number]["kind"]; name
 }
 
 describe("validateProject debug diagnostics", () => {
+  it("does not flag NearUnit control-panel device names", () => {
+    const project = blankProject();
+    const ch = newChapter();
+    ch.chapterTitle = "Visit";
+    const tk = newTask();
+    tk.taskTitle = "Stand by the fridge";
+    const ac = newAction();
+    ac.actionTitle = "Approach";
+    ac.check = "NearUnit";
+    ac.names = "TradingHQ, FarmFridge";
+    tk.actions = [ac];
+    ch.tasks = [tk];
+    project.chapters = [ch];
+    const issues = validateProject(project, catalog([{ kind: "poi", name: "TradingHQ" }]));
+    const unknown = issues.filter((i) => i.code === "unknown-name");
+    assert.equal(unknown.length, 0);
+  });
+
+  it("still flags a missing NearUnit POI, not the device after it", () => {
+    const project = blankProject();
+    const ch = newChapter();
+    ch.chapterTitle = "Visit";
+    const tk = newTask();
+    tk.taskTitle = "Stand by the fridge";
+    const ac = newAction();
+    ac.actionTitle = "Approach";
+    ac.check = "NearUnit";
+    ac.names = "MissingPoi, FarmFridge";
+    tk.actions = [ac];
+    ch.tasks = [tk];
+    project.chapters = [ch];
+    const issues = validateProject(project, catalog([{ kind: "poi", name: "TradingHQ" }]));
+    const unknown = issues.filter((i) => i.code === "unknown-name");
+    assert.equal(unknown.length, 1);
+    assert.match(unknown[0]!.message, /MissingPoi/);
+    assert.doesNotMatch(unknown[0]!.message, /FarmFridge/);
+    assert.equal(unknown[0]!.recommend, "review");
+  });
+
+  it("accepts a single NearUnit device that is a block", () => {
+    const project = blankProject();
+    const ch = newChapter();
+    ch.chapterTitle = "Visit";
+    const tk = newTask();
+    tk.taskTitle = "Constructor";
+    const ac = newAction();
+    ac.actionTitle = "Approach";
+    ac.check = "NearUnit";
+    ac.names = "ConstructorSurvival";
+    tk.actions = [ac];
+    ch.tasks = [tk];
+    project.chapters = [ch];
+    const issues = validateProject(project, catalog([{ kind: "block", name: "ConstructorSurvival" }]));
+    assert.equal(issues.filter((i) => i.code === "unknown-name").length, 0);
+  });
+
+  it("allows repeated subtask titles and still flags duplicate chapter titles", () => {
+    const project = blankProject();
+    const ch = newChapter();
+    ch.chapterTitle = "Supply run";
+    const first = newTask();
+    first.taskTitle = "Collect ore";
+    const second = newTask();
+    second.taskTitle = "Collect ore";
+    ch.tasks = [first, second];
+    const copy = newChapter();
+    copy.chapterTitle = "Supply run";
+    copy.tasks = [newTask()];
+    project.chapters = [ch, copy];
+    const issues = validateProject(project);
+    const dups = issues.filter((i) => i.code === "duplicate-title");
+    assert.equal(dups.length, 1);
+    assert.equal(dups[0]?.kind, "chapter");
+    assert.match(dups[0]?.message ?? "", /Supply run/);
+  });
+
   it("recommends deleting untitled chapters and tasks", () => {
     const project = blankProject();
     const ch = newChapter();

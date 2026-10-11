@@ -89,7 +89,8 @@ async function flush(name: string, value: string) {
 }
 
 function catalogTextKey(text: CatalogText) {
-  return text.role === "playfieldYaml" ? `playfieldYaml:${text.path}` : text.role;
+  if (text.role === "playfieldYaml" || text.role === "factions") return `${text.role}:${text.path}`;
+  return text.role;
 }
 
 export async function putCatalogTexts(

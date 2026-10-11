@@ -329,7 +329,6 @@ export function validateProject(project: PdaProject, catalog?: ScenarioCatalog):
       }
     });
 
-    const seenTaskTitles = new Map<string, string>();
     ch.tasks.forEach((tk, ti) => {
       const tkPath = pathOf(ch, tk);
       const visTitle = stripBbcode(tk.taskTitle);
@@ -346,28 +345,6 @@ export function validateProject(project: PdaProject, catalog?: ScenarioCatalog):
           suggestions: [],
           fixes: [{ type: "delete", label: "Delete task" }],
         });
-      } else {
-        const taskKey = visTitle.toLowerCase();
-        if (seenTaskTitles.has(taskKey)) {
-          push({
-            id: tk.id,
-            kind: "task",
-            level: "warning",
-            code: "duplicate-title",
-            message: `Duplicate task title “${visTitle}” in “${stripBbcode(ch.chapterTitle)}”.`,
-            path: tkPath,
-            recommend: "review",
-            field: "taskTitle",
-            value: tk.taskTitle,
-            suggestions: [`${visTitle} (copy)`],
-            fixes: [
-              { type: "set", field: "taskTitle", value: `${visTitle} (copy)`, label: "Rename copy" },
-              { type: "delete", label: "Delete this copy" },
-            ],
-          });
-        } else {
-          seenTaskTitles.set(taskKey, tk.id);
-        }
       }
       if (visTitle.length > 26) {
         const short = visTitle.slice(0, 26).trim();
@@ -477,7 +454,76 @@ export function validateProject(project: PdaProject, catalog?: ScenarioCatalog):
             });
           }
         }
-        if (catalogLoaded(catalog)) {
+        if (catalogLoaded(catalog) && ac.check === "NearUnit") {
+          const tokens = splitTokens(ac.names);
+          const poiToken = tokens[0];
+          if (poiToken && tokens.length >= 2) {
+            for (const hit of locaNameHits(catalog!, poiToken, ["poi"])) {
+              push({
+                id: ac.id,
+                kind: "action",
+                level: "warning",
+                code: "loca-name",
+                message: `“${hit.token}” is the blueprint file name. NearUnit’s first name should be the POI group or spawn name ${hit.name}.`,
+                path: acPath,
+                recommend: "fix",
+                field: "names",
+                value: hit.token,
+                suggestions: [hit.name],
+                fixes: tokenFixes("names", ac.names, hit.token, [hit.name]),
+              });
+            }
+            for (const token of unknownIn(catalog!, poiToken, ["poi"])) {
+              const suggestions = nearby(catalog, token, ["poi"], suggestCache);
+              push({
+                id: ac.id,
+                kind: "action",
+                level: "warning",
+                code: "unknown-name",
+                message: `NearUnit’s first name “${token}” is not a POI spawn, group, or blueprint file. The name after it is a device label from the control panel and is not checked.`,
+                path: acPath,
+                recommend: suggestions.length ? "fix" : "review",
+                field: "names",
+                value: token,
+                suggestions,
+                fixes: tokenFixes("names", ac.names, token, suggestions),
+              });
+            }
+          } else if (poiToken) {
+            const kinds: CatalogKind[] = ["poi", "entity", "block"];
+            for (const hit of locaNameHits(catalog!, poiToken, kinds)) {
+              push({
+                id: ac.id,
+                kind: "action",
+                level: "warning",
+                code: "loca-name",
+                message: `“${hit.token}” is a display or file name. NearUnit needs ${hit.name}.`,
+                path: acPath,
+                recommend: "fix",
+                field: "names",
+                value: hit.token,
+                suggestions: [hit.name],
+                fixes: tokenFixes("names", ac.names, hit.token, [hit.name]),
+              });
+            }
+            for (const token of unknownIn(catalog!, poiToken, kinds)) {
+              const suggestions = nearby(catalog, token, kinds, suggestCache);
+              push({
+                id: ac.id,
+                kind: "action",
+                level: "warning",
+                code: "unknown-name",
+                message: `“${token}” is not a known POI, entity, or block. Empyrion still accepts a device name set in the blueprint control panel.`,
+                path: acPath,
+                recommend: "review",
+                field: "names",
+                value: token,
+                suggestions,
+                fixes: tokenFixes("names", ac.names, token, suggestions),
+              });
+            }
+          }
+        } else if (catalogLoaded(catalog)) {
           const nameKinds = CHECK_NAME_KINDS[ac.check] ?? [];
           const typeKinds = CHECK_TYPE_KINDS[ac.check] ?? [];
           for (const hit of locaNameHits(catalog!, ac.names, nameKinds).slice(0, 4)) {

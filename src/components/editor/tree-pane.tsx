@@ -120,7 +120,12 @@ export function TreePane() {
                                   key={tk.id}
                                   task={tk}
                                   query={query}
-                                  selectedId={selected?.id}
+                                  taskActive={selected?.id === tk.id}
+                                  activeActionId={
+                                    selected?.kind === "action" && tk.actions.some((a) => a.id === selected.id)
+                                      ? selected.id
+                                      : undefined
+                                  }
                                   collapsed={collapsed}
                                   toggle={toggle}
                                   select={select}
@@ -177,17 +182,19 @@ function TreeTools() {
   );
 }
 
-function TaskBranch({
+const TaskBranch = memo(function TaskBranch({
   task,
   query,
-  selectedId,
+  taskActive,
+  activeActionId,
   collapsed,
   toggle,
   select,
 }: {
   task: TaskNode;
   query: string;
-  selectedId?: string;
+  taskActive: boolean;
+  activeActionId?: string;
   collapsed: string[];
   toggle: (id: string) => void;
   select: (sel: { kind: "task" | "action"; id: string }) => void;
@@ -199,7 +206,7 @@ function TaskBranch({
   return (
     <div>
       <Line
-        active={selectedId === task.id}
+        active={taskActive}
         depth={2}
         open={open}
         hasChildren={task.actions.length > 0}
@@ -211,7 +218,7 @@ function TaskBranch({
         ? task.actions.map((ac) => (
             <Line
               key={ac.id}
-              active={selectedId === ac.id}
+              active={activeActionId === ac.id}
               depth={3}
               open={false}
               hasChildren={false}
@@ -223,7 +230,7 @@ function TaskBranch({
         : null}
     </div>
   );
-}
+});
 
 const Line = memo(function Line(props: {
   active: boolean;

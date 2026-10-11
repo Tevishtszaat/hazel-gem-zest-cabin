@@ -136,6 +136,8 @@ export function classifyScenarioPath(path: string, hint?: string): string | null
   const meta = configMetaByFile(base);
   if (meta) return meta.role;
   if (base === "dialogues.ecf") return "dialogues";
+  if (base === "factions.ecf" || base === "faction.ecf" || base === "factionconfig.ecf") return "factions";
+  if (/\/factions?\//.test(p) && base.endsWith(".ecf") && !/warfare|reputation|diplomacy/.test(base)) return "factions";
   if (base === "dialogues.csv") return "dialoguesCsv";
   if (hint === "dialogues" && /\.csv$/.test(base)) return "dialoguesCsv";
   if (base.endsWith(".ecf")) return hint === "configs" || hint === "scenario" ? "ecf" : "ecf";
@@ -328,7 +330,7 @@ export function compactToken(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-let locaCache: { sig: string; rows: { key: string; name: string; label: string }[] } | null = null;
+const locaByCatalog = new WeakMap<ScenarioCatalog, { text: string; rows: { key: string; name: string; label: string }[] }>();
 
 type CatalogIndex = {
   byKind: Map<CatalogKind, CatalogEntry[]>;
@@ -389,8 +391,8 @@ export function getCatalogIndex(catalog: ScenarioCatalog): CatalogIndex {
 export function localizationLabels(catalog: ScenarioCatalog | undefined): { key: string; name: string; label: string }[] {
   if (!catalog) return [];
   const text = (catalog.texts ?? []).find((t) => t.role === "localization" && t.text)?.text ?? "";
-  const sig = `${catalog.indexedAt}:${catalog.entries.length}:${text.length}`;
-  if (locaCache?.sig === sig) return locaCache.rows;
+  const cached = locaByCatalog.get(catalog);
+  if (cached && cached.text === text) return cached.rows;
   const rows: { key: string; name: string; label: string }[] = [];
   if (text) {
     const table = parseCsv(text);
@@ -407,7 +409,7 @@ export function localizationLabels(catalog: ScenarioCatalog | undefined): { key:
   for (const entry of catalog.entries) {
     if (entry.label) rows.push({ key: entry.name, name: entry.name, label: entry.label });
   }
-  locaCache = { sig, rows };
+  locaByCatalog.set(catalog, { text, rows });
   return rows;
 }
 
@@ -558,6 +560,9 @@ export function indexScenario(files: ScenarioSource[], hint?: string): IndexedSc
         const kind = KIND_FROM_ECF[rec.kind.toLowerCase()];
         if (!kind) continue;
         addEntry(entries, seen, { kind, name: rec.name, source });
+        if (rec.abbrev && rec.abbrev.toLowerCase() !== rec.name.toLowerCase()) {
+          addEntry(entries, seen, { kind, name: rec.abbrev, label: rec.name, source });
+        }
         count += 1;
       }
     }
@@ -738,7 +743,7 @@ export const CHECK_NAME_KINDS: Record<string, CatalogKind[]> = {
   BlockDestroyed: ["poi", "block"],
   NearPoi: ["poi"],
   PoiDiscovered: ["poi"],
-  NearUnit: ["entity", "poi"],
+  NearUnit: ["poi", "entity", "block"],
   SubjectKilled: ["entity", "group"],
   PlayfieldEntered: ["playfield"],
   PlayfieldTypeEntered: ["playfield"],

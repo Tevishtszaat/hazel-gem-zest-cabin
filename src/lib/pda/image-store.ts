@@ -12,7 +12,10 @@ export type StoredImage = {
 
 const urls = new Map<string, string>();
 const aliases = new Map<string, string>();
+const iconMisses = new Set<string>();
 let wallpaperNamesCache: string[] | null = null;
+let warmPromise: Promise<void> | null = null;
+let iconsWarmed = false;
 const WP_CAP = 8;
 
 function basename(path: string): string {
@@ -134,11 +137,17 @@ export async function getImageUrl(name: string): Promise<string | null> {
   const hit = peekImageUrl(name);
   if (hit) return hit;
   if (typeof indexedDB === "undefined") return null;
+  const missKey = name.trim().toLowerCase();
+  if (missKey && iconMisses.has(missKey)) return null;
   try {
     if (!name.startsWith("wp:")) {
       await warmImageCache();
       const warmed = peekImageUrl(name);
       if (warmed) return warmed;
+      if (iconsWarmed && !resolveAlias(name)) {
+        if (missKey) iconMisses.add(missKey);
+        return null;
+      }
     }
     const key = name.startsWith("wp:") ? name : resolveAlias(name) || basename(name);
     const db = await openPdaDb();
@@ -147,7 +156,10 @@ export async function getImageUrl(name: string): Promise<string | null> {
       req.onsuccess = () => resolve(req.result as StoredImage | undefined);
       req.onerror = () => reject(req.error);
     });
-    if (!rec?.blob) return null;
+    if (!rec?.blob) {
+      if (missKey) iconMisses.add(missKey);
+      return null;
+    }
     let blob = rec.blob;
     if (rec.set === "wallpaper" || rec.name.startsWith("wp:")) {
       blob = await downscaleImageBlob(blob);
@@ -221,6 +233,8 @@ export async function clearImages(set?: ImageSet): Promise<void> {
     for (const url of urls.values()) URL.revokeObjectURL(url);
     urls.clear();
     aliases.clear();
+    iconMisses.clear();
+    iconsWarmed = false;
     wallpaperNamesCache = null;
     await new Promise<void>((resolve, reject) => {
       const req = db.transaction("blobs", "readwrite").objectStore("blobs").clear();
@@ -254,10 +268,18 @@ export async function clearImages(set?: ImageSet): Promise<void> {
 }
 
 export async function warmImageCache(): Promise<void> {
-  try {
-    const names = await listImageNames();
-    for (const name of names) remember(String(name));
-  } catch {
-    /* icons load on demand */
-  }
+  if (iconsWarmed) return;
+  if (warmPromise) return warmPromise;
+  warmPromise = (async () => {
+    try {
+      const names = await listImageNames();
+      for (const name of names) remember(String(name));
+      iconsWarmed = true;
+    } catch {
+      /* icons load on demand */
+    } finally {
+      warmPromise = null;
+    }
+  })();
+  return warmPromise;
 }
