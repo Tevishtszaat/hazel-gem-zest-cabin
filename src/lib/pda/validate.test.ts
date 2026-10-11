@@ -16,6 +16,46 @@ function catalog(names: { kind: ScenarioCatalog["entries"][number]["kind"]; name
 }
 
 describe("validateProject debug diagnostics", () => {
+  it("accepts a NearUnit block such as Eden_TreasureBox ahead of a device label", () => {
+    const project = blankProject();
+    const ch = newChapter();
+    ch.chapterTitle = "Scan for Fish in water areas";
+    const tk = newTask();
+    tk.taskTitle = "Scanning";
+    const ac = newAction();
+    ac.actionTitle = "Find School of Fish";
+    ac.check = "NearUnit";
+    ac.names = "Eden_TreasureBox, SchoolOfFish";
+    tk.actions = [ac];
+    ch.tasks = [tk];
+    project.chapters = [ch];
+    const issues = validateProject(project, catalog([{ kind: "block", name: "Eden_TreasureBox" }]));
+    assert.equal(issues.filter((i) => i.code === "unknown-name" || i.code === "loca-name").length, 0);
+  });
+
+  it("does not rewrite a real item label into a different item name", () => {
+    const project = blankProject();
+    const ch = newChapter();
+    ch.chapterTitle = "Scan for Fish in water areas";
+    const tk = newTask();
+    tk.taskTitle = "You see some fish around your Tack and Net!";
+    const ac = newAction();
+    ac.actionTitle = "You got a bite and have set your snare";
+    ac.check = "InventoryContains";
+    ac.types = "Grub Worms";
+    tk.actions = [ac];
+    ch.tasks = [tk];
+    project.chapters = [ch];
+    const issues = validateProject(
+      project,
+      catalog([
+        { kind: "item", name: "Bait", label: "Grub Worms" },
+        { kind: "item", name: "GoldCoins", label: "Gold Coins" },
+      ]),
+    );
+    assert.equal(issues.filter((i) => i.message.includes("Grub Worms") || i.message.includes("Bait")).length, 0);
+  });
+
   it("does not flag NearUnit control-panel device names", () => {
     const project = blankProject();
     const ch = newChapter();

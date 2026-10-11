@@ -4,6 +4,7 @@ import {
   CHECK_NAME_KINDS,
   CHECK_TYPE_KINDS,
   catalogLoaded,
+  compactToken,
   resolveCatalogToken,
   splitTokens,
   suggestionsFor,
@@ -62,6 +63,7 @@ function locaNameHits(catalog: ScenarioCatalog, value: string, kinds: CatalogKin
     }
     if (hit.via !== "label") return [];
     if (hit.entry.name.toLowerCase() === token.toLowerCase()) return [];
+    if (compactToken(hit.entry.name) !== compactToken(token)) return [];
     return [{ token, name: hit.entry.name, label: hit.entry.label || token }];
   });
 }
@@ -457,14 +459,15 @@ export function validateProject(project: PdaProject, catalog?: ScenarioCatalog):
         if (catalogLoaded(catalog) && ac.check === "NearUnit") {
           const tokens = splitTokens(ac.names);
           const poiToken = tokens[0];
+          const unitKinds: CatalogKind[] = ["poi", "block", "entity"];
           if (poiToken && tokens.length >= 2) {
-            for (const hit of locaNameHits(catalog!, poiToken, ["poi"])) {
+            for (const hit of locaNameHits(catalog!, poiToken, unitKinds)) {
               push({
                 id: ac.id,
                 kind: "action",
                 level: "warning",
                 code: "loca-name",
-                message: `“${hit.token}” is the blueprint file name. NearUnit’s first name should be the POI group or spawn name ${hit.name}.`,
+                message: `“${hit.token}” is a display name. NearUnit needs ${hit.name}.`,
                 path: acPath,
                 recommend: "fix",
                 field: "names",
@@ -473,14 +476,14 @@ export function validateProject(project: PdaProject, catalog?: ScenarioCatalog):
                 fixes: tokenFixes("names", ac.names, hit.token, [hit.name]),
               });
             }
-            for (const token of unknownIn(catalog!, poiToken, ["poi"])) {
-              const suggestions = nearby(catalog, token, ["poi"], suggestCache);
+            for (const token of unknownIn(catalog!, poiToken, unitKinds)) {
+              const suggestions = nearby(catalog, token, unitKinds, suggestCache);
               push({
                 id: ac.id,
                 kind: "action",
                 level: "warning",
                 code: "unknown-name",
-                message: `NearUnit’s first name “${token}” is not a POI spawn, group, or blueprint file. The name after it is a device label from the control panel and is not checked.`,
+                message: `NearUnit’s first name “${token}” is not a POI, block, or entity. Empyrion matches that slot to a blueprint or a device such as a container. The name after it is the control-panel label and is not checked.`,
                 path: acPath,
                 recommend: suggestions.length ? "fix" : "review",
                 field: "names",
