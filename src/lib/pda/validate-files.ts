@@ -18,6 +18,7 @@ import { bundlePlayfields } from "./playfield.ts";
 import { preflightPlayfield as preflightLists } from "./playfield-design.ts";
 import {
   catalogLoaded,
+  ENGINE_FACTIONS,
   resolveCatalogToken,
   suggestionsFor,
   type ScenarioCatalog,
@@ -244,6 +245,7 @@ function validateEcfRole(
     const factionField = obj.fields.Faction || obj.fields.faction;
     if (factionField && role !== "factions" && catalog.entries.some((e) => e.kind === "faction")) {
       for (const token of factionField.split(/[,|]/).map((part) => part.trim()).filter(Boolean)) {
+        if (ENGINE_FACTIONS.has(token.toLowerCase())) continue;
         if (resolveCatalogToken(catalog, token, ["faction"])) continue;
         const suggestions = suggestionsFor(catalog, ["faction"], token, 3).map((e) => e.name);
         push({

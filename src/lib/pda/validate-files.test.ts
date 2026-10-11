@@ -34,4 +34,33 @@ describe("file-kind debug", () => {
     assert.match(next, /Name: Beta/);
     assert.match(next, /Id: 11/);
   });
+
+  it("accepts the engine faction Player on a block", () => {
+    const catalog = {
+      ...emptyCatalog(),
+      indexedAt: 1,
+      texts: [
+        {
+          role: "blocks",
+          path: "BlocksConfig.ecf",
+          text: `{ Block Name: CPUExtenderHVT3
+  Faction: Player
+}
+{ Block Name: AlienCore
+  Faction: NotAFaction
+}
+`,
+        },
+      ],
+      files: [{ role: "blocks", path: "BlocksConfig.ecf", count: 2 }],
+      entries: [
+        { kind: "block" as const, name: "CPUExtenderHVT3", source: "blocks" },
+        { kind: "block" as const, name: "AlienCore", source: "blocks" },
+        { kind: "faction" as const, name: "Talon", source: "factions" },
+      ],
+    };
+    const issues = validateCatalog(catalog, "blocks");
+    assert.equal(issues.some((i) => i.message.includes("CPUExtenderHVT3") && i.message.includes("Player")), false);
+    assert.ok(issues.some((i) => i.code === "faction" && i.message.includes("NotAFaction")));
+  });
 });

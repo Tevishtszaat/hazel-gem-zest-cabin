@@ -21,7 +21,8 @@ export type ProblemFix =
   | { type: "rewards"; rewards: ChapterNode["rewards"]; label: string }
   | { type: "delete"; label: string }
   | { type: "ecf-set"; role: string; name: string; field: string; value: string; label: string }
-  | { type: "yaml-replace"; role: string; path: string; from: string; to: string; label: string };
+  | { type: "yaml-replace"; role: string; path: string; from: string; to: string; label: string }
+  | { type: "csv-pad"; role: string; path: string; line: number; label: string };
 
 export type Problem = {
   key: string;

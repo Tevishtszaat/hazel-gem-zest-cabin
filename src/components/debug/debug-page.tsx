@@ -60,7 +60,7 @@ export function DebugPage() {
   const selectedKeys = visible.filter((issue) => picked[issue.key]).map((issue) => problemIgnoreKey(issue));
 
   const apply = (issue: Problem, fix: ProblemFix) => {
-    if (fix.type === "ecf-set" || fix.type === "yaml-replace") {
+    if (fix.type === "ecf-set" || fix.type === "yaml-replace" || fix.type === "csv-pad") {
       applyFileFix(fix);
     } else if (issue.id) {
       if (fix.type === "delete") applyBulk([], [issue.id]);
@@ -78,7 +78,7 @@ export function DebugPage() {
     for (const issue of list) {
       const fix = preferredFix(issue);
       if (!fix) continue;
-      if (fix.type === "ecf-set" || fix.type === "yaml-replace") applyFileFix(fix);
+      if (fix.type === "ecf-set" || fix.type === "yaml-replace" || fix.type === "csv-pad") applyFileFix(fix);
       else if (issue.id) patches.push({ id: issue.id, patch: fixToPatch(fix) });
     }
     if (patches.length) applyBulk(patches);

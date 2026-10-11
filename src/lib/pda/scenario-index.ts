@@ -77,6 +77,8 @@ export const BUILTIN_NAMES = new Set([
   "NeedAll",
 ]);
 
+export const ENGINE_FACTIONS = new Set(["player"]);
+
 const KIND_FROM_ECF: Record<string, CatalogKind> = {
   item: "item",
   block: "block",

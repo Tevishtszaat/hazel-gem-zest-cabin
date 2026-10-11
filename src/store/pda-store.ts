@@ -12,6 +12,7 @@ import { clearImages, putImages, warmImageCache, type ImageSet } from "@/lib/pda
 import type { ImportKind } from "@/lib/pda/import-kinds.ts";
 import { catalogText } from "@/lib/pda/library.ts";
 import { applyEcfFix, applyYamlReplace } from "@/lib/pda/validate-files.ts";
+import { padCsvColumns } from "@/lib/pda/validate-syntax.ts";
 import type { ProblemFix } from "@/lib/pda/validate.ts";
 import type { ChapterNode, PdaProject } from "@/lib/pda/types.ts";
 
@@ -286,13 +287,13 @@ export const usePdaStore = create<PdaState>()(
       setCatalogText: (role, text, path) =>
         set((s) => {
           const texts = [...(s.catalog.texts ?? [])];
-          const i =
-            role === "playfieldYaml" && path
-              ? texts.findIndex((t) => t.role === role && t.path === path)
-              : texts.findIndex((t) => t.role === role);
-          if (i >= 0) texts[i] = { ...texts[i]!, text, path: path || texts[i]!.path };
+          const i = path
+            ? texts.findIndex((t) => t.role === role && t.path === path)
+            : -1;
+          const at = i >= 0 ? i : texts.findIndex((t) => t.role === role);
+          if (at >= 0) texts[at] = { ...texts[at]!, text, path: path || texts[at]!.path };
           else texts.push({ role, path: path || role, text });
-          void putCatalogTexts([texts[i >= 0 ? i : texts.length - 1]!]);
+          void putCatalogTexts([texts[at >= 0 ? at : texts.length - 1]!]);
           const files = [...s.catalog.files];
           if (!files.some((f) => f.role === role && (!path || f.path === path))) {
             files.push({ role, path: path || role, count: 1 });
@@ -469,6 +470,14 @@ export const usePdaStore = create<PdaState>()(
             texts.find((t) => t.role === fix.role && t.path === fix.path) ?? texts.find((t) => t.role === fix.role);
           if (!current?.text) return;
           get().setCatalogText(fix.role, applyYamlReplace(current.text, fix.from, fix.to), current.path);
+          return;
+        }
+        if (fix.type === "csv-pad") {
+          const texts = get().catalog.texts ?? [];
+          const current =
+            texts.find((t) => t.role === fix.role && t.path === fix.path) ?? texts.find((t) => t.role === fix.role);
+          if (!current?.text) return;
+          get().setCatalogText(fix.role, padCsvColumns(current.text, fix.line), current.path);
         }
       },
       ignoreProblems: (keys) =>
