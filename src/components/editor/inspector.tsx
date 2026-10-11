@@ -5,7 +5,9 @@ import { PdaImage } from "@/components/editor/pda-image.tsx";
 import { decodePdaEscapes, stripBbcode } from "@/lib/pda/bbcode.ts";
 import { CHECKS } from "@/lib/pda/types.ts";
 import { Button } from "@/components/ui/button.tsx";
+import { FieldNote } from "@/components/ui/field-note.tsx";
 import { Input, Label, Textarea } from "@/components/ui/input.tsx";
+import { noteForField } from "@/lib/pda/field-notes.ts";
 import { SuggestInput, TokenStatus } from "@/components/editor/suggest-input.tsx";
 import { CHECK_NAME_KINDS, CHECK_TYPE_KINDS } from "@/lib/pda/scenario-index.ts";
 import { selectedContext, usePdaStore } from "@/store/pda-store.ts";
@@ -352,7 +354,10 @@ function Field({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-2">
-        <Label>{label}</Label>
+        <Label className="inline-flex items-center gap-1.5">
+          {label}
+          <FieldNote label={label} note={noteForField(label)} />
+        </Label>
         {hint ? <span className={`text-[11px] ${warn ? "text-warn" : "text-subtle"}`}>{hint}</span> : null}
       </div>
       {children}

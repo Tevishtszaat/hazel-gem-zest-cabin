@@ -113,6 +113,7 @@ export const MULTI_FILE_ROLES = new Set([
   "warfare",
   "reputation",
   "statuseffects",
+  "randomPreset",
 ]);
 
 export function textForIndex(path: string, text: string | undefined): string | undefined {
@@ -151,6 +152,10 @@ export function chooseScenarioFolder(paths: string[], preferred = ""): string {
   if (hit) return hit;
   if (names.size === 1) return [...names][0]!;
   return "";
+}
+
+export function isMainGameReference(path: string, dropIncludesScenarios: boolean) {
+  return dropIncludesScenarios && !scenarioFolderOf(path);
 }
 
 export function isOtherScenarioPath(path: string, active: string): boolean {
@@ -192,6 +197,7 @@ export function classifyScenarioPath(path: string, hint?: string): string | null
   const p = normalizePath(path).toLowerCase();
   const base = p.split("/").pop() ?? "";
   if (base.startsWith("+backup") || p.includes("/backup/")) return null;
+  if (/\/randompresets\//i.test(p) && /\.ya?ml$/.test(base)) return "randomPreset";
   if (hint === "pdaYaml" && /\.ya?ml$/.test(base) && !/sectors|playfield/.test(base)) return "pdaYaml";
   if (hint === "pdaCsv" && /\.csv$/.test(base) && base !== "localization.csv") return "pdaCsv";
   if (hint === "dialogues" && /\.ecf$/.test(base)) return "dialogues";
@@ -272,9 +278,9 @@ export function collectCatalogTexts(files: ScenarioSource[], hint?: string): Cat
     }
     if (role && (CONFIG_TEXT_ROLES.has(role) || role === "ecf" || role === "pdaYaml" || role === "pdaCsv")) {
       consider(role, file);
-    } else if (role === "playfieldYaml" && file.text) {
-      byRole.set(`playfieldYaml:${normalizePath(file.path)}`, {
-        role: "playfieldYaml",
+    } else if ((role === "playfieldYaml" || role === "randomPreset") && file.text) {
+      byRole.set(`${role}:${normalizePath(file.path)}`, {
+        role,
         path: normalizePath(file.path),
         text: file.text,
       });
@@ -689,7 +695,7 @@ export function indexScenario(files: ScenarioSource[], hint?: string): IndexedSc
       }
     }
 
-    if (file.text && (CONFIG_TEXT_ROLES.has(role) || role === "ecf" || role === "pdaYaml" || role === "pdaCsv" || role === "playfieldYaml")) {
+    if (file.text && (CONFIG_TEXT_ROLES.has(role) || role === "ecf" || role === "pdaYaml" || role === "pdaCsv" || role === "playfieldYaml" || role === "randomPreset")) {
       texts.push({ role, path: normalizePath(file.path), text: file.text });
     }
 
@@ -831,8 +837,8 @@ export function mergeCatalog(base: ScenarioCatalog, extra: ScenarioCatalog): Sce
   const texts = [...(base.texts ?? [])];
   for (const text of extra.texts ?? []) {
     if (!text.text) continue;
-    if (text.role === "playfieldYaml") {
-      const i = texts.findIndex((t) => t.role === "playfieldYaml" && t.path === text.path);
+    if (text.role === "playfieldYaml" || text.role === "randomPreset") {
+      const i = texts.findIndex((t) => t.role === text.role && t.path === text.path);
       if (i >= 0) texts[i] = text;
       else texts.push(text);
       continue;

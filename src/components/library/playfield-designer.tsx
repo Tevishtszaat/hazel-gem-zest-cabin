@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button.tsx";
+import { FieldNote } from "@/components/ui/field-note.tsx";
 import { Input, Textarea } from "@/components/ui/input.tsx";
+import { noteForField } from "@/lib/pda/field-notes.ts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
 import {
   ASTEROID_COLS,
@@ -94,7 +96,10 @@ export function PlayfieldDesigner({
                       : undefined;
             return (
               <label key={key} className="block space-y-1">
-                <span className="text-xs uppercase tracking-[0.12em] text-muted">{key}</span>
+                <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.12em] text-muted">
+                  {key}
+                  <FieldNote label={key} note={noteForField(key, "playfield")} />
+                </span>
                 {key === "Description" ? (
                   <Textarea
                     rows={3}
@@ -298,7 +303,10 @@ function YamlTable({
             <tr>
               {cols.map((col) => (
                 <th key={col.key} className="px-2 py-1.5 font-medium">
-                  {col.label}
+                  <span className="inline-flex items-center gap-1">
+                    {col.label}
+                    <FieldNote label={col.label} note={noteForField(col.label, "playfield")} />
+                  </span>
                 </th>
               ))}
               <th className="w-10 px-2 py-1.5" />
@@ -390,7 +398,10 @@ function CreatureEditor({
       {biome ? (
         <div>
           <label className="block space-y-1">
-            <span className="text-xs uppercase tracking-[0.12em] text-muted">Biome</span>
+            <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.12em] text-muted">
+              Biome
+              <FieldNote label="Biome" note={noteForField("Biome")} />
+            </span>
             <Input
               value={String(biome.Biome ?? biome.Name ?? "")}
               onChange={(e) =>

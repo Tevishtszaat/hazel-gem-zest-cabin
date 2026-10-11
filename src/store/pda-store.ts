@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { durableStorage, putCatalogTexts, loadCatalogTexts, clearCatalogTexts } from "@/lib/pda/idb-storage.ts";
+import { durableStorage, putCatalogTexts, loadCatalogTexts, clearCatalogTexts, deleteCatalogText } from "@/lib/pda/idb-storage.ts";
 import { stringifyCsv, csvLookup, fillLocalizationEnglish } from "@/lib/pda/csv.ts";
 import { blankProject, applyCsvText, newAction, newChapter, newTask, type ImportFiles } from "@/lib/pda/yaml-import.ts";
 import { classifyScenarioPath, dropCatalogGroup, emptyCatalog, mergeCatalog, catalogLoadSummary, partitionContent, type ScenarioCatalog, type ScenarioSource } from "@/lib/pda/scenario-index.ts";
@@ -47,6 +47,7 @@ type PdaState = {
   clearImageSet: (set: ImageSet) => Promise<void>;
   setCatalog: (catalog: ScenarioCatalog) => void;
   setCatalogText: (role: string, text: string, path?: string) => void;
+  removeCatalogText: (role: string, path: string) => void;
   patchChapter: (id: string, patch: Partial<ChapterNode>) => void;
   updateSelected: (mut: (project: PdaProject) => void) => void;
   addChapter: (category?: string) => void;
@@ -317,6 +318,18 @@ export const usePdaStore = create<PdaState>()(
             files.push({ role, path: path || role, count: 1 });
           }
           return { catalog: { ...s.catalog, texts, files, indexedAt: Date.now() } };
+        }),
+      removeCatalogText: (role, path) =>
+        set((s) => {
+          void deleteCatalogText(role, path);
+          return {
+            catalog: {
+              ...s.catalog,
+              texts: (s.catalog.texts ?? []).filter((text) => !(text.role === role && text.path === path)),
+              files: s.catalog.files.filter((file) => !(file.role === role && file.path === path)),
+              indexedAt: Date.now(),
+            },
+          };
         }),
       patchChapter: (id, patch) =>
         set((s) => ({

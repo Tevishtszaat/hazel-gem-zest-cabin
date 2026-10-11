@@ -5,6 +5,7 @@ import { AppHeader } from "@/components/app-header.tsx";
 import { BbText } from "@/components/editor/bb-text.tsx";
 import { ItemIcon } from "@/components/editor/pda-image.tsx";
 import { Button } from "@/components/ui/button.tsx";
+import { FieldNote } from "@/components/ui/field-note.tsx";
 import { Input, Textarea } from "@/components/ui/input.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
 import {
@@ -42,8 +43,9 @@ import { stringifyCsv, upsertCsv } from "@/lib/pda/csv.ts";
 import type { CsvTable } from "@/lib/pda/types.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
 import { warmImageCache } from "@/lib/pda/image-store.ts";
+import { noteForField } from "@/lib/pda/field-notes.ts";
 
-type Tab = ConfigRole | "compare" | "localization" | "playfields";
+type Tab = ConfigRole | "compare" | "localization" | "playfields" | "presets";
 
 const GROUP_TONE: Record<ConfigGroup, { idle: string; on: string }> = {
   catalog: {
@@ -77,7 +79,7 @@ const GROUPS: { id: ConfigGroup; label: string }[] = [
 
 const GROUP_TABS: Record<ConfigGroup, Tab[]> = {
   catalog: ["items", "blocks", "templates", "tokens", "compare"],
-  world: ["factions", "playfields", "eclass", "egroups", "reputation", "warfare", "galaxy"],
+  world: ["factions", "playfields", "presets", "eclass", "egroups", "reputation", "warfare", "galaxy"],
   loot: ["containers", "lootgroups", "traders"],
   defs: ["materials", "statuseffects", "globaldefs", "blockgroups", "blockshapes", "animations", "baiconfig"],
   text: ["localization", "sectors"],
@@ -93,12 +95,14 @@ const WORKSPACE: Partial<
     | "/library/blocks"
     | "/library/factions"
     | "/library/playfields"
+    | "/library/presets"
   >
 > = {
   items: "/library/items",
   blocks: "/library/blocks",
   factions: "/library/factions",
   playfields: "/library/playfields",
+  presets: "/library/presets",
   galaxy: "/library/galaxy",
   reputation: "/library/reputation",
   warfare: "/library/warfare",
@@ -108,6 +112,7 @@ function tabLabel(id: Tab) {
   if (id === "compare") return "Compare";
   if (id === "localization") return "Localization";
   if (id === "playfields") return "Playfields";
+  if (id === "presets") return "Random presets";
   return configMeta(id)?.label || id;
 }
 
@@ -1245,8 +1250,11 @@ function BlockCompare({ initial }: { initial: string | null }) {
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <label className="block space-y-1">
-      <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">{label}</span>
+    <label className="relative block space-y-1">
+      <span className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.12em] text-muted">
+        {label}
+        <FieldNote label={label} note={noteForField(label)} />
+      </span>
       {children}
     </label>
   );

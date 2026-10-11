@@ -1,8 +1,10 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button.tsx";
+import { FieldNote } from "@/components/ui/field-note.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { WARFARE_STATS } from "@/lib/pda/config-stats.ts";
 import { stringifyEcfObjects, type EcfObject } from "@/lib/pda/ecf.ts";
+import { noteForField } from "@/lib/pda/field-notes.ts";
 import { catalogText, objectsFor, type ConfigRole } from "@/lib/pda/library.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
 
@@ -19,8 +21,11 @@ function download(name: string, text: string) {
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <label className="block space-y-1">
-      <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">{label}</span>
+    <label className="relative block space-y-1">
+      <span className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.12em] text-muted">
+        {label}
+        <FieldNote label={label} note={noteForField(label)} />
+      </span>
       {children}
     </label>
   );
@@ -104,10 +109,24 @@ export function ReputationTable() {
           <table className="w-max min-w-full text-sm">
             <thead className="sticky top-0 bg-bg text-left text-xs uppercase tracking-[0.12em] text-subtle">
               <tr>
-                <th className="px-2 py-2">Origin</th>
+                <th className="px-2 py-2">
+                  <span className="inline-flex items-center gap-1">
+                    Origin
+                    <FieldNote
+                      label="Origin"
+                      note="Who the reputation is measured from, usually the player origin. Example: Human:1"
+                    />
+                  </span>
+                </th>
                 {columns.map((col) => (
                   <th key={col} className="px-2 py-2">
-                    {col}
+                    <span className="inline-flex items-center gap-1">
+                      {col}
+                      <FieldNote
+                        label={col}
+                        note="Starting reputation of this player origin toward that faction. 16500 is neutral. Lower is hostile. Example: 8500"
+                      />
+                    </span>
                   </th>
                 ))}
                 <th className="px-2 py-2" />

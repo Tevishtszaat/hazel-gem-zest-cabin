@@ -168,14 +168,23 @@ function rankKind(kind: PlayfieldKind) {
   return 0;
 }
 
-export function bundlePlayfields(texts: CatalogText[]): PlayfieldBundle[] {
+export function bundlePlayfields(texts: CatalogText[], extraPaths: string[] = []): PlayfieldBundle[] {
   const groups = new Map<string, PlayfieldFile[]>();
-  for (const text of texts) {
-    if (text.role !== "playfieldYaml" || !text.text) continue;
-    const file = playfieldFromText(text.path, text.text);
+  const seen = new Set<string>();
+  const add = (file: PlayfieldFile) => {
+    if (seen.has(file.path)) return;
+    seen.add(file.path);
     const list = groups.get(file.folder) ?? [];
     list.push(file);
     groups.set(file.folder, list);
+  };
+  for (const text of texts) {
+    if (text.role !== "playfieldYaml" || !text.text) continue;
+    add(playfieldFromText(text.path, text.text));
+  }
+  for (const path of extraPaths) {
+    if (!isPlayfieldBasename(path.split(/[/\\]/).pop() || "")) continue;
+    add(playfieldFromText(path, ""));
   }
   return [...groups.values()]
     .map((files) => {

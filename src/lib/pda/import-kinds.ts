@@ -14,6 +14,7 @@ export type ImportKind =
   | "galaxy"
   | "sectors"
   | "playfields"
+  | "presets"
   | "blueprints";
 
 export const IMPORT_SLOTS: {
@@ -105,6 +106,13 @@ export const IMPORT_SLOTS: {
     directory: true,
   },
   {
+    id: "presets",
+    title: "Import random presets",
+    hint: "RandomPresets folder. SolarSystemConfig.yaml and SolarSystemConfig_Name.yaml.",
+    accept: ".yaml,.yml",
+    directory: true,
+  },
+  {
     id: "blueprints",
     title: "Import blueprints",
     hint: "Prefab .epb files — POI names for NearPoi / SpawnDrone.",
@@ -148,6 +156,7 @@ const ROLE_FOR_KIND: Record<Exclude<ImportKind, "scenario">, string[]> = {
   galaxy: ["galaxy"],
   sectors: ["sectors"],
   playfields: ["playfieldYaml"],
+  presets: ["randomPreset"],
   blueprints: ["poi"],
 };
 
@@ -173,6 +182,7 @@ export function areaForRole(role: string | null): Exclude<ImportKind, "scenario"
     "galaxy",
     "sectors",
     "playfields",
+    "presets",
     "blueprints",
   ];
   for (const kind of dedicated) {

@@ -1,6 +1,6 @@
 import { fileMatchesKind, type ImportKind } from "./import-kinds.ts";
 import { parseEpbHeader } from "./epb.ts";
-import { classifyScenarioPath, isOtherScenarioPath, chooseScenarioFolder, normalizePath, scenarioFolderOf, type ScenarioSource } from "./scenario-index.ts";
+import { classifyScenarioPath, isOtherScenarioPath, chooseScenarioFolder, isMainGameReference, normalizePath, scenarioFolderOf, type ScenarioSource } from "./scenario-index.ts";
 
 type DirReader = {
   readEntries: (ok: (entries: FsEntry[]) => void, err?: (e: DOMException) => void) => void;
@@ -98,6 +98,7 @@ export async function sourcesFromFiles(
   activeScenario = "",
 ): Promise<ScenarioSource[]> {
   const active = chooseScenarioFolder(files.map(relativeOf), activeScenario);
+  const dropIncludesScenarios = files.some((file) => scenarioFolderOf(relativeOf(file)));
   const picked = files.filter((file) => {
     const path = relativeOf(file);
     if (isOtherScenarioPath(path, active)) return false;
@@ -107,12 +108,12 @@ export async function sourcesFromFiles(
   const sources = await poolMap(picked, 10, async (file) => {
     const path = normalizePath(relativeOf(file));
     const role = classifyScenarioPath(path, kind);
-    const gameFile = !scenarioFolderOf(path);
+    const gameFile = isMainGameReference(path, dropIncludesScenarios);
     const mode = sourceReadMode(role);
     let source: ScenarioSource = { path };
-    if (gameFile && (role === "wallpaper" || role === "playfieldYaml")) {
-      source = { path };
-    } else if (role === "poi") {
+    if (gameFile && role === "wallpaper") source = { path };
+    else if (gameFile && role === "playfieldYaml") source = { path };
+    else if (role === "poi") {
       try {
         const buf = new Uint8Array(await file.slice(0, 65536).arrayBuffer());
         source = { path, meta: parseEpbHeader(buf, path) };

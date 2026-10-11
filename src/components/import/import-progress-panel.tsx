@@ -15,6 +15,7 @@ const SHORT: Record<ImportKind, string> = {
   galaxy: "Galaxy",
   sectors: "Sectors",
   playfields: "Playfields",
+  presets: "Presets",
   blueprints: "Blueprints",
 };
 

@@ -121,6 +121,23 @@ export async function putCatalogText(text: CatalogText): Promise<void> {
   return putCatalogTexts([text]);
 }
 
+export async function deleteCatalogText(role: string, path: string): Promise<void> {
+  if (typeof indexedDB === "undefined") return;
+  try {
+    const db = await openPdaDb();
+    if (!db.objectStoreNames.contains(TEXT_STORE)) return;
+    const key = catalogTextKey({ role, path, text: " " });
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(TEXT_STORE, "readwrite");
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.objectStore(TEXT_STORE).delete(key);
+    });
+  } catch {
+    /* keep the in-memory copy gone even if the store is unavailable */
+  }
+}
+
 export async function loadCatalogTexts(): Promise<CatalogText[]> {
   if (typeof indexedDB === "undefined") return [];
   try {

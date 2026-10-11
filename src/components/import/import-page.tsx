@@ -39,6 +39,7 @@ const ICONS: Record<ImportKind, ReactNode> = {
   galaxy: <Sun className="size-5" />,
   sectors: <Map className="size-5" />,
   playfields: <Map className="size-5" />,
+  presets: <Map className="size-5" />,
   blueprints: <Box className="size-5" />,
 };
 
@@ -109,6 +110,8 @@ function slotCount(kind: ImportKind, files: { role: string; count: number }[], p
       return sum("sectors");
     case "playfields":
       return sum("playfieldYaml", "playfield");
+    case "presets":
+      return sum("randomPreset");
     case "blueprints":
       return sum("poi");
     default:

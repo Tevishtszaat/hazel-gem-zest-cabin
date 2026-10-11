@@ -16,6 +16,7 @@ import {
   saveScroll,
 } from "@/components/library/dialogue-tools.tsx";
 import { Button } from "@/components/ui/button.tsx";
+import { FieldNote } from "@/components/ui/field-note.tsx";
 import { Input, Label, Textarea } from "@/components/ui/input.tsx";
 import { upsertCsv } from "@/lib/pda/csv.ts";
 import {
@@ -41,6 +42,7 @@ import {
   type DialogueVariable,
 } from "@/lib/pda/dialogues.ts";
 import { catalogText, dialogueCsvTable, dialogueDocFor, dialogueStrings, writeDialogues, writeDialoguesCsv, writeLocalization } from "@/lib/pda/library.ts";
+import { noteForField } from "@/lib/pda/field-notes.ts";
 import { suggestionsFor, type ScenarioCatalog } from "@/lib/pda/scenario-index.ts";
 import type { CsvTable } from "@/lib/pda/types.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
@@ -465,8 +467,11 @@ export function DialogueEditor() {
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <label className="block space-y-1">
-      <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">{label}</span>
+    <label className="relative block space-y-1">
+      <span className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.12em] text-muted">
+        {label}
+        <FieldNote label={label} note={noteForField(label)} />
+      </span>
       {children}
     </label>
   );
@@ -534,7 +539,10 @@ function CsvBoundField({
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between gap-2">
-        <Label>{label}</Label>
+        <Label className="inline-flex items-center gap-1.5">
+          {label}
+          <FieldNote label={label} note={noteForField(label)} />
+        </Label>
       </div>
       <FormatBar mode={mode} onMode={onMode} onInsert={(open, close) => onChange(isKey ? value : wrapInsert(value, open, close))} />
       <Input value={value} list="pulse-dlg-keys" placeholder="Literal text or CSV key" onChange={(e) => onChange(e.target.value)} />

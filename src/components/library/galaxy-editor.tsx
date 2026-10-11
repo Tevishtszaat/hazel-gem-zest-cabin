@@ -1,9 +1,11 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { GalaxyStarChart } from "@/components/library/galaxy-chart.tsx";
 import { Button } from "@/components/ui/button.tsx";
+import { FieldNote } from "@/components/ui/field-note.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { GALAXY_GENERAL_STATS, TERRITORY_STATS } from "@/lib/pda/config-stats.ts";
 import { stringifyEcfObjects, type EcfObject } from "@/lib/pda/ecf.ts";
+import { noteForField } from "@/lib/pda/field-notes.ts";
 import { catalogText, objectsFor } from "@/lib/pda/library.ts";
 import { applyOrbitFixes, parseSectorBodies, STAR_MODELS, STAR_REGION_STATS, STAR_STATS, fieldToHex, hexToField, isStarType, parseStarMix, writeStarMix, type StarMix } from "@/lib/pda/galaxy.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
@@ -17,10 +19,14 @@ function download(name: string, text: string) {
   URL.revokeObjectURL(a.href);
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+function Field({ label, note, area, children }: { label: string; note?: string; area?: string; children: ReactNode }) {
+  const text = note || noteForField(label, area);
   return (
-    <label className="block space-y-1">
-      <span className="text-xs font-medium uppercase tracking-[0.12em] text-muted">{label}</span>
+    <label className="relative block space-y-1">
+      <span className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.12em] text-muted">
+        {label}
+        <FieldNote label={label} note={text} />
+      </span>
       {children}
     </label>
   );
@@ -47,7 +53,11 @@ export function GalaxyEditor() {
   const regions = children.filter((c) => /starregion/i.test(c.name));
   const stars = objects.filter((o) => o !== general && isStarType(o));
   const [starName, setStarName] = useState(stars[0]?.name || "");
+  const [regionName, setRegionName] = useState(regions[0]?.name || "");
+  const [territoryName, setTerritoryName] = useState(territories[0]?.name || "");
   const star = stars.find((s) => s.name === starName) ?? stars[0];
+  const region = regions.find((r) => r.name === regionName) ?? regions[0];
+  const territory = territories.find((t) => t.name === territoryName) ?? territories[0];
 
   const patchGeneral = (mut: (obj: EcfObject) => EcfObject) => {
     if (generalIndex < 0) {
@@ -77,6 +87,7 @@ export function GalaxyEditor() {
         { kind: "Child", plus: false, name: `Territory_${n}`, fields: { Faction: "NewFaction", Center: "0, 0, 0", Radius: "20" } },
       ],
     }));
+    setTerritoryName(`Territory_${n}`);
   };
 
   const addRegion = () => {
@@ -93,6 +104,7 @@ export function GalaxyEditor() {
         },
       ],
     }));
+    setRegionName(`StarRegion_${n}`);
   };
 
   const addStar = () => {
@@ -207,7 +219,7 @@ export function GalaxyEditor() {
       {star ? (
         <div className="mt-3 grid max-w-4xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {[...STAR_STATS, ...extraStar].map((key) => (
-            <Field key={key} label={key}>
+            <Field key={key} label={key} area="star">
               {key === "Description" ? (
                 <textarea
                   className="min-h-20 w-full rounded-sm border border-border bg-bg px-2 py-1.5 text-sm"
@@ -288,7 +300,7 @@ export function GalaxyEditor() {
       <h2 className="mt-8 text-xs font-medium uppercase tracking-[0.14em] text-accent">General</h2>
       <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[...GALAXY_GENERAL_STATS, ...extraGeneral].map((key) => (
-          <Field key={key} label={key}>
+          <Field key={key} label={key} area="general">
             <Input
               value={general?.fields[key] ?? ""}
               onChange={(e) => patchGeneral((cur) => ({ ...cur, fields: { ...cur.fields, [key]: e.target.value } }))}
@@ -301,236 +313,278 @@ export function GalaxyEditor() {
       <p className="mt-1 text-xs text-subtle">
         Where stars spawn (LY). Mix rows are StarClass_n + Prob — that is the actual fill, not the default star list.
       </p>
-      <RegionTable
+      <RegionEditor
         rows={regions}
+        selected={region?.name || ""}
+        onSelect={setRegionName}
         onChange={(name, col, value) => patchChild(name, (cur) => ({ ...cur, fields: { ...cur.fields, [col]: value } }))}
         onMix={(name, mix) => patchChild(name, (cur) => ({ ...cur, fields: writeStarMix(cur.fields, mix) }))}
-        onRemove={(name) =>
-          patchGeneral((cur) => ({ ...cur, children: (cur.children ?? []).filter((c) => c.name !== name) }))
-        }
+        onRemove={(name) => {
+          patchGeneral((cur) => ({ ...cur, children: (cur.children ?? []).filter((c) => c.name !== name) }));
+          const next = regions.find((row) => row.name !== name);
+          setRegionName(next?.name || "");
+        }}
       />
 
       <h2 className="mt-8 text-xs font-medium uppercase tracking-[0.14em] text-accent">Territories</h2>
       <p className="mt-1 text-xs text-subtle">Faction spheres in LY. Other_n lets extra POI factions leak in from center to edge.</p>
-      <div className="mt-2 overflow-auto">
-        <table className="w-full min-w-[640px] text-sm">
-          <thead className="text-left text-xs uppercase tracking-[0.12em] text-subtle">
-            <tr>
-              <th className="px-2 py-2">Id</th>
-              {TERRITORY_STATS.map((col) => (
-                <th key={col} className="px-2 py-2">
-                  {col}
-                </th>
+      {!territories.length ? (
+        <p className="mt-2 text-sm text-muted">None yet. Add a territory to place a faction sphere.</p>
+      ) : (
+        <>
+          <div className="mt-2 max-w-xl">
+            <select
+              className="h-10 w-full rounded-sm border border-border bg-bg px-2 text-sm"
+              value={territory?.name || ""}
+              onChange={(e) => setTerritoryName(e.target.value)}
+            >
+              {territories.map((row) => (
+                <option key={row.name} value={row.name}>
+                  {childLabel(row, row.fields.Faction || row.fields.Name)}
+                </option>
               ))}
-              <th className="px-2 py-2">Other factions</th>
-              <th className="px-2 py-2" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {territories.map((row) => (
-              <tr key={row.name}>
-                <td className="px-2 py-1.5 font-mono text-xs text-subtle">{row.name}</td>
-                {TERRITORY_STATS.map((col) => (
-                  <td key={col} className="px-2 py-1.5">
+            </select>
+          </div>
+          {territory ? (
+            <div className="mt-3 max-w-4xl">
+              <div className="mb-3 flex items-center gap-2">
+                <span className="font-mono text-xs text-subtle">{territory.name}</span>
+                <Button
+                  className="ml-auto"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    patchGeneral((cur) => ({
+                      ...cur,
+                      children: (cur.children ?? []).filter((c) => c.name !== territory.name),
+                    }));
+                    const next = territories.find((row) => row.name !== territory.name);
+                    setTerritoryName(next?.name || "");
+                  }}
+                >
+                  Remove
+                </Button>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {[...TERRITORY_STATS, ...extraKeys(territory, TERRITORY_STATS)].map((col) => (
+                  <Field key={col} label={col} area="territory">
                     <Input
-                      className="h-8"
-                      value={row.fields[col] ?? ""}
-                      onChange={(e) => patchChild(row.name, (cur) => ({ ...cur, fields: { ...cur.fields, [col]: e.target.value } }))}
+                      value={territory.fields[col] ?? ""}
+                      onChange={(e) =>
+                        patchChild(territory.name, (cur) => ({ ...cur, fields: { ...cur.fields, [col]: e.target.value } }))
+                      }
                     />
-                  </td>
+                  </Field>
                 ))}
-                <td className="px-2 py-1.5">
-                  <div className="flex flex-wrap items-center gap-1">
-                    <span className="text-xs text-muted">
-                      {Object.entries(row.fields)
-                        .filter(([k]) => /^Other_/i.test(k))
-                        .map(([, v]) => v.split(",")[0].trim())
-                        .filter(Boolean)
-                        .join(", ") || "—"}
-                    </span>
-                    <Input
-                      className="h-8 w-28"
-                      placeholder="Add faction"
-                      onKeyDown={(e) => {
-                        if (e.key !== "Enter") return;
-                        const name = (e.target as HTMLInputElement).value.trim();
-                        if (!name) return;
-                        patchChild(row.name, (cur) => {
-                          const n = Object.keys(cur.fields).filter((k) => /^Other_/i.test(k)).length + 1;
-                          return { ...cur, fields: { ...cur.fields, [`Other_${n}`]: name } };
-                        });
-                        (e.target as HTMLInputElement).value = "";
-                      }}
-                    />
-                  </div>
-                </td>
-                <td className="px-2 py-1.5">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() =>
-                      patchGeneral((cur) => ({
-                        ...cur,
-                        children: (cur.children ?? []).filter((c) => c.name !== row.name),
-                      }))
-                    }
-                  >
-                    Remove
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+              </div>
+              <div className="mt-3">
+                <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted">
+                  Other factions
+                  <FieldNote
+                    label="Other factions"
+                    note="Other_n names. Extra factions that can still appear in this sphere, more often near the center and less toward the edge."
+                  />
+                </p>
+                <p className="mt-2 text-sm text-muted">
+                  {Object.entries(territory.fields)
+                    .filter(([key]) => /^Other_/i.test(key))
+                    .map(([, value]) => value.split(",")[0].trim())
+                    .filter(Boolean)
+                    .join(", ") || "None"}
+                </p>
+                <Input
+                  className="mt-2 h-8 max-w-xs"
+                  placeholder="Add faction, then Enter"
+                  onKeyDown={(e) => {
+                    if (e.key !== "Enter") return;
+                    const name = (e.target as HTMLInputElement).value.trim();
+                    if (!name) return;
+                    patchChild(territory.name, (cur) => {
+                      const n = Object.keys(cur.fields).filter((key) => /^Other_/i.test(key)).length + 1;
+                      return { ...cur, fields: { ...cur.fields, [`Other_${n}`]: name } };
+                    });
+                    (e.target as HTMLInputElement).value = "";
+                  }}
+                />
+              </div>
+            </div>
+          ) : null}
+        </>
+      )}
     </div>
   );
 }
 
-function RegionTable({
+function childLabel(row: EcfObject, display: string | undefined) {
+  const name = display?.trim();
+  if (name && name !== row.name) return `${name} — ${row.name}`;
+  return name || row.name;
+}
+
+function extraKeys(row: EcfObject, known: readonly string[]) {
+  return Object.keys(row.fields).filter((key) => !known.includes(key) && !/^Other_/i.test(key) && !/^StarClass_/i.test(key));
+}
+
+function RegionEditor({
   rows,
+  selected,
+  onSelect,
   onChange,
   onMix,
   onRemove,
 }: {
   rows: EcfObject[];
+  selected: string;
+  onSelect: (name: string) => void;
   onChange: (name: string, col: string, value: string) => void;
   onMix: (name: string, mix: StarMix[]) => void;
   onRemove: (name: string) => void;
 }) {
-  if (!rows.length) return <p className="mt-2 text-sm text-muted">None yet. Add a star region to place classes in LY.</p>;
+  const row = rows.find((item) => item.name === selected) ?? rows[0];
+  if (!rows.length || !row) return <p className="mt-2 text-sm text-muted">None yet. Add a star region to place classes in LY.</p>;
+  const mix = parseStarMix(row.fields);
   return (
-    <div className="mt-2 space-y-4">
-      {rows.map((row) => {
-        const mix = parseStarMix(row.fields);
-        return (
-          <div key={row.name} className="rounded-md border border-border">
-            <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2">
-              <span className="font-mono text-xs text-subtle">{row.name}</span>
-              <span className="text-sm">{row.fields.Name || "Unnamed region"}</span>
-              <span className="ml-auto text-xs text-subtle">
-                {mix.length ? `${mix.length} classes` : "default mix"}
-              </span>
-              <Button size="sm" variant="ghost" onClick={() => onRemove(row.name)}>
-                Remove
-              </Button>
-            </div>
-            <div className="grid gap-2 p-3 sm:grid-cols-2 lg:grid-cols-4">
-              {STAR_REGION_STATS.map((col) => (
-                <Field key={col} label={col}>
-                  <Input className="h-8" value={row.fields[col] ?? ""} onChange={(e) => onChange(row.name, col, e.target.value)} />
-                </Field>
+    <div className="mt-2 max-w-4xl">
+      <select
+        className="h-10 w-full max-w-xl rounded-sm border border-border bg-bg px-2 text-sm"
+        value={row.name}
+        onChange={(e) => onSelect(e.target.value)}
+      >
+        {rows.map((item) => (
+          <option key={item.name} value={item.name}>
+            {childLabel(item, item.fields.Name)}
+          </option>
+        ))}
+      </select>
+      <div className="mt-3 rounded-md border border-border">
+        <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2">
+          <span className="font-mono text-xs text-subtle">{row.name}</span>
+          <span className="text-sm">{row.fields.Name || "Unnamed region"}</span>
+          <span className="ml-auto text-xs text-subtle">{mix.length ? `${mix.length} classes` : "default mix"}</span>
+          <Button size="sm" variant="ghost" onClick={() => onRemove(row.name)}>
+            Remove
+          </Button>
+        </div>
+        <div className="grid gap-2 p-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[...STAR_REGION_STATS, ...extraKeys(row, STAR_REGION_STATS)].map((col) => (
+            <Field key={col} label={col} area="region">
+              <Input className="h-8" value={row.fields[col] ?? ""} onChange={(e) => onChange(row.name, col, e.target.value)} />
+            </Field>
+          ))}
+        </div>
+        <div className="overflow-auto px-3 pb-3">
+          <p className="mb-2 flex items-center gap-1.5 text-xs uppercase tracking-[0.12em] text-subtle">
+            Star mix
+            <FieldNote
+              label="Star mix"
+              note="Class is the star letter. Prob is that class’s share of this region and should add up to about 1. Cluster is the chance of a clump. Cluster range is how many extra stars, as minimum-maximum. Spawn amount is a fixed count when you set one."
+            />
+          </p>
+          <table className="w-full min-w-[560px] text-sm">
+            <thead className="text-left text-xs uppercase tracking-[0.12em] text-subtle">
+              <tr>
+                <th className="py-1 pr-2">Class</th>
+                <th className="py-1 pr-2">Prob</th>
+                <th className="py-1 pr-2">Cluster</th>
+                <th className="py-1 pr-2">Cluster range</th>
+                <th className="py-1 pr-2">Spawn amount</th>
+                <th className="py-1" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {mix.map((entry, i) => (
+                <tr key={`${row.name}-${entry.index}`}>
+                  <td className="py-1 pr-2">
+                    <Input
+                      className="h-8 w-24"
+                      value={entry.starClass}
+                      onChange={(e) =>
+                        onMix(
+                          row.name,
+                          mix.map((item, j) => (j === i ? { ...item, starClass: e.target.value } : item)),
+                        )
+                      }
+                    />
+                  </td>
+                  <td className="py-1 pr-2">
+                    <Input
+                      className="h-8 w-20"
+                      value={entry.prob}
+                      onChange={(e) =>
+                        onMix(
+                          row.name,
+                          mix.map((item, j) => (j === i ? { ...item, prob: e.target.value } : item)),
+                        )
+                      }
+                    />
+                  </td>
+                  <td className="py-1 pr-2">
+                    <Input
+                      className="h-8 w-20"
+                      value={entry.clusterProb}
+                      onChange={(e) =>
+                        onMix(
+                          row.name,
+                          mix.map((item, j) => (j === i ? { ...item, clusterProb: e.target.value } : item)),
+                        )
+                      }
+                    />
+                  </td>
+                  <td className="py-1 pr-2">
+                    <Input
+                      className="h-8 w-28"
+                      value={entry.clusterRange}
+                      onChange={(e) =>
+                        onMix(
+                          row.name,
+                          mix.map((item, j) => (j === i ? { ...item, clusterRange: e.target.value } : item)),
+                        )
+                      }
+                    />
+                  </td>
+                  <td className="py-1 pr-2">
+                    <Input
+                      className="h-8 w-24"
+                      value={entry.spawnAmount}
+                      onChange={(e) =>
+                        onMix(
+                          row.name,
+                          mix.map((item, j) => (j === i ? { ...item, spawnAmount: e.target.value } : item)),
+                        )
+                      }
+                    />
+                  </td>
+                  <td className="py-1">
+                    <Button size="sm" variant="ghost" onClick={() => onMix(row.name, mix.filter((_, j) => j !== i))}>
+                      Remove
+                    </Button>
+                  </td>
+                </tr>
               ))}
-            </div>
-            <div className="overflow-auto px-3 pb-3">
-              <p className="mb-2 text-xs uppercase tracking-[0.12em] text-subtle">Star mix</p>
-              <table className="w-full min-w-[560px] text-sm">
-                <thead className="text-left text-xs uppercase tracking-[0.12em] text-subtle">
-                  <tr>
-                    <th className="py-1 pr-2">Class</th>
-                    <th className="py-1 pr-2">Prob</th>
-                    <th className="py-1 pr-2">Cluster</th>
-                    <th className="py-1 pr-2">Cluster range</th>
-                    <th className="py-1 pr-2">Spawn amount</th>
-                    <th className="py-1" />
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {mix.map((entry, i) => (
-                    <tr key={`${row.name}-${entry.index}`}>
-                      <td className="py-1 pr-2">
-                        <Input
-                          className="h-8 w-24"
-                          value={entry.starClass}
-                          onChange={(e) =>
-                            onMix(
-                              row.name,
-                              mix.map((item, j) => (j === i ? { ...item, starClass: e.target.value } : item)),
-                            )
-                          }
-                        />
-                      </td>
-                      <td className="py-1 pr-2">
-                        <Input
-                          className="h-8 w-20"
-                          value={entry.prob}
-                          onChange={(e) =>
-                            onMix(
-                              row.name,
-                              mix.map((item, j) => (j === i ? { ...item, prob: e.target.value } : item)),
-                            )
-                          }
-                        />
-                      </td>
-                      <td className="py-1 pr-2">
-                        <Input
-                          className="h-8 w-20"
-                          value={entry.clusterProb}
-                          onChange={(e) =>
-                            onMix(
-                              row.name,
-                              mix.map((item, j) => (j === i ? { ...item, clusterProb: e.target.value } : item)),
-                            )
-                          }
-                        />
-                      </td>
-                      <td className="py-1 pr-2">
-                        <Input
-                          className="h-8 w-28"
-                          value={entry.clusterRange}
-                          onChange={(e) =>
-                            onMix(
-                              row.name,
-                              mix.map((item, j) => (j === i ? { ...item, clusterRange: e.target.value } : item)),
-                            )
-                          }
-                        />
-                      </td>
-                      <td className="py-1 pr-2">
-                        <Input
-                          className="h-8 w-24"
-                          value={entry.spawnAmount}
-                          onChange={(e) =>
-                            onMix(
-                              row.name,
-                              mix.map((item, j) => (j === i ? { ...item, spawnAmount: e.target.value } : item)),
-                            )
-                          }
-                        />
-                      </td>
-                      <td className="py-1">
-                        <Button size="sm" variant="ghost" onClick={() => onMix(row.name, mix.filter((_, j) => j !== i))}>
-                          Remove
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <Button
-                className="mt-2"
-                size="sm"
-                variant="secondary"
-                onClick={() =>
-                  onMix(row.name, [
-                    ...mix,
-                    {
-                      index: mix.length + 1,
-                      starClass: "G",
-                      spawnAmount: "",
-                      prob: "0.2",
-                      clusterProb: "0",
-                      clusterRange: "0-0",
-                    },
-                  ])
-                }
-              >
-                Add class
-              </Button>
-            </div>
-          </div>
-        );
-      })}
+            </tbody>
+          </table>
+          <Button
+            className="mt-2"
+            size="sm"
+            variant="secondary"
+            onClick={() =>
+              onMix(row.name, [
+                ...mix,
+                {
+                  index: mix.length + 1,
+                  starClass: "G",
+                  spawnAmount: "",
+                  prob: "0.2",
+                  clusterProb: "0",
+                  clusterRange: "0-0",
+                },
+              ])
+            }
+          >
+            Add class
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

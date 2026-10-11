@@ -21,6 +21,7 @@ import { Route as LibraryFactionsRouteImport } from './routes/library.factions'
 import { Route as LibraryGalaxyRouteImport } from './routes/library.galaxy'
 import { Route as LibraryItemsRouteImport } from './routes/library.items'
 import { Route as LibraryPlayfieldsRouteImport } from './routes/library.playfields'
+import { Route as LibraryPresetsRouteImport } from './routes/library.presets'
 import { Route as LibraryReputationRouteImport } from './routes/library.reputation'
 import { Route as LibraryWarfareRouteImport } from './routes/library.warfare'
 
@@ -84,6 +85,11 @@ const LibraryPlayfieldsRoute = LibraryPlayfieldsRouteImport.update({
   path: '/playfields',
   getParentRoute: () => LibraryRoute,
 } as any)
+const LibraryPresetsRoute = LibraryPresetsRouteImport.update({
+  id: '/presets',
+  path: '/presets',
+  getParentRoute: () => LibraryRoute,
+} as any)
 const LibraryReputationRoute = LibraryReputationRouteImport.update({
   id: '/reputation',
   path: '/reputation',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/library/galaxy': typeof LibraryGalaxyRoute
   '/library/items': typeof LibraryItemsRoute
   '/library/playfields': typeof LibraryPlayfieldsRoute
+  '/library/presets': typeof LibraryPresetsRoute
   '/library/reputation': typeof LibraryReputationRoute
   '/library/warfare': typeof LibraryWarfareRoute
   '/library/': typeof LibraryIndexRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/library/galaxy': typeof LibraryGalaxyRoute
   '/library/items': typeof LibraryItemsRoute
   '/library/playfields': typeof LibraryPlayfieldsRoute
+  '/library/presets': typeof LibraryPresetsRoute
   '/library/reputation': typeof LibraryReputationRoute
   '/library/warfare': typeof LibraryWarfareRoute
   '/library': typeof LibraryIndexRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/library/galaxy': typeof LibraryGalaxyRoute
   '/library/items': typeof LibraryItemsRoute
   '/library/playfields': typeof LibraryPlayfieldsRoute
+  '/library/presets': typeof LibraryPresetsRoute
   '/library/reputation': typeof LibraryReputationRoute
   '/library/warfare': typeof LibraryWarfareRoute
   '/library/': typeof LibraryIndexRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/library/galaxy'
     | '/library/items'
     | '/library/playfields'
+    | '/library/presets'
     | '/library/reputation'
     | '/library/warfare'
     | '/library/'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/library/galaxy'
     | '/library/items'
     | '/library/playfields'
+    | '/library/presets'
     | '/library/reputation'
     | '/library/warfare'
     | '/library'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/library/galaxy'
     | '/library/items'
     | '/library/playfields'
+    | '/library/presets'
     | '/library/reputation'
     | '/library/warfare'
     | '/library/'
@@ -288,6 +300,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LibraryPlayfieldsRouteImport
       parentRoute: typeof LibraryRoute
     }
+    '/library/presets': {
+      id: '/library/presets'
+      path: '/presets'
+      fullPath: '/library/presets'
+      preLoaderRoute: typeof LibraryPresetsRouteImport
+      parentRoute: typeof LibraryRoute
+    }
     '/library/reputation': {
       id: '/library/reputation'
       path: '/reputation'
@@ -311,6 +330,7 @@ interface LibraryRouteChildren {
   LibraryGalaxyRoute: typeof LibraryGalaxyRoute
   LibraryItemsRoute: typeof LibraryItemsRoute
   LibraryPlayfieldsRoute: typeof LibraryPlayfieldsRoute
+  LibraryPresetsRoute: typeof LibraryPresetsRoute
   LibraryReputationRoute: typeof LibraryReputationRoute
   LibraryWarfareRoute: typeof LibraryWarfareRoute
   LibraryIndexRoute: typeof LibraryIndexRoute
@@ -322,6 +342,7 @@ const LibraryRouteChildren: LibraryRouteChildren = {
   LibraryGalaxyRoute: LibraryGalaxyRoute,
   LibraryItemsRoute: LibraryItemsRoute,
   LibraryPlayfieldsRoute: LibraryPlayfieldsRoute,
+  LibraryPresetsRoute: LibraryPresetsRoute,
   LibraryReputationRoute: LibraryReputationRoute,
   LibraryWarfareRoute: LibraryWarfareRoute,
   LibraryIndexRoute: LibraryIndexRoute,

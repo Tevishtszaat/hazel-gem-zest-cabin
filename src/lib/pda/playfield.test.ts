@@ -8,7 +8,7 @@ import {
   playfieldFromText,
   yamlScalars,
 } from "./playfield.ts";
-import { classifyScenarioPath, collectCatalogTexts } from "./scenario-index.ts";
+import { classifyScenarioPath, collectCatalogTexts, isMainGameReference } from "./scenario-index.ts";
 
 describe("playfield yaml variants", () => {
   it("classifies planet, orbit, and space file names", () => {
@@ -18,6 +18,11 @@ describe("playfield yaml variants", () => {
     assert.equal(classifyScenarioPath("Playfields/Akua/playfield.yaml"), "playfieldYaml");
     assert.equal(classifyScenarioPath("Playfields/Akua Orbit/playfield_dynamic.yaml"), "playfieldYaml");
     assert.equal(classifyScenarioPath("Content/Playfields/OpenSpace/space_dynamic.yaml"), "playfieldYaml");
+    assert.equal(isMainGameReference("Ascension-Reborn/Playfields/Akua/playfield.yaml", false), false);
+    const texts = collectCatalogTexts([
+      { path: "Ascension-Reborn/Playfields/Akua/playfield.yaml", text: "PlayfieldType: Planet\n" },
+    ]);
+    assert.equal(texts.filter((text) => text.role === "playfieldYaml").length, 1);
   });
 
   it("detects planet vs orbit vs space from PlayfieldType and file variant", () => {

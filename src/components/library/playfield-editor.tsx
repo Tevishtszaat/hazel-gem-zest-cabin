@@ -4,16 +4,35 @@ import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import { PlayfieldDesigner } from "@/components/library/playfield-designer.tsx";
 import { bundlePlayfields, kindLabel, variantLabel, type PlayfieldKind } from "@/lib/pda/playfield.ts";
+import type { ScenarioCatalog } from "@/lib/pda/scenario-index.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
 
 const KINDS: PlayfieldKind[] = ["planet", "moon", "orbit", "space", "unknown"];
+
+function playfieldPaths(catalog: ScenarioCatalog) {
+  const paths = new Set<string>();
+  for (const file of catalog.files ?? []) {
+    if (file.role === "playfieldYaml" || file.role === "playfield") paths.add(file.path);
+  }
+  for (const text of catalog.texts ?? []) {
+    if (/\/playfields?\//i.test(text.path) && /playfield|space_/i.test(text.path)) paths.add(text.path);
+  }
+  for (const entry of [...catalog.entries, ...(catalog.game ?? [])]) {
+    if (entry.kind !== "playfield") continue;
+    const source = entry.source || "";
+    if (!/playfield|space_/i.test(source) && !/\/playfields?\//i.test(source)) continue;
+    paths.add(source.includes("/") ? source : `${entry.name}/${source}`);
+  }
+  return [...paths];
+}
 
 export function PlayfieldEditor() {
   const catalog = usePdaStore((s) => s.catalog);
   const setCatalogText = usePdaStore((s) => s.setCatalogText);
   const bundles = useMemo(
-    () => bundlePlayfields(catalog.texts ?? []),
-    [catalog.texts],
+    () =>
+      bundlePlayfields(catalog.texts ?? [], playfieldPaths(catalog)),
+    [catalog.texts, catalog.files],
   );
   const [kind, setKind] = useState<"all" | PlayfieldKind>("all");
   const [query, setQuery] = useState("");
@@ -69,8 +88,9 @@ export function PlayfieldEditor() {
           <ScrollArea className="h-full">
           {!visible.length ? (
             <p className="p-4 text-sm text-muted">
-              Import the scenario Playfields folder. Planets use playfield.yaml or static/dynamic pairs. Orbits often
-              only have playfield_dynamic.yaml. Open space uses space_dynamic.yaml.
+              Import the scenario folder that contains Playfields, not only Configuration. Planets use
+              playfield.yaml or static/dynamic pairs. Orbits often only have playfield_dynamic.yaml. Open space uses
+              space_dynamic.yaml.
             </p>
           ) : (
             visible.map((bundle) => (
