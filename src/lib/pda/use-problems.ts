@@ -6,11 +6,36 @@ import { FILE_DEBUG_TABS, FILE_SCAN_ORDER, type FileDebugId } from "./validate-f
 import { usePdaStore } from "@/store/pda-store.ts";
 import { useBusyStore } from "@/store/busy-store.ts";
 import { setDebugStats } from "@/store/debug-stats.ts";
+import type { PdaProject } from "./types.ts";
+import type { ScenarioCatalog } from "./scenario-index.ts";
 
 export type ScanProgress = { label: string; file: string; pct: number };
 
 function tabLabel(id: string) {
   return FILE_DEBUG_TABS.find((tab) => tab.id === id)?.label || id;
+}
+
+export async function collectAllProblems(project: PdaProject, catalog: ScenarioCatalog): Promise<Problem[]> {
+  const merged: Problem[] = [];
+  const queue = ["pda-tree", "pda", ...FILE_SCAN_ORDER.filter((id) => id !== "pda")] as const;
+  for (const step of queue) {
+    if (step === "pda-tree") {
+      try {
+        const pda = await validateOffthread(project, catalog);
+        merged.push(...(pda.issues || []));
+      } catch {
+        merged.push(...validateProject(project, catalog));
+      }
+      continue;
+    }
+    try {
+      const part = await validateFilesOffthread(catalog, step);
+      merged.push(...(part.issues || []));
+    } catch (err) {
+      console.warn(`Debug scan failed for ${step}`, err);
+    }
+  }
+  return merged;
 }
 
 export function useProblems(opts?: {

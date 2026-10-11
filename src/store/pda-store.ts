@@ -58,6 +58,7 @@ type PdaState = {
   patchNode: (id: string, patch: Record<string, unknown>) => void;
   applyBulk: (patches: { id: string; patch: Record<string, unknown> }[], deleteIds?: string[]) => void;
   applyFileFix: (fix: ProblemFix) => void;
+  applyFileFixes: (fixes: ProblemFix[]) => void;
   ignoredProblems: string[];
   ignoreProblems: (keys: string[]) => void;
   unignoreProblems: (keys: string[]) => void;
@@ -498,15 +499,7 @@ export const usePdaStore = create<PdaState>()(
           return;
         }
         if (fix.type === "orbit-move") {
-          const texts = get().catalog.texts ?? [];
-          const current =
-            texts.find((t) => t.role === fix.role && t.path === fix.path) ?? texts.find((t) => t.role === fix.role);
-          if (!current?.text) return;
-          get().setCatalogText(
-            fix.role,
-            applyOrbitFixes(current.text, [{ name: fix.name, coords: fix.coords }]),
-            current.path,
-          );
+          get().applyFileFixes([fix]);
           return;
         }
         if (fix.type === "loca-english") {
@@ -524,6 +517,25 @@ export const usePdaStore = create<PdaState>()(
           if (!current?.text) return;
           get().setCatalogText(fix.role, renameSectorBody(current.text, fix.from, fix.to), current.path);
         }
+      },
+      applyFileFixes: (fixes) => {
+        const orbits = fixes.filter((fix) => fix.type === "orbit-move");
+        const rest = fixes.filter((fix) => fix.type !== "orbit-move");
+        const grouped = new Map<string, { role: string; path: string; moves: { name: string; coords: [number, number, number] }[] }>();
+        for (const fix of orbits) {
+          const key = `${fix.role}\n${fix.path}`;
+          const hit = grouped.get(key) ?? { role: fix.role, path: fix.path, moves: [] };
+          hit.moves.push({ name: fix.name, coords: fix.coords });
+          grouped.set(key, hit);
+        }
+        for (const group of grouped.values()) {
+          const texts = get().catalog.texts ?? [];
+          const current =
+            texts.find((t) => t.role === group.role && t.path === group.path) ?? texts.find((t) => t.role === group.role);
+          if (!current?.text) continue;
+          get().setCatalogText(group.role, applyOrbitFixes(current.text, group.moves), current.path);
+        }
+        for (const fix of rest) get().applyFileFix(fix);
       },
       ignoreProblems: (keys) =>
         set((s) => ({

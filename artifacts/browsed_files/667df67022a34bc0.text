@@ -1,0 +1,378 @@
+To be used with the Dialogues.ecf!
+=================================
+
+ = Textflow (UI) =
+
+ Text forwarding (player convenience):  Right Mouse Button = skip the roll-in text effect and show the page at once
+
+ ======
+
+ =Global=
+
+- Use 'Welcome {PlayerName}' on OUTPUT  to greet the player with his profile name. Can also be used in OPTION (answer texts)
+- Use 'NPCName' to override or change the default entity/blockname in the dialogue header element; Needs to be set in the FIRST element of the dialogue!
+- Use 'Output' to let the NPC/Questgiver talk to the player
+- Use 'OptionNext_' and 'Option_' for dialogues where the user makes a choices  (both work in conjunction)
+- Use 'NextIf_' and 'Next_' for automatically advancing dialogues (based on the IF condition)(both work in conjunction)
+
+
+ = Basics: Advance a dialogue per user choices (Option*) 
+
+ 1. Set an 'Option_1'      > this is what the player can choose
+ 2. Set an 'OptionNext_1'  > this is what happens next.
+ 3. Set an 'OptionIf_1'    > Dialogue proceeds to OptionNext_1 target only if condition is met
+ 4. Set an 'OptionExecute_1' > Function is called either if Option_1 is chosen AND/OR OptionIf_1 is met
+
+ Note: You can set more than one Option/OptionNext/OptionIf/OptionExecute combo, just take care the set items have the same number!
+
+ Parameters you can use with OptionNext_1 are for example:
+ - End  = Closes the dialogue when the option is selected
+ - Add another 'Dialogue Name:' = moves the dialogue to the next element
+ 
+ = Basics: Advance a dialouge per logic, code or automatically (Next*)
+ 1. Set a 'NextIf_1'    > Here you define the condition
+ 2. Set a 'Next_1'      > Here you define what happens when the condition is met
+ 3. Set an 'Exectue_1'  > Function is called when NextIf_1 conditions are met
+ Note: You can set more than one NextIf/Next/Execute pair, just take care the set items have the same number!!
+ Parameters you can use with Next_* are for example:
+ - End  = Closes the dialogue when the option is selected
+ - Add another 'Dialogue Name:' = moves the dialogue to the next element
+
+ = Dynamic Jump Target =
+ With the release of v1.2 we are allowing now to specify a target dialogue state within a string variable. With that you can build f.e. sub routine dialogues that
+ jump back to a state that is defined before. Use @variablename to indicate that the content of variablename should be used as jump target.
+ F.e. OptionNext_1: @variablename    or   Next_1: @variablename
+ Define variablename as a string variable and assign the target dialogue before using it, f.e. Execute_1: "variablename = 'TargetStateName'".
+ Attention: when a dialogue is started, it is analyzed which states can be accessed from the start state and only these states are compiled to C# code. As
+ a dialogue state in a variable cannot be detected as part of the dialogue, this will not be compiled. For that we introduced a new element "RequiredStates" with 
+ that you can force all states in that list to be compiled to C#. Use it like that
+ RequiredStates: "state1, state2, state3" to add state1-3 to the C# compilation for this dialogue.
+
+ 
+ = Advanced: Functions examples for use in NextIf_, OptionExectue_ or Execute_ statemens
+ 
+ GetReputation(Faction.Talon) < Reputation.FriendlyMin    // use > or < or <= or >= ; Also works with NeutralMin etc
+ GetReputation(Faction.Talon) < 24000                     // use > or < or <= or >= ; Steps: 0-6000 = Hostile, 6001-12000 = Undfriendly, 12001-18000 = Neutral, 18001-24000 = Friendly, 24001 = Honored
+ AddReputation(Faction.Zirax, -100)                       // Adds amount of reputation points
+ HasItem('Token', 3, 1234)                         // item name, count, (meta optional)
+ AddItem('GoldCoins', 2*GoldCoinsPlayerBet)               // item name, count, (meta optional)
+ RemoveItem('Token', 3, 1234)                      // item name, count, (meta optional)
+ SetSignal('SignalName', true/false)                      // signal name and status (on or off = true or false)
+ bool IsSignalSet('SignalName')                          // signal name, returns status (see above)
+ bool IsPdaChapterActive('ChapterTitle')                  // use chapter title as set in PDA.yaml (no localized text)
+ AddBookmark('Test Name', 2, 'Jite Pi', 4000, 5000, 6000)"// AddBookmark(name, type, target playfield name, posx, posy, posz) type: 2 = space, 3 = planet
+ int GetGameTimeInSec()                                   // returns the time in seconds since the game was started
+ string DeltaTimeToString(gametime)                       // formats a time intervall to f.e. 1.2 days or 0.7 h
+ int AddToGlobalVar('VarName', increment)                 // global vars should only be changed with this call. and only increments (+/- values) can be used to avoid any multi user conflicts.
+ int SetGlobalVar('VarName', val)                         // set the value of a global vars. attention: another player can also call this function and overwrite any changes
+ int GetInstanceTicket()                                  // returns the index number of the current instance or 0 if no instance is active
+ int GetInstanceTicket('playfieldname')                   // returns the index number of the instance of 'playfieldname' or 0 if no instance is with this playfield is active
+ void OpenTraderWindow()                                  // call this when you started the dialogue from a trader (only possible in that case!)
+ 
+ Other States that can be used (w. examples)
+ Player.Stamina = 100        // Check for player stats  
+ Player.Health -= 1          // Check for player stats  
+ Player.Oxygen = 30          // Check for player stats  
+ Player.Food += 1            // Check for player stats  
+ Player.Credit += 1.1        // player credits on his bank account (NOT the moneycard!)
+ Player.Origin = 0           // For player origins. Requires the ID of the Origin as set in the sectors.yaml
+ Player.ExperiencePoints = 11// Sets or gets the player's XP
+ Player.Level                // Gets the current level of the player (you can only change the level by changing the ExperiencePoints)
+ Player.UpgradePoints = 88   // Sets or gets the player's Upgrade/UnlockPoints 
+ 
+
+ Global Variables that can be used read only:
+ PlayerName - name of the local player
+ PlayersInPlayfield - number of players in current playfield
+
+ Local Variables:
+ int, bool, string, float
+ dbplayer_int: this var holds the same amount for this player in all dialogues
+ dbstate_int: this var holds the same amount for this player for the current start state
+ dbglobal_int: this var can be accessed over all dialogs and players (global var). use AddToGlobalVar() or SetGlobalVar() to change it.
+ dbglobalpf_int: this var can be accessed over all dialogs and players within a playfield (global in a playfield var). use AddToGlobalPfVar() or SetGlobalPfVar() to change it.
+ dbplayerpoi_int: this var holds the same value for each player only within the current POI.
+
+ Text formatting 
+ Colors, bold, italic: can be used
+
+ NPC Text flow management and pagination
+ Global format: '@<type><time>' 
+ type: <p> = break the NPC text into several 'pages' with automatic forwarding (no user interaction required!); NOTE: @p9 will STOP the auto-forward and wait for the user to move the dialogue to the next page! 
+ type: <w> = when placed after a word, the text-forward is paused for the time set, then resumed with the next word.
+ type: <d> = For control element 'd' the time-digit determines the words-per-second speed for the current page from '1' = 17 to '9' = 4.5 words / sec  while @d0 means = show entire remaining text instantly!
+ time = 1-digit timing (integer, not a float!). Each digit is worth 1/2 a second. For examle: @w2 = wait 1 second until showing the next word. 0 = instant. 
+ EXAMPLE: "It seems...@w2 you have no Gold...@p3Get some and come back. Bye" 
+ Note: the new format can be used IN a word (see the example) but only ONCE
+ Note: if you need the @ as a symblo, just use it twice: @@w2Player
+ Note: Some examples
+ "@hello" will show the @ in your text, because the next latter after the @ is NOT a 'w' or 'p' 
+ "@wait" will show the @ as well, because the latter after the 'w' ist not a digit (0-9)  
+
+===========
+EXAMPLES
+===========
+
+ ===
+ Example for Traders to have a dialogue option and not directly opening the trading window; Add the Trader_DialogueSwitchStart to the Dialogue box of a trader ( Control Panel > Trader > right side ) 
+ ===
+ 
+ { +Dialogue Name: Trader_DialogueSwitch_Start
+  NPCName: "Trader"
+  Output: "How may I serve you?"
+  Option_1: What are the latest news?
+  OptionNext_1: Trader_DialogueSwitch_Talk
+  Option_2: I want to trade
+  OptionNext_2: Trader_DialogueSwitch_Trade
+}
+{ +Dialogue Name: Trader_DialogueSwitch_Talk
+  NPCName: "Trader"
+  Output: "The quantumelectric field in Gamma Orionis has shown some fluctuations."
+  Option_1: Ah..interesting
+  OptionNext_1: Trader_DialogueSwitch_Start
+  Option_2: Bye
+  OptionNext_2: End
+}
+{ +Dialogue Name: Trader_DialogueSwitch_Trade
+  NPCName: "Trader"
+  Execute_1: OpenTraderWindow()
+} 
+ 
+ TC = TalonChief -----------------------------------------------
+
+{ +Dialogue Name: TC_Start
+  NPCName: Talon Chief
+  Variable_1: "FoodCounter",   param1: int
+  Variable_2: "TalkCount",     param1: dbstate_int
+  Variable_3: "PlayerTalkExp", param1: dbplayer_int      this var holds the same amount for this player in all dialogues
+  Variable_4: "GlobalVar",     param1: dbglobal_int      this var can be accessed across all dialogs and players
+  Execute_1: "TalkCount = TalkCount + 1"
+  Execute_2: "PlayerTalkExp = PlayerTalkExp + 1"
+  Execute_3: "GlobalVar += AddToGlobalVar('GlobalVar', 3)"   always use AddToGlobalVar() to change the value. the data is immediately written into the DB.
+  Next_1: TC_RepuBad
+  NextIf_1: "GetReputation(Faction.Talon) < Reputation.NeutralMin"
+  Next_2: TC_HasHolyStatus
+  NextIf_2: "HasItem('KeyCardBlack',3)"
+  Next_3: TC_TalkingOk
+  NextIf_3: "TalkCount > 3 && Random(1, 4) == 1"  give player a change to talk again   
+  Next_4: TC_CameBack
+  NextIf_4: "TalkCount > 1"
+  Next_5: TC_DefaultEntry
+}
+
+{ +Dialogue Name: TC_CameBack
+  Output: "Hey we talked already {TalkCount} times, that's enough for now!"
+}
+
+{ +Dialogue Name: TC_TalkingOk
+  Output: "Let's start from the beginning"
+  Execute_1: "TalkCount = 1"
+  Next_1: TC_DefaultEntry
+}
+
+{ +Dialogue Name: TC_RepuBad
+  Output: "dlgTCBadRepu"
+}
+
+{ +Dialogue Name: TC_HasHolyStatus
+  Output: "dlgTCHolyStatue"
+  Option_1: "Yes, I give it to you as a present"
+  OptionNext_1: TC_GiveHolyStatue
+  Option_2: "No, I want to keep it"
+  OptionNext_2: TC_DefaultEntryCont
+  Option_3: "I need to go"
+  OptionNext_3: End
+}
+
+{ +Dialogue Name: TC_DefaultEntry
+  Output: "dlgTCGreetings"
+  Next_1: TC_DefaultEntryCont
+}
+
+{ +Dialogue Name: TC_DefaultEntryCont
+  Option_1: "dlgTCTellMeStory"
+  OptionNext_1: TC_AskStoryAboutPeople
+  Option_2: "Can you give me some food?"
+  OptionNext_2: TC_CheckFood
+  Option_3: "I need to go."
+  OptionNext_3: End
+}
+
+{ +Dialogue Name: TC_GiveHolyStatue
+  Output: "I never dreamt that I will get back the statue! I will give you rich presents for that."
+  RemoveItem: ""
+  AddItem: ""
+  Next_1: TC_AskForMore
+}
+{ +Dialogue Name: TC_CheckFood
+   Next_1: TC_TooMuchFood
+   NextIf_1: "FoodCounter == 1"
+   Next_2: TC_TooMuchFood2
+   NextIf_2: "FoodCounter > 1"
+   Next_3: TC_GiveFood
+}
+{ +Dialogue Name: TC_GiveFood
+  Execute_1: "FoodCounter = FoodCounter + 1"
+  Output: "Yes of course. Here is some sea grass. Can I help you more?"
+  Next_1: TC_DefaultEntryCont
+}
+{ +Dialogue Name: TC_TooMuchFood
+  Execute_1: "FoodCounter = FoodCounter + 1"
+  Output: "You already got food but here is some more sea grass. Now choose something else!"
+  Next_1: TC_DefaultEntryCont
+}
+{ +Dialogue Name: TC_TooMuchFood2
+  Output: "You will not get any more food! Bye!"
+}
+{ +Dialogue Name: TC_AskStoryAboutPeople
+  Output: "The story of the Talon began long, long time ago..."
+}
+ BJ = BlackJack ------------------------------------------------
+
+{ +Dialogue Name: BJ_Start
+  NPCName: txt_UGmuO
+  Variable_1: "PlayerCards", param1: int
+  Variable_2: "TalkCount", param1: dbstate_int
+  Variable_3: "TotalGamesWon", param1: dbstate_int
+  Variable_4: "TotalGamesLost", param1: dbstate_int
+  Variable_5: "TableGamesWon", param1: dbstate_int
+  Variable_6: "TableGamesLost", param1: dbstate_int
+  Variable_7: "TableCoinsWon", param1: dbstate_int
+  Variable_8: "TableCoinsLost", param1: dbstate_int
+  Variable_9: "GamesPlayed", param1: dbstate_int
+  Output: txt_mWeCe
+  Next_1: BJ_NoMoney
+  NextIf_1: "!HasItem('GoldCoins',1)"
+  Next_2: BJ_AskBet
+  NextIf_2: "HasItem('GoldCoins',1) && TotalGamesLost < 20 && TotalGamesWon < 10"
+  Next_3: BJ_Cooldown_Lost
+  NextIf_3: "TotalGamesLost >= 20"
+  Next_4: BJ_Cooldown_Won
+  NextIf_4: "TotalGamesWon >= 10"
+}
+{ +Dialogue Name: BJ_Cooldown_Won
+  Output: txt_KaO0m
+  Execute_1: "TalkCount = TalkCount + 1"
+  Next_1: BJ_Cooldown_Won_Clear
+  NextIf_1: "TalkCount >= 10"
+}
+{ +Dialogue Name: BJ_Cooldown_Won_Clear
+  Execute_1: "TotalGamesWon = 0"
+}
+{ +Dialogue Name: BJ_Cooldown_Lost
+  Output: txt_O4ame
+  Execute_1: "TalkCount = TalkCount + 1"
+  Next_1: BJ_Cooldown_Lost_Clear
+  NextIf_1: "TalkCount >= 20"
+}
+{ +Dialogue Name: BJ_Cooldown_Lost_Clear
+  Execute_1: "TotalGamesLost = 0"
+}
+{ +Dialogue Name: BJ_AskBet
+  Variable_1: "GoldCoinsPlayerBet", param1: int
+  Output: txt_mq8OK
+  Option_1: txt_4WUCq
+  OptionNext_1: BJ_RemoveCoins
+  OptionExecute_1: "GoldCoinsPlayerBet = 1"
+  Option_2: txt_Zi4Gm
+  OptionIf_2: "HasItem('GoldCoins', 10)"
+  OptionNext_2: BJ_RemoveCoins
+  OptionExecute_2: "GoldCoinsPlayerBet = 10"
+  Option_3: txt_BxmOu
+  OptionIf_3: "HasItem('GoldCoins', 100)"
+  OptionNext_3: BJ_RemoveCoins
+  OptionExecute_3: "GoldCoinsPlayerBet = 100"
+  Option_4: txt_80qd8
+  OptionNext_4: BJ_Rules
+  Option_5: txt_eeUSG
+  OptionNext_5: BJ_Statistics
+  Execute_1: "TalkCount = 0"
+}
+{ +Dialogue Name: BJ_Statistics
+  Output: txt_WKaie
+  Option_1: txt_aCMq8
+  OptionNext_1: BJ_AskBet
+}
+{ +Dialogue Name: BJ_Rules
+  Output: txt_oiqaF
+  Option_1: txt_emqJ4
+  OptionNext_1: BJ_AskBet
+}
+{ +Dialogue Name: BJ_RemoveCoins
+  Execute_1: "RemoveItem('GoldCoins', GoldCoinsPlayerBet)"
+  Next_1: BJ_StartGame
+}
+{ +Dialogue Name: BJ_NoMoney
+  Output: txt_8cmWW
+}
+{ +Dialogue Name: BJ_StartGame
+  Execute_1: "PlayerCards = Random(1,11)"
+  Output: txt_S0uKE
+  Next_1: BJ_AskCard
+}
+{ +Dialogue Name: BJ_AskCard
+  Output: txt_aqCI0
+  Option_1: txt_GiiaK
+  OptionNext_1: BJ_NewCard
+  Option_2: txt_8OGas
+  OptionNext_2: BJ_DealerTakesFirstCard
+}
+{ +Dialogue Name: BJ_NewCard
+  Variable_1: "NextCard", param1: int
+  Execute_1: "NextCard = Random(1,11)"
+  Execute_2: "PlayerCards = PlayerCards + NextCard"
+  Output: txt_GaeK3
+  Next_1: BJ_CheckPlayerLost
+  NextIf_1: "PlayerCards > 21"
+  Next_2: BJ_AskCard
+}
+{ +Dialogue Name: BJ_CheckPlayerLost
+  Execute_1: "TotalGamesLost = TotalGamesLost + 1"
+  Execute_2: "TableGamesLost = TableGamesLost + 1"
+  Execute_3: "TableCoinsLost = TableCoinsLost  + GoldCoinsPlayerBet"
+  Output: txt_G0Fqm
+  Next_1: BJ_AskForNewGame
+}
+{ +Dialogue Name: BJ_DealerTakesFirstCard
+  Variable_1: "DealerCards", param1: int
+  Execute_1: "DealerCards = Random(1,11)"
+  Output: txt_O4W4q
+  Next_1: BJ_DealerTakesAnotherCard
+}
+{ +Dialogue Name: BJ_DealerTakesAnotherCard
+  Variable_1: "DealerNewCard", param1: int
+  Execute_1: "DealerNewCard = Random(1,11)"
+  Execute_2: "DealerCards = DealerCards + DealerNewCard"
+  Output: txt_0CqKm
+  Next_1: BJ_DealerTakesAnotherCard
+  NextIf_1: "DealerCards < 21 && DealerCards < PlayerCards"
+  Next_2: BJ_PlayerWins
+  NextIf_2: "PlayerCards > DealerCards || DealerCards > 21"
+  Next_3: BJ_DealerWins
+}
+{ +Dialogue Name: BJ_PlayerWins
+  Output: txt_40jMG
+  Execute_1: "AddItem('GoldCoins', 2*GoldCoinsPlayerBet)"
+  Execute_2: "TotalGamesWon = TotalGamesWon + 1"
+  Execute_3: "TableGamesWon = TableGamesWon + 1"
+  Execute_4: "TableCoinsWon = TableCoinsWon  + GoldCoinsPlayerBet"
+  Next_1: BJ_AskForNewGame
+}
+{ +Dialogue Name: BJ_DealerWins
+  Output: txt_8mhiq
+  Execute_1: "TotalGamesLost = TotalGamesLost + 1"
+  Execute_2: "TableGamesLost = TableGamesLost + 1"
+  Execute_3: "TableCoinsLost = TableCoinsLost  + GoldCoinsPlayerBet"
+  Next_1: BJ_AskForNewGame
+}
+{ +Dialogue Name: BJ_AskForNewGame
+  Output: txt_8Ujii
+  Option_1: txt_vmOu4
+  OptionNext_1: BJ_Start
+  Option_2: txt_8Oiie
+  OptionNext_2: BJ_Bye
+  Execute_1: "GamesPlayed = GamesPlayed + 1"
+}
+{ +Dialogue Name: BJ_Bye
+  Output: txt_O8CaF
+}

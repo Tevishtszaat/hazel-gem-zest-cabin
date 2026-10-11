@@ -1,0 +1,99 @@
+//  ***************************************************** 
+//  ***************     HI LEVEL    ********************* 
+//  ***************************************************** 
+
+{ Element Name: BehaviorPoolPreload
+  Name: "Behaviors/HiLevelTrees/MainAnimal"
+  Count: 35
+}
+
+{ Element Name: BehaviorPoolPreload
+  Name: "Behaviors/HiLevelTrees/ZiraxTroopCommands"
+  Count: 40
+}
+
+{ Element Name: BehaviorPoolPreload
+  Name: "Behaviors/HiLevelTrees/AlienBug01"
+  Count: 30
+}
+
+{ Element Name: BehaviorPoolPreload
+  Name: "Behaviors/HiLevelTrees/TalonGuardianCommands"
+  Count: 30
+}
+
+{ Element Name: BehaviorPoolPreload
+  Name: "Behaviors/HiLevelTrees/Telluropod"
+  Count: 5
+}
+
+//  ***************************************************** 
+//  **************    ACTIVITIES    ********************* 
+//  ***************************************************** 
+
+{ Element Name: BehaviorPoolPreload
+  Name: "Behaviors/Activities/BasicLifeCycle"
+  Count: 20
+}
+
+{ Element Name: BehaviorPoolPreload
+  Name: "Behaviors/Activities/RandomWalk"
+  Count: 15
+}
+
+{ Element Name: BehaviorPoolPreload
+  Name: "Behaviors/Activities/SearchTarget"
+  Count: 40
+}
+
+{ Element Name: BehaviorPoolPreload
+  Name: "Behaviors/Activities/AnimalAttack"
+  Count: 15
+}
+
+{ Element Name: BehaviorPoolPreload
+  Name: "Behaviors/Activities/AnimalBabyPlay"
+  Count: 15
+}
+
+{ Element Name: BehaviorPoolPreload
+  Name: "Behaviors/Activities/HerbivoreLowAlert"
+  Count: 20
+}
+
+{ Element Name: BehaviorPoolPreload
+  Name: "Behaviors/Activities/HerbivoreFlee"
+  Count: 30
+}
+
+{ Element Name: BehaviorPoolPreload
+  Name: "Behaviors/Activities/HerbivoreBabyHideOrRun"
+  Count: 3
+}
+
+{ Element Name: BehaviorPoolPreload
+  Name: "Behaviors/Activities/HumanoidIdle"
+  Count: 40
+}
+
+{ Element Name: BehaviorPoolPreload
+  Name: "Behaviors/Activities/HumanoidBasicAttack"
+  Count: 40
+}
+
+{ Element Name: BehaviorPoolPreload
+  Name: "Behaviors/Activities/HumanoidPatrolLifeCycle"
+  Count: 30
+}
+
+{ Element Name: BehaviorPoolPreload
+  Name: "Behaviors/Activities/HumanoidMeleeAttack"
+  Count: 15
+}
+
+{ Element Name: BehaviorPoolPreload
+  Name: "Behaviors/Actions/AnimalMeleeAttack"
+  Count: 15
+}
+
+

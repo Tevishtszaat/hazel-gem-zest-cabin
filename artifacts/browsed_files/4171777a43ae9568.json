@@ -1,0 +1,178 @@
+[
+  {
+    "name": ".gitattributes",
+    "path": ".gitattributes",
+    "sha": "1ff0c423042b46cb1d617b81efb715defbe8054d",
+    "size": 2518,
+    "url": "https://api.github.com/repos/NotOats/EgsLib/contents/.gitattributes?ref=master",
+    "html_url": "https://github.com/NotOats/EgsLib/blob/master/.gitattributes",
+    "git_url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/1ff0c423042b46cb1d617b81efb715defbe8054d",
+    "download_url": "https://raw.githubusercontent.com/NotOats/EgsLib/master/.gitattributes",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/NotOats/EgsLib/contents/.gitattributes?ref=master",
+      "git": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/1ff0c423042b46cb1d617b81efb715defbe8054d",
+      "html": "https://github.com/NotOats/EgsLib/blob/master/.gitattributes"
+    }
+  },
+  {
+    "name": ".github",
+    "path": ".github",
+    "sha": "5bcb40b9afee82af30367c39797b5353e2963eca",
+    "size": 0,
+    "url": "https://api.github.com/repos/NotOats/EgsLib/contents/.github?ref=master",
+    "html_url": "https://github.com/NotOats/EgsLib/tree/master/.github",
+    "git_url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/5bcb40b9afee82af30367c39797b5353e2963eca",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/NotOats/EgsLib/contents/.github?ref=master",
+      "git": "https://api.github.com/repos/NotOats/EgsLib/git/trees/5bcb40b9afee82af30367c39797b5353e2963eca",
+      "html": "https://github.com/NotOats/EgsLib/tree/master/.github"
+    }
+  },
+  {
+    "name": ".gitignore",
+    "path": ".gitignore",
+    "sha": "8a448a135130ec293d967e604f3813db60b584aa",
+    "size": 6254,
+    "url": "https://api.github.com/repos/NotOats/EgsLib/contents/.gitignore?ref=master",
+    "html_url": "https://github.com/NotOats/EgsLib/blob/master/.gitignore",
+    "git_url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/8a448a135130ec293d967e604f3813db60b584aa",
+    "download_url": "https://raw.githubusercontent.com/NotOats/EgsLib/master/.gitignore",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/NotOats/EgsLib/contents/.gitignore?ref=master",
+      "git": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/8a448a135130ec293d967e604f3813db60b584aa",
+      "html": "https://github.com/NotOats/EgsLib/blob/master/.gitignore"
+    }
+  },
+  {
+    "name": "EgsLib.Benchmark",
+    "path": "EgsLib.Benchmark",
+    "sha": "cc8adca3ff6c9e447174fbe032b84b2048c16f2c",
+    "size": 0,
+    "url": "https://api.github.com/repos/NotOats/EgsLib/contents/EgsLib.Benchmark?ref=master",
+    "html_url": "https://github.com/NotOats/EgsLib/tree/master/EgsLib.Benchmark",
+    "git_url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/cc8adca3ff6c9e447174fbe032b84b2048c16f2c",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/NotOats/EgsLib/contents/EgsLib.Benchmark?ref=master",
+      "git": "https://api.github.com/repos/NotOats/EgsLib/git/trees/cc8adca3ff6c9e447174fbe032b84b2048c16f2c",
+      "html": "https://github.com/NotOats/EgsLib/tree/master/EgsLib.Benchmark"
+    }
+  },
+  {
+    "name": "EgsLib.Tests",
+    "path": "EgsLib.Tests",
+    "sha": "edc48dc58fb0e9ef1c9d6734e82b3fbdff810552",
+    "size": 0,
+    "url": "https://api.github.com/repos/NotOats/EgsLib/contents/EgsLib.Tests?ref=master",
+    "html_url": "https://github.com/NotOats/EgsLib/tree/master/EgsLib.Tests",
+    "git_url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/edc48dc58fb0e9ef1c9d6734e82b3fbdff810552",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/NotOats/EgsLib/contents/EgsLib.Tests?ref=master",
+      "git": "https://api.github.com/repos/NotOats/EgsLib/git/trees/edc48dc58fb0e9ef1c9d6734e82b3fbdff810552",
+      "html": "https://github.com/NotOats/EgsLib/tree/master/EgsLib.Tests"
+    }
+  },
+  {
+    "name": "EgsLib.sln",
+    "path": "EgsLib.sln",
+    "sha": "cee65379dcae8f067676e46fbc6341e1595d9ae0",
+    "size": 3284,
+    "url": "https://api.github.com/repos/NotOats/EgsLib/contents/EgsLib.sln?ref=master",
+    "html_url": "https://github.com/NotOats/EgsLib/blob/master/EgsLib.sln",
+    "git_url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/cee65379dcae8f067676e46fbc6341e1595d9ae0",
+    "download_url": "https://raw.githubusercontent.com/NotOats/EgsLib/master/EgsLib.sln",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/NotOats/EgsLib/contents/EgsLib.sln?ref=master",
+      "git": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/cee65379dcae8f067676e46fbc6341e1595d9ae0",
+      "html": "https://github.com/NotOats/EgsLib/blob/master/EgsLib.sln"
+    }
+  },
+  {
+    "name": "EgsLib",
+    "path": "EgsLib",
+    "sha": "63110d1e6239c364c38a6c022807727e0d13fd81",
+    "size": 0,
+    "url": "https://api.github.com/repos/NotOats/EgsLib/contents/EgsLib?ref=master",
+    "html_url": "https://github.com/NotOats/EgsLib/tree/master/EgsLib",
+    "git_url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/63110d1e6239c364c38a6c022807727e0d13fd81",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/NotOats/EgsLib/contents/EgsLib?ref=master",
+      "git": "https://api.github.com/repos/NotOats/EgsLib/git/trees/63110d1e6239c364c38a6c022807727e0d13fd81",
+      "html": "https://github.com/NotOats/EgsLib/tree/master/EgsLib"
+    }
+  },
+  {
+    "name": "LICENSE.md",
+    "path": "LICENSE.md",
+    "sha": "e72bfddabc15be5718a7cc061ac10e47741d8219",
+    "size": 35148,
+    "url": "https://api.github.com/repos/NotOats/EgsLib/contents/LICENSE.md?ref=master",
+    "html_url": "https://github.com/NotOats/EgsLib/blob/master/LICENSE.md",
+    "git_url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/e72bfddabc15be5718a7cc061ac10e47741d8219",
+    "download_url": "https://raw.githubusercontent.com/NotOats/EgsLib/master/LICENSE.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/NotOats/EgsLib/contents/LICENSE.md?ref=master",
+      "git": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/e72bfddabc15be5718a7cc061ac10e47741d8219",
+      "html": "https://github.com/NotOats/EgsLib/blob/master/LICENSE.md"
+    }
+  },
+  {
+    "name": "README.md",
+    "path": "README.md",
+    "sha": "18e32a48ba58490f4a3986e04c86157b928a020b",
+    "size": 1898,
+    "url": "https://api.github.com/repos/NotOats/EgsLib/contents/README.md?ref=master",
+    "html_url": "https://github.com/NotOats/EgsLib/blob/master/README.md",
+    "git_url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/18e32a48ba58490f4a3986e04c86157b928a020b",
+    "download_url": "https://raw.githubusercontent.com/NotOats/EgsLib/master/README.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/NotOats/EgsLib/contents/README.md?ref=master",
+      "git": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/18e32a48ba58490f4a3986e04c86157b928a020b",
+      "html": "https://github.com/NotOats/EgsLib/blob/master/README.md"
+    }
+  },
+  {
+    "name": "Resources",
+    "path": "Resources",
+    "sha": "09ed4a2684f4de629e1393e5fb1ec3c24ecdc436",
+    "size": 0,
+    "url": "https://api.github.com/repos/NotOats/EgsLib/contents/Resources?ref=master",
+    "html_url": "https://github.com/NotOats/EgsLib/tree/master/Resources",
+    "git_url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/09ed4a2684f4de629e1393e5fb1ec3c24ecdc436",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/NotOats/EgsLib/contents/Resources?ref=master",
+      "git": "https://api.github.com/repos/NotOats/EgsLib/git/trees/09ed4a2684f4de629e1393e5fb1ec3c24ecdc436",
+      "html": "https://github.com/NotOats/EgsLib/tree/master/Resources"
+    }
+  },
+  {
+    "name": "ScenarioDumper",
+    "path": "ScenarioDumper",
+    "sha": "36b51199c918df3b7665003795b8189f5bbae360",
+    "size": 0,
+    "url": "https://api.github.com/repos/NotOats/EgsLib/contents/ScenarioDumper?ref=master",
+    "html_url": "https://github.com/NotOats/EgsLib/tree/master/ScenarioDumper",
+    "git_url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/36b51199c918df3b7665003795b8189f5bbae360",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/NotOats/EgsLib/contents/ScenarioDumper?ref=master",
+      "git": "https://api.github.com/repos/NotOats/EgsLib/git/trees/36b51199c918df3b7665003795b8189f5bbae360",
+      "html": "https://github.com/NotOats/EgsLib/tree/master/ScenarioDumper"
+    }
+  }
+]

@@ -1,0 +1,1216 @@
+{
+  "sha": "5c53591ade4584b8cbc163643baee6f9aacbe23a",
+  "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/5c53591ade4584b8cbc163643baee6f9aacbe23a",
+  "tree": [
+    {
+      "path": ".gitattributes",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1ff0c423042b46cb1d617b81efb715defbe8054d",
+      "size": 2518,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/1ff0c423042b46cb1d617b81efb715defbe8054d"
+    },
+    {
+      "path": ".github",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5bcb40b9afee82af30367c39797b5353e2963eca",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/5bcb40b9afee82af30367c39797b5353e2963eca"
+    },
+    {
+      "path": ".github/workflows",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7d6672068f860fe0f05d213523cd34b0d33fbf45",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/7d6672068f860fe0f05d213523cd34b0d33fbf45"
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "edefdc0ae65f1fce0a32c37017a951096ff5f3e5",
+      "size": 1704,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/edefdc0ae65f1fce0a32c37017a951096ff5f3e5"
+    },
+    {
+      "path": ".gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8a448a135130ec293d967e604f3813db60b584aa",
+      "size": 6254,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/8a448a135130ec293d967e604f3813db60b584aa"
+    },
+    {
+      "path": "EgsLib.Benchmark",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "cc8adca3ff6c9e447174fbe032b84b2048c16f2c",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/cc8adca3ff6c9e447174fbe032b84b2048c16f2c"
+    },
+    {
+      "path": "EgsLib.Benchmark/Blueprints",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f5a436b0203a714a8fb8c8988e77475efcfbe2f0",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/f5a436b0203a714a8fb8c8988e77475efcfbe2f0"
+    },
+    {
+      "path": "EgsLib.Benchmark/Blueprints/BlueprintReader.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "706b23019eaea33ff21167e32604a2e5b210d9c0",
+      "size": 1100,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/706b23019eaea33ff21167e32604a2e5b210d9c0"
+    },
+    {
+      "path": "EgsLib.Benchmark/ConfigFiles",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3f7856ac6299040dedc347e2cd6ef78258a352ef",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/3f7856ac6299040dedc347e2cd6ef78258a352ef"
+    },
+    {
+      "path": "EgsLib.Benchmark/ConfigFiles/EcfFilePerformance.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a82b15a3242b0d38f71d43a7ca5fff078afd4335",
+      "size": 2562,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/a82b15a3242b0d38f71d43a7ca5fff078afd4335"
+    },
+    {
+      "path": "EgsLib.Benchmark/EgsLib.Benchmark.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b8b286e0b21e7ecdb3650f4290d222ac0ad55fe8",
+      "size": 615,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/b8b286e0b21e7ecdb3650f4290d222ac0ad55fe8"
+    },
+    {
+      "path": "EgsLib.Benchmark/Program.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "455e9821ece7af31627ef9c07db5be4888d22063",
+      "size": 322,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/455e9821ece7af31627ef9c07db5be4888d22063"
+    },
+    {
+      "path": "EgsLib.Tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "edc48dc58fb0e9ef1c9d6734e82b3fbdff810552",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/edc48dc58fb0e9ef1c9d6734e82b3fbdff810552"
+    },
+    {
+      "path": "EgsLib.Tests/Blueprints",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "fd45bfdc2bb83543a270325f2cf500ae37505dbd",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/fd45bfdc2bb83543a270325f2cf500ae37505dbd"
+    },
+    {
+      "path": "EgsLib.Tests/Blueprints/BlueprintReaderTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1f96566b783266fd5bd7a8f3c5fe6a5b22f0ae81",
+      "size": 2355,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/1f96566b783266fd5bd7a8f3c5fe6a5b22f0ae81"
+    },
+    {
+      "path": "EgsLib.Tests/Blueprints/BlueprintTestData.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0918c5bee610f6adaf188983621d86468c39d671",
+      "size": 4775,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/0918c5bee610f6adaf188983621d86468c39d671"
+    },
+    {
+      "path": "EgsLib.Tests/ConfigFiles",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a39e307a45e3a02e20678901f8db68ba1c22144b",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/a39e307a45e3a02e20678901f8db68ba1c22144b"
+    },
+    {
+      "path": "EgsLib.Tests/ConfigFiles/BaseFileFixture.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3fbf058fbac0b2ff6fa2bbbb1e813ab76cd5cc5a",
+      "size": 350,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/3fbf058fbac0b2ff6fa2bbbb1e813ab76cd5cc5a"
+    },
+    {
+      "path": "EgsLib.Tests/ConfigFiles/BlockGroupTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1afdc0cd50e7b2bd2a785f1e455e0b4d8b5ca43e",
+      "size": 1224,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/1afdc0cd50e7b2bd2a785f1e455e0b4d8b5ca43e"
+    },
+    {
+      "path": "EgsLib.Tests/ConfigFiles/BlockTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0251617a202bffd13346d5feb4e0a6cbafc3e7be",
+      "size": 1318,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/0251617a202bffd13346d5feb4e0a6cbafc3e7be"
+    },
+    {
+      "path": "EgsLib.Tests/ConfigFiles/ContainerTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e0899c5172b6e6570201a0b54eacdfb74119ed41",
+      "size": 3069,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/e0899c5172b6e6570201a0b54eacdfb74119ed41"
+    },
+    {
+      "path": "EgsLib.Tests/ConfigFiles/Dialogue.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "347e78124e9fb224c2e958c6828a2b5d72fe2e6c",
+      "size": 4143,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/347e78124e9fb224c2e958c6828a2b5d72fe2e6c"
+    },
+    {
+      "path": "EgsLib.Tests/ConfigFiles/EcfFileTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5dc0842c020bfa6431d802f76e515f67d07bdc6a",
+      "size": 2981,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/5dc0842c020bfa6431d802f76e515f67d07bdc6a"
+    },
+    {
+      "path": "EgsLib.Tests/ConfigFiles/GlobalDefTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a25481bab0f2065dd8267cead6656fd6d0306c6b",
+      "size": 1231,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/a25481bab0f2065dd8267cead6656fd6d0306c6b"
+    },
+    {
+      "path": "EgsLib.Tests/ConfigFiles/ItemTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6c4e56e605b3f6b048a76bf2d7599c4e25f11c25",
+      "size": 1313,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/6c4e56e605b3f6b048a76bf2d7599c4e25f11c25"
+    },
+    {
+      "path": "EgsLib.Tests/ConfigFiles/LootGroupTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dbcff21300a18f87f5d44bc1017a518e2f325367",
+      "size": 3214,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/dbcff21300a18f87f5d44bc1017a518e2f325367"
+    },
+    {
+      "path": "EgsLib.Tests/ConfigFiles/MaterialTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "64569f703034a9d966eaff59fd0ae6df741df6e6",
+      "size": 1365,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/64569f703034a9d966eaff59fd0ae6df741df6e6"
+    },
+    {
+      "path": "EgsLib.Tests/ConfigFiles/StatusEffect.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ba5583695b0ad594cd62391418be39c42e68a1b1",
+      "size": 1531,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/ba5583695b0ad594cd62391418be39c42e68a1b1"
+    },
+    {
+      "path": "EgsLib.Tests/ConfigFiles/TemplateTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ee3d08429e6edfcbca1e1f89880dd5ac3a6d491",
+      "size": 1658,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/3ee3d08429e6edfcbca1e1f89880dd5ac3a6d491"
+    },
+    {
+      "path": "EgsLib.Tests/ConfigFiles/TokenTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b35e47ca962864d76735493c64e8efcc2ad4611e",
+      "size": 1852,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/b35e47ca962864d76735493c64e8efcc2ad4611e"
+    },
+    {
+      "path": "EgsLib.Tests/ConfigFiles/TraderTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a3bcdd8328ec53f9526c0ef8b8e3bac2a63ad771",
+      "size": 2261,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/a3bcdd8328ec53f9526c0ef8b8e3bac2a63ad771"
+    },
+    {
+      "path": "EgsLib.Tests/EgsLib.Tests.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dce374669858e3ba7f4c4347127f05d3083f7d57",
+      "size": 1316,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/dce374669858e3ba7f4c4347127f05d3083f7d57"
+    },
+    {
+      "path": "EgsLib.Tests/GlobalUsings.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8c927eb747a6a304db265e6753aee6c47504f604",
+      "size": 19,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/8c927eb747a6a304db265e6753aee6c47504f604"
+    },
+    {
+      "path": "EgsLib.Tests/Localization",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "631bd30473ade44a5273fdcfe4513dca89c9ff34",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/631bd30473ade44a5273fdcfe4513dca89c9ff34"
+    },
+    {
+      "path": "EgsLib.Tests/Localization/LocalizationTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "78ba3245b499d11700cdc706c67a10fa0dcbbdfd",
+      "size": 2399,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/78ba3245b499d11700cdc706c67a10fa0dcbbdfd"
+    },
+    {
+      "path": "EgsLib.sln",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cee65379dcae8f067676e46fbc6341e1595d9ae0",
+      "size": 3284,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/cee65379dcae8f067676e46fbc6341e1595d9ae0"
+    },
+    {
+      "path": "EgsLib",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "63110d1e6239c364c38a6c022807727e0d13fd81",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/63110d1e6239c364c38a6c022807727e0d13fd81"
+    },
+    {
+      "path": "EgsLib/Blueprints",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5ca7a8954cfae1a92cf32ac71761b786d911f001",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/5ca7a8954cfae1a92cf32ac71761b786d911f001"
+    },
+    {
+      "path": "EgsLib/Blueprints/Block.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "182a47788ed7ba091afdb7dac7bdfc6fccfc6267",
+      "size": 802,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/182a47788ed7ba091afdb7dac7bdfc6fccfc6267"
+    },
+    {
+      "path": "EgsLib/Blueprints/Blueprint.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0cc3e193051e9c1db5ab24405c4adf27c7ce701a",
+      "size": 4407,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/0cc3e193051e9c1db5ab24405c4adf27c7ce701a"
+    },
+    {
+      "path": "EgsLib/Blueprints/BlueprintBlockData.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7046d3ce1098adbe4b01d48feb511b6da8adf88f",
+      "size": 10080,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/7046d3ce1098adbe4b01d48feb511b6da8adf88f"
+    },
+    {
+      "path": "EgsLib/Blueprints/BlueprintHeader.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a467279fe35b17047bbfa891b8c58fbacfaf7a8e",
+      "size": 9392,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/a467279fe35b17047bbfa891b8c58fbacfaf7a8e"
+    },
+    {
+      "path": "EgsLib/Blueprints/DeviceGroup.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fb8eee5d8658dbbd34eb017e07445cbbf7ea8ced",
+      "size": 2866,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/fb8eee5d8658dbbd34eb017e07445cbbf7ea8ced"
+    },
+    {
+      "path": "EgsLib/Blueprints/NbtTags",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "610fc8a5967713b020b18b9f1cd550827c0810ee",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/610fc8a5967713b020b18b9f1cd550827c0810ee"
+    },
+    {
+      "path": "EgsLib/Blueprints/NbtTags/INbtTag.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a676ddaf038c1431efdc485b5001fe759701be3",
+      "size": 143,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/6a676ddaf038c1431efdc485b5001fe759701be3"
+    },
+    {
+      "path": "EgsLib/Blueprints/NbtTags/NbtBool.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "98ce6a144256365a6469ce98b8e96bf3691c5c57",
+      "size": 322,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/98ce6a144256365a6469ce98b8e96bf3691c5c57"
+    },
+    {
+      "path": "EgsLib/Blueprints/NbtTags/NbtColor.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4d0019e081afc1cf6ebb203090e933bd1adcfbc3",
+      "size": 467,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/4d0019e081afc1cf6ebb203090e933bd1adcfbc3"
+    },
+    {
+      "path": "EgsLib/Blueprints/NbtTags/NbtInt32.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b92e4d67ba9683632a451bf68481dfcffeec3d1a",
+      "size": 322,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/b92e4d67ba9683632a451bf68481dfcffeec3d1a"
+    },
+    {
+      "path": "EgsLib/Blueprints/NbtTags/NbtList.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0915ed12a7a115b0252d8246fae87295cc5896d2",
+      "size": 2774,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/0915ed12a7a115b0252d8246fae87295cc5896d2"
+    },
+    {
+      "path": "EgsLib/Blueprints/NbtTags/NbtSingle.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fb0da6d1053e0dd1d6e9d68b5379a8923c9c1723",
+      "size": 329,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/fb0da6d1053e0dd1d6e9d68b5379a8923c9c1723"
+    },
+    {
+      "path": "EgsLib/Blueprints/NbtTags/NbtString.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "92a5f26330b2e55197351809c0d5d81fcc8e4d70",
+      "size": 330,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/92a5f26330b2e55197351809c0d5d81fcc8e4d70"
+    },
+    {
+      "path": "EgsLib/Blueprints/PropertyDetails.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e4b653afd4fa946b9382618bf5c3110d41d5eef8",
+      "size": 2353,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/e4b653afd4fa946b9382618bf5c3110d41d5eef8"
+    },
+    {
+      "path": "EgsLib/Blueprints/Statistics.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a8ea3e7bdd6231e9949078a956e5ff1732e6a1d6",
+      "size": 3400,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/a8ea3e7bdd6231e9949078a956e5ff1732e6a1d6"
+    },
+    {
+      "path": "EgsLib/ConfigFiles",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5e7a4965617153c79aba89215a0023d22bb67093",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/5e7a4965617153c79aba89215a0023d22bb67093"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/BaseConfig.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dd9121e98477be5107177872ccb81953c3390f79",
+      "size": 4665,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/dd9121e98477be5107177872ccb81953c3390f79"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Block.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "519c4f581655eb7cb535ff51a1fc338e7ee7b754",
+      "size": 19863,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/519c4f581655eb7cb535ff51a1fc338e7ee7b754"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/BlockGroup.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "58b5082f04a494d1c374fb9892ba53dd6dfdbed7",
+      "size": 1335,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/58b5082f04a494d1c374fb9892ba53dd6dfdbed7"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Container.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0311e843c9de45eac4968a2387053fb176523521",
+      "size": 8757,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/0311e843c9de45eac4968a2387053fb176523521"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Dialogue.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8a7be30431650af471e38da3e672728a858c29f9",
+      "size": 8003,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/8a7be30431650af471e38da3e672728a858c29f9"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Ecf",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "10ec03cbd78cb5e0657d7eabcdf05d662d9e2835",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/10ec03cbd78cb5e0657d7eabcdf05d662d9e2835"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Ecf/Attributes",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "2464bb657eb8df90302c4335eccc5efebf806587",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/2464bb657eb8df90302c4335eccc5efebf806587"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Ecf/Attributes/ConverterAttribute.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9e5d9e86375bdc4937f6980a4fdcb06b5404daf6",
+      "size": 1869,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/9e5d9e86375bdc4937f6980a4fdcb06b5404daf6"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Ecf/Attributes/EcfFieldAttribute.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ea051351a9fc8cdb7d67fce5eb7af79b79182613",
+      "size": 804,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/ea051351a9fc8cdb7d67fce5eb7af79b79182613"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Ecf/Attributes/EcfObjectAttribute.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "279394a37703eeb3a581ba5b721aed05649921aa",
+      "size": 542,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/279394a37703eeb3a581ba5b721aed05649921aa"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Ecf/Attributes/EcfPropertyAttribute.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1214b7ea7f30a411e668be1972106b8a34042526",
+      "size": 820,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/1214b7ea7f30a411e668be1972106b8a34042526"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Ecf/EcfFile.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5eedfe64ee85cb9039e32ee9bf6b9382322e7ac3",
+      "size": 7969,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/5eedfe64ee85cb9039e32ee9bf6b9382322e7ac3"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Ecf/IEcfChild.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8d23d87924926ca76129b9457e1fb4ccb29c9e8b",
+      "size": 1184,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/8d23d87924926ca76129b9457e1fb4ccb29c9e8b"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Ecf/IEcfObject.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "08bd433fcf3633f7a99dcdcb23fe60f19adc61e9",
+      "size": 3961,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/08bd433fcf3633f7a99dcdcb23fe60f19adc61e9"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Ecf/PropertyDecorator.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d2b3f08aac4302c6a2e8dcd845ec88c5a46e3f54",
+      "size": 3823,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/d2b3f08aac4302c6a2e8dcd845ec88c5a46e3f54"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Ecf/PropertyDecoratorTypeConverter.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5c4e6bedcdef25d6532b928cfcba93b1841f7a61",
+      "size": 2736,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/5c4e6bedcdef25d6532b928cfcba93b1841f7a61"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Galaxy.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9ba8a1504bce990e1e97a3935d4d8907ce4358e7",
+      "size": 8146,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/9ba8a1504bce990e1e97a3935d4d8907ce4358e7"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/GlobalDef.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ac6cf18cefdb56e4b3dcf860aa1258db3e09304b",
+      "size": 1684,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/ac6cf18cefdb56e4b3dcf860aa1258db3e09304b"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Item.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "587a143e98f174a93c02cd14ccd957b8d46e45ae",
+      "size": 6778,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/587a143e98f174a93c02cd14ccd957b8d46e45ae"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/LootGroup.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0011d4a6bc0759b65046bcfcdba048a484183ddd",
+      "size": 5386,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/0011d4a6bc0759b65046bcfcdba048a484183ddd"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Material.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "daaa64da4e82e52b531f79cb817be40140dc52bd",
+      "size": 2368,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/daaa64da4e82e52b531f79cb817be40140dc52bd"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/StatusEffect.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "06bb330baf739a42eb72b5d76881545f87a8ca6c",
+      "size": 3955,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/06bb330baf739a42eb72b5d76881545f87a8ca6c"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Template.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e66e3a562246eaa5342c45b44bb6c38f63de70fe",
+      "size": 3717,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/e66e3a562246eaa5342c45b44bb6c38f63de70fe"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Token.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "58c725ac308e376ccb77cfb3b1e83e0fe9bdf795",
+      "size": 1272,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/58c725ac308e376ccb77cfb3b1e83e0fe9bdf795"
+    },
+    {
+      "path": "EgsLib/ConfigFiles/Trader.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a05ce7ce8186c870b5e8918e54297b306e08f03a",
+      "size": 7804,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/a05ce7ce8186c870b5e8918e54297b306e08f03a"
+    },
+    {
+      "path": "EgsLib/EgsLib.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "54187b58cbd289231ab5ff1dfef432c57db61f43",
+      "size": 2104,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/54187b58cbd289231ab5ff1dfef432c57db61f43"
+    },
+    {
+      "path": "EgsLib/Extensions",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8dab79a0d8ac15c58a3d1f127bbb2f70be6ad50a",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/8dab79a0d8ac15c58a3d1f127bbb2f70be6ad50a"
+    },
+    {
+      "path": "EgsLib/Extensions/BinaryReaderExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "674de3b2065348d5bdb48cb1e67044957cca3d57",
+      "size": 1083,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/674de3b2065348d5bdb48cb1e67044957cca3d57"
+    },
+    {
+      "path": "EgsLib/Extensions/StringExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "be649967b38bcd7bcedcfbabf0d1d1bdd93036c2",
+      "size": 3398,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/be649967b38bcd7bcedcfbabf0d1d1bdd93036c2"
+    },
+    {
+      "path": "EgsLib/Localization.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1b2c2043cd6cb395799fbee6bb84686fd54c50b8",
+      "size": 5323,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/1b2c2043cd6cb395799fbee6bb84686fd54c50b8"
+    },
+    {
+      "path": "EgsLib/Playfields",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a635f74fe58ff38ffbd4ba5583b7af95ec3c4b04",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/a635f74fe58ff38ffbd4ba5583b7af95ec3c4b04"
+    },
+    {
+      "path": "EgsLib/Playfields/Files",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "ed83b0264e33e6f58e0fc264c743c2a3f43d4ee4",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/ed83b0264e33e6f58e0fc264c743c2a3f43d4ee4"
+    },
+    {
+      "path": "EgsLib/Playfields/Files/BasePlayfieldFile.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4bd61ce5887160ef79470411d85ad874b63bf77",
+      "size": 1072,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/f4bd61ce5887160ef79470411d85ad874b63bf77"
+    },
+    {
+      "path": "EgsLib/Playfields/Files/GenericPlayfieldFile.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "15b5f93ad73ad1525073b6c7a73bbc77752ae664",
+      "size": 3251,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/15b5f93ad73ad1525073b6c7a73bbc77752ae664"
+    },
+    {
+      "path": "EgsLib/Playfields/Files/PlayfieldDynamic.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "98961fd3202dca05a07ee2341478118066fcd418",
+      "size": 521,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/98961fd3202dca05a07ee2341478118066fcd418"
+    },
+    {
+      "path": "EgsLib/Playfields/Files/PlayfieldObsoleteFormat.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "92317cc6f1b78be4dd94962bd0fd43cb5decfc00",
+      "size": 519,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/92317cc6f1b78be4dd94962bd0fd43cb5decfc00"
+    },
+    {
+      "path": "EgsLib/Playfields/Files/PlayfieldStatic.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e9213b4f11b1c1010837efe07a0f52958dad77dd",
+      "size": 510,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/e9213b4f11b1c1010837efe07a0f52958dad77dd"
+    },
+    {
+      "path": "EgsLib/Playfields/Files/SpaceDynamic.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2ab29d8e20cab96427c07f13eb7ffa565104da78",
+      "size": 503,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/2ab29d8e20cab96427c07f13eb7ffa565104da78"
+    },
+    {
+      "path": "EgsLib/Playfields/Files/Types",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e46d2b6cf2d15b50b24a3f43f498a748e8d6b21b",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/e46d2b6cf2d15b50b24a3f43f498a748e8d6b21b"
+    },
+    {
+      "path": "EgsLib/Playfields/Files/Types/PlacingTargets.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c45fa5aa1b0f22937885b7ade1e5393c4bf67fe7",
+      "size": 281,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/c45fa5aa1b0f22937885b7ade1e5393c4bf67fe7"
+    },
+    {
+      "path": "EgsLib/Playfields/Files/Types/PlayerSpawnOption.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0df68ce97681e8db80495e5a0bcb2414a25b3dd5",
+      "size": 245,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/0df68ce97681e8db80495e5a0bcb2414a25b3dd5"
+    },
+    {
+      "path": "EgsLib/Playfields/Files/Types/PlayfieldDynamicYaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c756a51cd3a2925e82b966c42802e252706160f8",
+      "size": 249,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/c756a51cd3a2925e82b966c42802e252706160f8"
+    },
+    {
+      "path": "EgsLib/Playfields/Files/Types/PlayfieldSpaceYaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2efb4a5fe16cce367a116442ff4333c78d23dd53",
+      "size": 3365,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/2efb4a5fe16cce367a116442ff4333c78d23dd53"
+    },
+    {
+      "path": "EgsLib/Playfields/Files/Types/PlayfieldYaml.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e40202379e41b1e5ea3c4bc23ef704a723630445",
+      "size": 9066,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/e40202379e41b1e5ea3c4bc23ef704a723630445"
+    },
+    {
+      "path": "EgsLib/Playfields/Files/Types/Property.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8898f8d86570ca06e09c48770af0c5baffd0123f",
+      "size": 235,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/8898f8d86570ca06e09c48770af0c5baffd0123f"
+    },
+    {
+      "path": "EgsLib/Playfields/IPlayfieldFile.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8d604bb8675acec64e1903137c188efade3e928b",
+      "size": 329,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/8d604bb8675acec64e1903137c188efade3e928b"
+    },
+    {
+      "path": "EgsLib/Playfields/Playfield.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7488331ba2e643e6f2278b7935449363f11e5ff6",
+      "size": 5044,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/7488331ba2e643e6f2278b7935449363f11e5ff6"
+    },
+    {
+      "path": "EgsLib/Playfields/PlayfieldType.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f3139f4e8c5be03eaa3ead41a5d277f9b6799f5e",
+      "size": 171,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/f3139f4e8c5be03eaa3ead41a5d277f9b6799f5e"
+    },
+    {
+      "path": "EgsLib/Range'T.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "05368456089100e3f9809367e7cac7131e6fae06",
+      "size": 3652,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/05368456089100e3f9809367e7cac7131e6fae06"
+    },
+    {
+      "path": "EgsLib/Vector3.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "96535aa34c598fc2fa612dce204ec82c76e040ea",
+      "size": 1620,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/96535aa34c598fc2fa612dce204ec82c76e040ea"
+    },
+    {
+      "path": "LICENSE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e72bfddabc15be5718a7cc061ac10e47741d8219",
+      "size": 35148,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/e72bfddabc15be5718a7cc061ac10e47741d8219"
+    },
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "18e32a48ba58490f4a3986e04c86157b928a020b",
+      "size": 1898,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/18e32a48ba58490f4a3986e04c86157b928a020b"
+    },
+    {
+      "path": "Resources",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "09ed4a2684f4de629e1393e5fb1ec3c24ecdc436",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/09ed4a2684f4de629e1393e5fb1ec3c24ecdc436"
+    },
+    {
+      "path": "Resources/Blueprints",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "27ce4c070c8818cf10b59ecf448226b88b5c77db",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/27ce4c070c8818cf10b59ecf448226b88b5c77db"
+    },
+    {
+      "path": "Resources/Blueprints/Cargo Box - M",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "450aefa34e6e80e07da88c25c8352c0fc2c91364",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/450aefa34e6e80e07da88c25c8352c0fc2c91364"
+    },
+    {
+      "path": "Resources/Blueprints/Cargo Box - M/Cargo Box - M.epb",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b10e7629b2c55fc3eb5e49b2d1338d72537173fc",
+      "size": 2227,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/b10e7629b2c55fc3eb5e49b2d1338d72537173fc"
+    },
+    {
+      "path": "Resources/Blueprints/Cargo Box - M/Cargo Box - M.jpg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b7d99651189f16600d2194fdb56cbc27c2417f3e",
+      "size": 69786,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/b7d99651189f16600d2194fdb56cbc27c2417f3e"
+    },
+    {
+      "path": "Resources/Blueprints/Pocket SV",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d7c703ad10ded61796c913246a8397163503ae82",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/d7c703ad10ded61796c913246a8397163503ae82"
+    },
+    {
+      "path": "Resources/Blueprints/Pocket SV/Pocket SV.epb",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "502dfa1a3d862b00616fc483e7e2d077e8209be8",
+      "size": 1160,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/502dfa1a3d862b00616fc483e7e2d077e8209be8"
+    },
+    {
+      "path": "Resources/Blueprints/Pocket SV/Pocket SV.jpg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "614c724ced560935b34ebfc5efba7f2d1e2ac458",
+      "size": 51341,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/614c724ced560935b34ebfc5efba7f2d1e2ac458"
+    },
+    {
+      "path": "Resources/Blueprints/[Basics] Constructor 1.5",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3b3e40296117262c99a699bd85a392e3fd61f0a2",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/3b3e40296117262c99a699bd85a392e3fd61f0a2"
+    },
+    {
+      "path": "Resources/Blueprints/[Basics] Constructor 1.5/[Basics] Constructor 1.5.epb",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a92a225ed606a98d4a0e721633ca7385f30b4799",
+      "size": 973,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/a92a225ed606a98d4a0e721633ca7385f30b4799"
+    },
+    {
+      "path": "Resources/Blueprints/[Basics] Constructor 1.5/[Basics] Constructor 1.5.jpg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "39c0a9c5713bdcdcebfd899ca9aa1583015e2c88",
+      "size": 39535,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/39c0a9c5713bdcdcebfd899ca9aa1583015e2c88"
+    },
+    {
+      "path": "Resources/Blueprints/[Basics] Fridge",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c4e48fb48fd7adf3b6fb72e1ad62a21b3fa78f92",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/c4e48fb48fd7adf3b6fb72e1ad62a21b3fa78f92"
+    },
+    {
+      "path": "Resources/Blueprints/[Basics] Fridge/[Basics] Fridge.epb",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cca55fa2b1cd1ee4244346c7ca73b6579a200cf0",
+      "size": 859,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/cca55fa2b1cd1ee4244346c7ca73b6579a200cf0"
+    },
+    {
+      "path": "Resources/Blueprints/[Basics] Fridge/[Basics] Fridge.jpg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f5febc3b6d22b7a4c19f743c04418ebd2eaaafe3",
+      "size": 42242,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/f5febc3b6d22b7a4c19f743c04418ebd2eaaafe3"
+    },
+    {
+      "path": "Resources/Blueprints/[Basics] Lg Constructor",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8a9d3cc4946909eb2107cd0cccb46ec1db24b871",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/8a9d3cc4946909eb2107cd0cccb46ec1db24b871"
+    },
+    {
+      "path": "Resources/Blueprints/[Basics] Lg Constructor/[Basics] Lg Constructor.epb",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c7cf8ee4c0efca290edddf9ada2693df20d4c9c6",
+      "size": 1058,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/c7cf8ee4c0efca290edddf9ada2693df20d4c9c6"
+    },
+    {
+      "path": "Resources/Blueprints/[Basics] Lg Constructor/[Basics] Lg Constructor.jpg",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f44719c0f178d32d408e252c5f8b89b3c84cb0e4",
+      "size": 60762,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/f44719c0f178d32d408e252c5f8b89b3c84cb0e4"
+    },
+    {
+      "path": "Resources/Configuration",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a85ab31fb14452e0b43029c1e8076b6f1c54ef33",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/a85ab31fb14452e0b43029c1e8076b6f1c54ef33"
+    },
+    {
+      "path": "Resources/Configuration/+Backup ItemsConfig.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "203a15f613681fd62cfd389ab716837cf57ab3a1",
+      "size": 986935,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/203a15f613681fd62cfd389ab716837cf57ab3a1"
+    },
+    {
+      "path": "Resources/Configuration/BlockGroupsConfig.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "356809f6c3a3add17bb4c91918e0145f6ff807f8",
+      "size": 7114,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/356809f6c3a3add17bb4c91918e0145f6ff807f8"
+    },
+    {
+      "path": "Resources/Configuration/BlocksConfig.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "789539a37fcd44a3bffc3eb3f51e96d3c936a641",
+      "size": 1827733,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/789539a37fcd44a3bffc3eb3f51e96d3c936a641"
+    },
+    {
+      "path": "Resources/Configuration/Containers.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6b57b240a6ff1898a7bd1e9bed710b9cce7af136",
+      "size": 142947,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/6b57b240a6ff1898a7bd1e9bed710b9cce7af136"
+    },
+    {
+      "path": "Resources/Configuration/DamageMultiplierConfig.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a3f214ac0469e481890c5eed7ea4b30304cf3ab3",
+      "size": 146909,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/a3f214ac0469e481890c5eed7ea4b30304cf3ab3"
+    },
+    {
+      "path": "Resources/Configuration/DefReputation.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ef8e91b51880781fe25c28c9182dae8f17f89b19",
+      "size": 28170,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/ef8e91b51880781fe25c28c9182dae8f17f89b19"
+    },
+    {
+      "path": "Resources/Configuration/Dialogues.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bade06a284d66171dfa03fe7becf33651fd0b0bb",
+      "size": 2132593,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/bade06a284d66171dfa03fe7becf33651fd0b0bb"
+    },
+    {
+      "path": "Resources/Configuration/Dialogues.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "21231f3b4a907fe2131f345bcf979444d74eccd1",
+      "size": 1645284,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/21231f3b4a907fe2131f345bcf979444d74eccd1"
+    },
+    {
+      "path": "Resources/Configuration/EClassConfig.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1029d1a2d9fb08ada8a653d1cb4bf213ca717ab4",
+      "size": 484997,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/1029d1a2d9fb08ada8a653d1cb4bf213ca717ab4"
+    },
+    {
+      "path": "Resources/Configuration/EGroupsConfig.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a2bf27634d0dd6533514c0c7300d43658dddc6ae",
+      "size": 14130,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/a2bf27634d0dd6533514c0c7300d43658dddc6ae"
+    },
+    {
+      "path": "Resources/Configuration/FactionWarfare.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3d70c1bafbfe500b0605dd01acf24311e9b8ceb7",
+      "size": 52380,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/3d70c1bafbfe500b0605dd01acf24311e9b8ceb7"
+    },
+    {
+      "path": "Resources/Configuration/Factions.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7769692bed2797d9b3925c6246c3b539d38d8210",
+      "size": 17354,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/7769692bed2797d9b3925c6246c3b539d38d8210"
+    },
+    {
+      "path": "Resources/Configuration/GalaxyConfig.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "162d4885d219e4d3b975524330f20d7433b4f1d7",
+      "size": 229099,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/162d4885d219e4d3b975524330f20d7433b4f1d7"
+    },
+    {
+      "path": "Resources/Configuration/GlobalDefsConfig.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f16c2ce42a96b3793ae2064da160f00eb6e72698",
+      "size": 2588,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/f16c2ce42a96b3793ae2064da160f00eb6e72698"
+    },
+    {
+      "path": "Resources/Configuration/ItemsConfig.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "45ceda23aaeb81630dcd14794bac29341825ab9a",
+      "size": 1000496,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/45ceda23aaeb81630dcd14794bac29341825ab9a"
+    },
+    {
+      "path": "Resources/Configuration/LootGroups.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d66036716974e04a341156574129ff21da4d6947",
+      "size": 63278,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/d66036716974e04a341156574129ff21da4d6947"
+    },
+    {
+      "path": "Resources/Configuration/MaterialConfig.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "89b3e7705c1587ec9020b99b026b309b4de358a9",
+      "size": 19452,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/89b3e7705c1587ec9020b99b026b309b4de358a9"
+    },
+    {
+      "path": "Resources/Configuration/StatusEffects.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b75c0ae6450cd0670b0f1c392c2c31e348d94c0c",
+      "size": 48040,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/b75c0ae6450cd0670b0f1c392c2c31e348d94c0c"
+    },
+    {
+      "path": "Resources/Configuration/Templates.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "20799d0cac1349497225dc27887b108c8135e3d3",
+      "size": 224870,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/20799d0cac1349497225dc27887b108c8135e3d3"
+    },
+    {
+      "path": "Resources/Configuration/TokenConfig.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1c58d4bbec592140927acfeb6f02645cb3e478d6",
+      "size": 196384,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/1c58d4bbec592140927acfeb6f02645cb3e478d6"
+    },
+    {
+      "path": "Resources/Configuration/TraderNPCConfig.ecf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "003abedb5c019f313403e9e38ca9197214548141",
+      "size": 251696,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/003abedb5c019f313403e9e38ca9197214548141"
+    },
+    {
+      "path": "Resources/Configuration/_PoiGroupsConfig_example.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8d8ef0bb4fbf1538dad2f160446c22a2afcf2fb8",
+      "size": 12123,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/8d8ef0bb4fbf1538dad2f160446c22a2afcf2fb8"
+    },
+    {
+      "path": "Resources/Localization",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "27e4cad4fc603b8279413eccfa633ae10fd2568f",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/27e4cad4fc603b8279413eccfa633ae10fd2568f"
+    },
+    {
+      "path": "Resources/Localization/Localization.csv",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d6ead856c81ad48965281f59eee597853f871f8b",
+      "size": 1294754,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/d6ead856c81ad48965281f59eee597853f871f8b"
+    },
+    {
+      "path": "ScenarioDumper",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "36b51199c918df3b7665003795b8189f5bbae360",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/36b51199c918df3b7665003795b8189f5bbae360"
+    },
+    {
+      "path": "ScenarioDumper/Converters",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c7dee864a8b3ceb44aa956e30798bfb60b6cb1fa",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/c7dee864a8b3ceb44aa956e30798bfb60b6cb1fa"
+    },
+    {
+      "path": "ScenarioDumper/Converters/Vector3Converter.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0f77bd77106b504d7834b0a95b0acb565a307082",
+      "size": 4264,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/0f77bd77106b504d7834b0a95b0acb565a307082"
+    },
+    {
+      "path": "ScenarioDumper/Program.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7411c91ef3ebdf826a7a0d44f63c0084f1b44086",
+      "size": 5487,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/7411c91ef3ebdf826a7a0d44f63c0084f1b44086"
+    },
+    {
+      "path": "ScenarioDumper/Properties",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "21514d25e0f5a501f4542ba9ff6d3afeb29eef61",
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/trees/21514d25e0f5a501f4542ba9ff6d3afeb29eef61"
+    },
+    {
+      "path": "ScenarioDumper/Properties/launchSettings.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "87069f7f7ab706d0fe1fc28337ed8bf427cc0b33",
+      "size": 739,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/87069f7f7ab706d0fe1fc28337ed8bf427cc0b33"
+    },
+    {
+      "path": "ScenarioDumper/ScenarioDumper.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0bcdfe7323902c8bb4bf3f2dd15cb8573017a916",
+      "size": 463,
+      "url": "https://api.github.com/repos/NotOats/EgsLib/git/blobs/0bcdfe7323902c8bb4bf3f2dd15cb8573017a916"
+    }
+  ],
+  "truncated": false
+}

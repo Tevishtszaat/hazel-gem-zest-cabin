@@ -200,10 +200,24 @@ describe("galaxy habitable zones", () => {
     assert.ok(lab);
     assert.equal(lab?.expectedZone, "OuterSystem");
     assert.equal(akua, undefined);
-    const next = applyOrbitFixes(yaml, issues.map((i) => ({ name: i.body.name, coords: i.suggested })));
+    const next = applyOrbitFixes(yaml, issues.filter((i) => i.movable).map((i) => ({ name: i.body.name, coords: i.suggested })));
     const moved = parseSectorBodies(next);
     assert.ok((moved.find((b) => b.name === "TooCloseLava")?.distance ?? 99) <= 56);
     assert.ok((moved.find((b) => b.name === "Laboratorio")?.distance ?? 0) <= 132);
     assert.match(next, /TooCloseLava/);
+    const again = diagnoseOrbits(star, overlayBodies(star, moved));
+    assert.equal(again.find((i) => i.body.name === "TooCloseLava"), undefined);
+  });
+
+  it("does not suggest a 20-sector move when the star has no bands", () => {
+    const star = parseEcfObjects(`{ GalaxyConfig Name: Dim
+  Luminosity: 1
+}
+`)[0]!;
+    const issues = diagnoseOrbits(star, [
+      { system: "System", name: "Akua Lo", kind: "Planet", playfieldType: "Temperate", coords: [4, 0, 0], distance: 4 },
+    ]);
+    assert.ok(issues.length);
+    assert.equal(issues.every((issue) => !issue.movable), true);
   });
 });

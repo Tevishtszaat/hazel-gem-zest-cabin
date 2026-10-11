@@ -16,6 +16,7 @@ import {
   parseSectorBodies,
   parseStarMix,
   STAR_ZONES,
+  starZoneSpans,
 } from "./galaxy.ts";
 import { bundlePlayfields } from "./playfield.ts";
 import { preflightPlayfield as preflightLists } from "./playfield-design.ts";
@@ -542,17 +543,32 @@ function validateGalaxy(catalog: ScenarioCatalog, push: (p: Omit<Problem, "key">
   if (!sectorText) return;
   const bodies = parseSectorBodies(sectorText);
   const systems = groupSystems(bodies);
-  for (const star of stars.slice(0, 8)) {
-    const klass = (star.fields.StarClass || star.name || "").toLowerCase();
-    const system = systems.find((s) => (s.starClass || "").toLowerCase() === klass) ?? systems[0];
+  const usableStars = stars.filter((star) => starZoneSpans(star).length);
+  const fallbackStar = usableStars[0];
+  for (const star of usableStars.slice(0, 8)) {
+    const klass = (star.fields.StarClass || "").toLowerCase();
+    const byClass = klass ? systems.find((s) => (s.starClass || "").toLowerCase() === klass) : undefined;
+    const system = byClass || (star === fallbackStar ? systems.find((s) => !s.starClass) || systems[0] : undefined);
     if (!system) continue;
     const issues = diagnoseOrbits(star, overlayBodies(star, system.bodies));
-    for (const issue of issues.slice(0, 20)) {
+    for (const issue of issues.slice(0, 40)) {
       const zone =
         issue.expectedZone === "parent"
           ? "its planet"
           : (STAR_ZONES.find((z) => z.key === issue.expectedZone)?.label ?? "its band");
       const coord = formatCoords(issue.suggested);
+      const fixes: ProblemFix[] = issue.movable
+        ? [
+            {
+              type: "orbit-move",
+              role: "sectors",
+              path: catalog.texts.find((t) => t.role === "sectors")?.path || "Sectors.yaml",
+              name: issue.body.name,
+              coords: issue.suggested,
+              label: `Move to ${zone} (${coord})`,
+            },
+          ]
+        : [];
       push({
         id: null,
         kind: "file",
@@ -562,19 +578,10 @@ function validateGalaxy(catalog: ScenarioCatalog, push: (p: Omit<Problem, "key">
         code: "orbit",
         message: `${system.name}: ${issue.body.name} — ${issue.reason}`,
         path: `${system.name} · ${issue.body.name}`,
-        recommend: "fix",
-        suggestions: [`${zone} at ${issue.suggestedDistance.toFixed(0)} sectors`],
+        recommend: fixes.length ? "fix" : "review",
+        suggestions: fixes.length ? [`${zone} at ${issue.suggestedDistance.toFixed(0)} sectors`] : [],
         value: coord,
-        fixes: [
-          {
-            type: "orbit-move",
-            role: "sectors",
-            path: catalog.texts.find((t) => t.role === "sectors")?.path || "Sectors.yaml",
-            name: issue.body.name,
-            coords: issue.suggested,
-            label: `Move to ${zone} (${coord})`,
-          },
-        ],
+        fixes,
       });
     }
   }

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PulsePDA — Empyrion mission editor</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">P</div>
+        <div>
+          <h1>PulsePDA</h1>
+          <small>Local Empyrion PDA workshop</small>
+        </div>
+      </div>
+      <div class="search">
+        <span class="hint">⌕</span>
+        <input id="search" placeholder="Search chapters, tasks, actions…" />
+      </div>
+      <div class="actions">
+        <button class="btn ghost" id="btnUndo" title="Ctrl+Z">Undo</button>
+        <button class="btn" id="btnImport">Import</button>
+        <button class="btn" id="btnYaml">Export YAML</button>
+        <button class="btn" id="btnCsv">Export CSV</button>
+        <button class="btn primary" id="btnBoth">Export both</button>
+      </div>
+    </header>
+
+    <div class="status">
+      <span>Scenario <b id="statName">Untitled</b></span>
+      <span>Chapters <b id="statCh">0</b></span>
+      <span>Tasks <b id="statTk">0</b></span>
+      <span>Actions <b id="statAc">0</b></span>
+      <span id="statIssues">Issues <b>0</b></span>
+      <span id="statSave">Saved locally</span>
+      <span style="margin-left:auto">Ctrl+S export · data never leaves this browser</span>
+    </div>
+
+    <main class="workspace">
+      <section class="pane tree-pane">
+        <div class="pane-head">
+          <h2>Structure</h2>
+          <div class="tree-tools">
+            <button class="btn primary" id="addChapter">+ Chapter</button>
+            <button class="btn" id="addTask">+ Task</button>
+            <button class="btn" id="addAction">+ Action</button>
+          </div>
+        </div>
+        <div class="pane-body" id="tree"></div>
+      </section>
+
+      <section class="pane">
+        <div class="pane-head">
+          <h2 id="inspectTitle">Inspector</h2>
+          <div class="tree-tools">
+            <button class="btn" id="dupNode">Duplicate</button>
+            <button class="btn" id="moveUp">Up</button>
+            <button class="btn" id="moveDown">Down</button>
+            <button class="btn danger" id="delNode">Delete</button>
+          </div>
+        </div>
+        <div class="pane-body" id="inspector"></div>
+      </section>
+
+      <section class="pane preview-pane">
+        <div class="pane-head"><h2>Preview + checks</h2></div>
+        <div class="pane-body">
+          <div class="preview" id="preview"></div>
+          <div class="issues" id="issues"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-bg" id="importModal">
+    <div class="modal">
+      <h3>Import PDA files</h3>
+      <p class="hint">Drop <code>PDA.yaml</code> and optionally <code>PDA.csv</code>. Parsing stays on this machine.</p>
+      <div class="drop" id="dropzone">Drop files here or click to choose</div>
+      <input id="fileInput" type="file" accept=".yaml,.yml,.csv,.txt" multiple hidden />
+      <div class="tree-tools">
+        <button class="btn" id="loadSample">Load sample mission</button>
+        <button class="btn danger" id="wipeAll">Clear project</button>
+        <button class="btn ghost" id="closeImport">Close</button>
+      </div>
+      <p class="hint" style="margin-top:12px">
+        YAML titles can be raw text or CSV keys. If you import a CSV, keys get replaced with the English column.
+      </p>
+    </div>
+  </div>
+
+  <script src="js-yaml.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

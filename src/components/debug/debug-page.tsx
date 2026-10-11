@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { AppHeader } from "@/components/app-header.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { problemIgnoreKey } from "@/lib/pda/problems.ts";
-import { useProblems } from "@/lib/pda/use-problems.ts";
+import { useProblems, collectAllProblems } from "@/lib/pda/use-problems.ts";
 import { FILE_DEBUG_TABS } from "@/lib/pda/validate-files.ts";
 import type { Problem, ProblemFix } from "@/lib/pda/validate.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
@@ -21,6 +21,7 @@ const FILTERS = [
 export function DebugPage() {
   const applyBulk = usePdaStore((s) => s.applyBulk);
   const applyFileFix = usePdaStore((s) => s.applyFileFix);
+  const applyFileFixes = usePdaStore((s) => s.applyFileFixes);
   const jumpTo = usePdaStore((s) => s.jumpTo);
   const ignoreProblems = usePdaStore((s) => s.ignoreProblems);
   const unignoreProblems = usePdaStore((s) => s.unignoreProblems);
@@ -31,6 +32,8 @@ export function DebugPage() {
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState<Record<string, boolean>>({});
   const [showLength, setShowLength] = useState(false);
+  const [note, setNote] = useState("");
+  const [mastering, setMastering] = useState(false);
   const { issues, stats, busy, raw, ignoredCount, scan } = useProblems({
     includeLength: showLength || filter === "ignored",
     includeIgnored: filter === "ignored",
@@ -58,15 +61,9 @@ export function DebugPage() {
   const selectedKeys = visible.filter((issue) => picked[issue.key]).map((issue) => problemIgnoreKey(issue));
 
   const apply = (issue: Problem, fix: ProblemFix) => {
-    if (
-      fix.type === "ecf-set" ||
-      fix.type === "yaml-replace" ||
-      fix.type === "csv-pad" ||
-      fix.type === "orbit-move" ||
-      fix.type === "loca-english" ||
-      fix.type === "sector-rename"
-    ) {
+    if (isFileFix(fix)) {
       applyFileFix(fix);
+      setNote("Updated the loaded file. Use Export to write it into the scenario folder on disk.");
     } else if (issue.id) {
       if (fix.type === "delete") applyBulk([], [issue.id]);
       else applyBulk([{ id: issue.id, patch: fixToPatch(fix) }]);
@@ -78,24 +75,50 @@ export function DebugPage() {
     });
   };
 
-  const acceptIssues = (list: Problem[]) => {
+  const acceptIssues = (list: Problem[], doneNote?: string) => {
     const patches: { id: string; patch: Record<string, unknown> }[] = [];
+    const fileFixes: ProblemFix[] = [];
+    const seen = new Set<string>();
+    let applied = 0;
     for (const issue of list) {
       const fix = preferredFix(issue);
       if (!fix) continue;
-      if (
-        fix.type === "ecf-set" ||
-        fix.type === "yaml-replace" ||
-        fix.type === "csv-pad" ||
-        fix.type === "orbit-move" ||
-        fix.type === "loca-english" ||
-        fix.type === "sector-rename"
-      )
-        applyFileFix(fix);
+      const sig = fixSignature(issue, fix);
+      if (seen.has(sig)) continue;
+      seen.add(sig);
+      applied += 1;
+      if (isFileFix(fix)) fileFixes.push(fix);
       else if (issue.id) patches.push({ id: issue.id, patch: fixToPatch(fix) });
     }
+    if (fileFixes.length) applyFileFixes(fileFixes);
     if (patches.length) applyBulk(patches);
     setPicked({});
+    if (applied) {
+      setNote(doneNote || "Updated the loaded file. Use Export to write it into the scenario folder on disk.");
+    }
+    return applied;
+  };
+
+  const masterFix = async () => {
+    if (mastering) return;
+    setMastering(true);
+    setNote("Master Fix is scanning every file…");
+    try {
+      const state = usePdaStore.getState();
+      const all = await collectAllProblems(state.project, state.catalog);
+      const ignored = new Set(state.ignoredProblems);
+      const fixable = all.filter((issue) => !ignored.has(problemIgnoreKey(issue)) && preferredFix(issue));
+      const applied = acceptIssues(fixable);
+      setNote(
+        applied
+          ? `Master Fix applied ${applied} best-match fixes. Use Export to write them into the scenario folder on disk.`
+          : "Master Fix found nothing it can correct.",
+      );
+    } catch (err) {
+      setNote(err instanceof Error ? err.message : "Master Fix failed.");
+    } finally {
+      setMastering(false);
+    }
   };
 
   const selectable = visible.filter((issue) => issue.id || issue.fixes.length);
@@ -131,6 +154,10 @@ export function DebugPage() {
           <p className="mt-1 max-w-2xl text-sm text-muted">
             Scans PDA, dialogues, and each config for broken syntax plus missing names and duplicate IDs.
           </p>
+          <Button className="mt-3" disabled={mastering || busy} onClick={() => void masterFix()}>
+            {mastering ? "Master Fix…" : "Master Fix"}
+          </Button>
+          {note ? <p className="mt-2 text-xs text-subtle">{note}</p> : null}
         </div>
 
         {busy || scan ? (
@@ -218,10 +245,10 @@ export function DebugPage() {
           <Button size="sm" variant="ghost" disabled={!Object.values(picked).some(Boolean)} onClick={() => setPicked({})}>
             Deselect all
           </Button>
-          <Button size="sm" disabled={!selectedFixable.length} onClick={() => acceptIssues(selectedFixable)}>
+          <Button size="sm" disabled={!selectedFixable.length || mastering} onClick={() => acceptIssues(selectedFixable)}>
             Accept selected ({selectedFixable.length})
           </Button>
-          <Button size="sm" disabled={!suggestedFixes.length} onClick={() => acceptIssues(suggestedFixes)}>
+          <Button size="sm" disabled={!suggestedFixes.length || mastering} onClick={() => acceptIssues(suggestedFixes)}>
             Accept all suggested ({suggestedFixes.length})
           </Button>
           {filter === "ignored" ? (
@@ -361,6 +388,28 @@ export function DebugPage() {
         ) : null}
       </main>
     </div>
+  );
+}
+
+function fixSignature(issue: Problem, fix: ProblemFix) {
+  if (fix.type === "orbit-move") return `orbit:${fix.path}:${fix.name.toLowerCase()}`;
+  if (fix.type === "sector-rename") return `rename:${fix.path}:${fix.from.toLowerCase()}`;
+  if (fix.type === "ecf-set") return `ecf:${fix.role}:${fix.name}:${fix.field}`;
+  if (fix.type === "yaml-replace") return `yaml:${fix.path}:${fix.from}`;
+  if (fix.type === "csv-pad") return `csv:${fix.path}:${fix.line}`;
+  if (fix.type === "loca-english") return `loca:${fix.path}:${fix.key}`;
+  if (issue.id) return `node:${issue.id}:${fix.type}:${"field" in fix ? fix.field : ""}`;
+  return `${issue.path}:${issue.code}:${fix.type}:${fix.label}`;
+}
+
+function isFileFix(fix: ProblemFix) {
+  return (
+    fix.type === "ecf-set" ||
+    fix.type === "yaml-replace" ||
+    fix.type === "csv-pad" ||
+    fix.type === "orbit-move" ||
+    fix.type === "loca-english" ||
+    fix.type === "sector-rename"
   );
 }
 

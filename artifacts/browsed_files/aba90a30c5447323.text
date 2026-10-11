@@ -1,0 +1,659 @@
+## Line format: Item_x: name , data: count[-range], xdata: probability (x incrementing, if using a count-range use double quotes)
+
+{ +LootGroup Name: empty
+}
+
+## New Escape Pod settings: Difficulty Levels 
+{ +LootGroup Name: EscapePodEasy
+  Count: all
+  Item_0: EmergencyRations, param1: 1
+  Item_1: WaterBottle, param1: 5
+  Item_2: RadarSuitT1, param1: 1
+  Item_3: SurvivalTent, param: 1
+  Item_4: OreScanner, param:1
+  # Item_4: MobileAirCon, param: 1
+  # Item_5: OxygenGeneratorSmall, param: 1
+  # Item_6: OreScanner, param: 1
+  # Item_1: EmergencyRations, param1: 1
+  # Item_2: RespiratorCharge, param1: 3
+  
+  # Item_0: Flashlight, param1: 1
+  # Item_1: Pistol, param1: 1
+  # Item_2: 50Caliber, param1: 250
+  # Item_3: Explosives, param1: 5  
+  # Item_4: Drill, param1: 1
+  # Item_5: Chainsaw, param1: 1
+  # Item_6: BioFuel, param1: 5
+  # Item_7: ConstructorSurvival, param1: 1
+  # Item_8: PlayerBikeKit, param1: 1
+  # Item_9: AutoMinerCore, param1: 10
+  # Item_10: Medikit02, param1: 3
+  # Item_11: AntibioticPills, param1: 3
+  # Item_12: RadiationPills, param1: 2
+  # Item_13: EmergencyRations, param1: 4
+  # Item_14: WaterBottle, param1: 2
+  # Item_15: RespiratorCharge, param1: 5
+
+  # Item_16: SiliconIngot, param1: 200
+  # Item_17: CopperIngot, param1: 300
+  # Item_18: IronIngot, param1: 350
+  # Item_19: CobaltIngot, param1: 175
+  # Item_20: MagnesiumPowder, param1: 50
+  # Item_21: PromethiumPellets, param1: 350
+
+  # Item_22: EnergyCell, param1: 5
+  # Item_23: EVABoost, param1: 1
+  # Item_24: OxygenBottleLarge, param1: 5
+  # Item_25: OxygenGenerator, param1: 1
+  # Item_26: Core, param1: 1
+  
+  # Item_27: GrowingPot, param1: 2
+  # Item_28: LightPlant01, param1: 1
+  # Item_29: TomatoStage1, param1: 1
+  # Item_30: WheatStage1, param1: 1
+  # Item_31: CornStage1, param1: 1
+  # Item_32: PumpkinStage1, param1: 1
+  # Item_33: PearthingStage1, param1: 1
+  # Item_34: DurianRoot, param1: 1
+}
+
+{ +LootGroup Name: EscapePodMedium
+  Count: all
+  Item_0: EmergencyRations, param1: 1
+  Item_1: WaterBottle, param1: 5
+  Item_2: RadarSuitT1, param1: 1
+  Item_3: SurvivalTent, param: 1
+  Item_4: OreScanner, param:1
+  # Item_1: EmergencyRations, param1: 1
+  # Item_2: RespiratorCharge, param1: 2
+  # Item_0: Flashlight, param1: 1
+  # Item_1: Pistol, param1: 1
+  # Item_2: 50Caliber, param1: 150
+  # Item_3: Drill, param1: 1
+  # Item_4: Chainsaw, param1: 1
+  # Item_5: BioFuel, param1: 4
+  # Item_6: ConstructorSurvival, param1: 1
+  # Item_7: OxygenGeneratorSmall, param1: 1
+  # Item_8: EnergyCell, param1: 3
+  # Item_9: RespiratorCharge, param1: 2
+  # Item_10: WaterBottle, param1: 2
+  # Item_11: Medikit02, param1: 2
+  # Item_12: EmergencyRations, param1: 2
+  # Item_13: StomachPills, param1: 1
+
+  # Item_14: SiliconIngot, param1: 50
+  # Item_15: CopperIngot, param1: 50
+  # Item_16: IronIngot, param1: 10
+  # Item_17: CobaltIngot, param1: 50
+  # Item_18: MagnesiumPowder, param1: 30
+  # Item_19: PromethiumPellets, param1: 50
+
+  # Item_20: Core, param1: 1
+  # Item_21: PlayerBikeKit, param1: 1
+  # Item_22: AutoMinerCore, param1: 8
+  # Item_23: EVABoost, param1: 1
+}
+
+{ +LootGroup Name: EscapePodHard
+  Count: all
+  Item_0: EmergencyRations, param1: 1
+  Item_1: WaterBottle, param1: 5
+  Item_2: RadarSuitT1, param1: 1
+  Item_3: SurvivalTent, param: 1
+  Item_4: OreScanner, param:1
+  # Item_1: EmergencyRations, param1: 1
+  # Item_2: RespiratorCharge, param1: 1
+  # Item_0: Flashlight, param1: 1
+  # Item_1: Pistol, param1: 1
+  # Item_2: 50Caliber, param1: 150
+  # Item_3: Drill, param1: 1
+  # Item_4: Chainsaw, param1: 1
+  # Item_5: BioFuel, param1: 2
+  # Item_6: ConstructorSurvival, param1: 1
+  # Item_7: OxygenGeneratorSmall, param1: 1
+  # Item_8: EnergyCell, param1: 3
+  # Item_9: EmergencyRations, param1: 1
+  # Item_10: PlayerBikeKit, param1: 1
+  # Item_11: AutoMinerCore, param1: 5
+}
+
+## Escape pod - New Start 
+{ +LootGroup Name: StartingEquipment_NewStart
+  # Count: all  
+  # Item_0: Drill, param1: 1
+  # Item_1: Chainsaw, param1: 1
+  # Item_2: BioFuel, param1: 2
+  # Item_3: ConstructorSurvival, param1: 1
+  # Item_4: OxygenGeneratorSmall, param1: 1
+}
+
+## Random Loot 
+{ +LootGroup Name: BasicComponents
+  Count: "1,2"
+  Item_0: SteelPlate, param1: "1,5", param2: 0.3
+  Item_1: GlassPlate, param1: "1,2", param2: 0.3
+  Item_2: Electronics, param1: "1,2", param2: 0.2
+  Item_3: OpticalFiber, param1: "1,2", param2: 0.3
+  Item_4: EnergyMatrix, param1: "1,2", param2: 0.3
+  # Item_5: MetalPieces, param1: "1,5", param2: 0.3
+}
+
+{ +LootGroup Name: CompositeComponents
+  Count: "1,2"
+  Item_0: MechanicalComponents, param1: "1,5", param2: 0.4
+  Item_1: Motor, param1: "1,2", param2: 0.2
+  Item_2: Nanotubes, param1: "1,5", param2: 0.2
+  Item_3: Computer, param1: "1,2", param2: 0.1
+  Item_4: CapacitorComponent, param1: "1,2", param2: 0.01
+  Item_5: CobaltAlloy, param1: 1, param2: 0.01
+}
+
+# not yet dropped
+{ +LootGroup Name: AdvancedComponents
+  Count: "1"
+  Item_0: FluxCoil, param1: "1,3", param2: 0.2
+  Item_1: Oscillator, param1: "1,2", param2: 0.2
+}
+
+{ +LootGroup Name: Ores
+  Count: "1,2"
+  Item_0: IronOre, param1: "10,20", param2: 0.4
+  Item_1: CobaltOre, param1: "10,20", param2: 0.4
+  Item_2: CopperOre, param1: "10,15", param2: 0.3
+  Item_3: SiliconOre, param1: "10,15", param2: 0.3
+  Item_4: NeodymiumOre, param1: "10,15", param2: 0.2
+  Item_5: TitanOre, param1: "10,15", param2: 0.2
+  Item_6: MagnesiumOre, param1: "10,15", param2: 0.1
+  Item_7: PromethiumOre, param1: "10,15", param2: 0.1
+  /*  Item_0: ErestrumOre, param1: "1,20", param2: 0.2
+  Item_10: ZascosiumOre, param1: "1,20", param2: 0.2  */
+}
+
+{ +LootGroup Name: Ingots
+  Count: "1,2"
+  Item_0: IronIngot, param1: "10,20", param2: 0.5
+  Item_1: CobaltIngot, param1: "10,20", param2: 0.4
+  Item_2: CopperIngot, param1: "10,15", param2: 0.3
+  Item_3: SiliconIngot, param1: "10,15", param2: 0.2
+  Item_4: NeodymiumIngot, param1: "10,15", param2: 0.1
+  Item_5: TitanRods, param1: "10,15", param2: 0.1
+  Item_6: MagnesiumPowder, param1: "10,15", param2: 0.1
+  Item_7: PromethiumPellets, param1: "10,20", param2: 0.2
+  Item_8: PlasticMaterial, param1: "10,20", param2: 0.3
+  /*    Item_0: ErestrumIngot, param1: "1,10", param2: 0.2
+  Item_0: ZascosiumIngot, param1: "1,10", param2: 0.2  */
+}
+
+{ +LootGroup Name: Sprouts
+  Count: "1,2"
+  Item_0: DurianRoot, param1: 1, param2: 0.2
+  Item_1: TomatoStage1, param1: 1, param2: 0.2
+  Item_2: WheatStage1, param1: 1, param2: 0.2
+  Item_3: CornStage1, param1: 1, param2: 0.2
+  Item_4: PumpkinStage1, param1: 1, param2: 0.2
+  Item_5: PearthingStage1, param1: 1, param2: 0.2
+  Item_6: InsanityPepperStage1, param1: 1, param2: 0.2
+  Item_7: DesertPlant20Stage1, param1: 1, param2: 0.2
+}
+
+# TEST - nested groups not yet working 
+/*  { +LootGroup Name: PistolAmmo
+  Count: all
+  Item_0: Pistol, param1: 1
+  Item_1: 50Caliber, param1: "10,20"
+}
+{ +LootGroup Name: ShotgunAmmo
+  Count: all
+  Item_0: Shotgun, param1: 1
+  Item_1: ShotgunShells, param1: "5,10"
+}
+{ +LootGroup Name: AssaultRifleAmmo
+  Count: all
+  Item_0: AssaultRifle, param1: 1
+  Item_1: 5.8mmBullet, param1: "20,30"
+}
+{ +LootGroup Name: SniperAmmo
+  Count: all
+  Item_0: Sniper, param1: 1
+  Item_1: 12.7mmBullet, param1: "5,12"
+}
+{ +LootGroup Name: WeaponsBasic
+  Count: "1,2"
+  Group_0: PistolAmmo, param1: 1, param2: 0.3
+  Group_1: ShotgunAmmo, param1: 1, param2: 0.3
+  Group_2: AssaultRifleAmmo, param1: 1, param2: 0.3
+  Group_3: SniperAmmo, param1: 1, param2: 0.3
+} */
+
+
+## NEW LOOT GROUPS 
+## Common 
+{ +LootGroup Name: OresBasic
+  Count: "1,2"
+  Item_0: IronOre, param1: "5,20", param2: 0.8
+  Item_1: CopperOre, param1: "5,20", param2: 0.8
+  Item_2: SiliconOre, param1: "5,15", param2: 0.6
+  Item_3: PromethiumOre, param1: "5,12", param2: 0.4
+}
+
+{ +LootGroup Name: OresAdvanced
+  Count: "1,2"
+  Item_0: CobaltOre, param1: "5,10", param2: 0.6
+  Item_1: NeodymiumOre, param1: "5,10", param2: 0.6
+  Item_2: MagnesiumOre, param1: "5,8", param2: 0.4
+  Item_3: TitanOre, param1: "5,8", param2: 0.5
+}
+
+{ +LootGroup Name: OresRare
+  Count: "1"
+  Item_0: ErestrumOre, param1: "3,5", param2: 0.4
+  Item_1: ZascosiumOre, param1: "3,5", param2: 0.2
+  Item_2: SathiumOre, param1: "5,8", param2: 0.4
+}
+
+{ +LootGroup Name: IngotsBasic
+  Count: "1,2"
+  Item_0: IronIngot, param1: "5,20", param2: 0.4
+  Item_1: CobaltIngot, param1: "5,20", param2: 0.4
+  Item_2: CopperIngot, param1: "5,15", param2: 0.3
+  Item_3: SiliconIngot, param1: "5,15", param2: 0.3
+  Item_4: NeodymiumIngot, param1: "5,15", param2: 0.3
+  Item_5: TitanRods, param1: "5,15", param2: 0.3
+}
+
+{ +LootGroup Name: ComponentsBasic
+  Count: "1,2"
+  Item_0: SteelPlate, param1: "5,15", param2: 0.3
+  Item_1: Electronics, param1: "2,5", param2: 0.2
+  Item_2: OpticalFiber, param1: "2,5", param2: 0.3
+  Item_3: EnergyMatrix, param1: "2,5", param2: 0.3
+  Item_4: GlassPlate, param1: "5,10", param2: 0.3
+  Item_5: MechanicalComponents, param1: "5,10", param2: 0.4
+  Item_6: Motor, param1: "2,5", param2: 0.2
+  Item_7: Nanotubes, param1: "5,10", param2: 0.2
+  Item_8: Computer, param1: "1,2", param2: 0.1
+  # Item_9: MetalPieces, param1: "5,10", param2: 0.3
+}
+
+{ +LootGroup Name: CraftingMaterial
+  Count: "1,2"
+  Item_0: Cement, param1: "5,10", param2: 0.3
+  Item_1: WoodPlanks, param1: "5,10", param2: 0.3
+  Item_2: PlasticMaterial, param1: "5,10", param2: 0.2
+  Item_3: XenoSubstrate, param1: "5,10", param2: 0.3
+  Item_4: WaterBottle, param1: "5,10", param2: 0.3
+  Item_5: RockDust, param1: "5,10", param2: 0.3
+  Item_6: PromethiumPellets, param1: "30,100", param2: 0.3
+  Item_7: HydrogenBottle, param1: "1,5", param2: 0.3
+  Item_8: MagnesiumPowder, param1: "5,10", param2: 0.3
+}
+
+{ +LootGroup Name: EnergyItems
+  Count: "1,2"
+  Item_0: RespiratorCharge, param1: "2,5", param2: 0.3
+  Item_1: OxygenBottleLarge, param1: "2,5", param2: 0.3
+  Item_2: WaterJug, param1: "1,3", param2: 0.3
+  Item_3: EnergyCell, param1: "5,10", param2: 0.3
+  Item_4: EnergyCellLarge, param1: "2,5", param2: 0.3
+  Item_5: FusionCell, param1: "1,2", param2: 0.3
+}
+
+{ +LootGroup Name: BuildingBlocks
+  Count: "1,2"
+  Item_0: HullSmallBlocks, param1: "10,15", param2: 0.1
+  Item_1: HullArmoredSmallBlocks, param1: "5,10", param2: 0.05
+  Item_2: HullLargeBlocks, param1: "10,15", param2: 0.05
+  Item_3: HullArmoredLargeBlocks, param1: "5,10", param2: 0.03
+  Item_4: HullCombatLargeBlocks, param1: "5,10", param2: 0.01
+  Item_5: ConcreteBlocks, param1: "10,15", param2: 0.2
+  Item_6: WoodBlocks, param1: "10,15", param2: 0.3
+  Item_7: TrussSmallBlocks, param1: "10,15", param2: 0.2
+  Item_8: TrussLargeBlocks, param1: "10,15", param2: 0.2
+  Item_9: StairsBlocks, param1: "5,10", param2: 0.3
+  Item_10: WindowSmallBlocks, param1: "5,10", param2: 0.3
+  Item_11: WindowLargeBlocks, param1: "5,10", param2: 0.1
+  Item_12: WindowArmoredSmallBlocks, param1: "5,10", param2: 0.3
+  Item_13: WindowArmoredLargeBlocks, param1: "5,10", param2: 0.1
+  Item_14: WalkwayLargeBlocks, param1: "5,10", param2: 0.3
+  Item_15: DecoBlocks, param1: "5,10", param2: 0.3
+  Item_16: ConsoleBlocks, param1: "5,10", param2: 0.3
+  Item_17: IndoorPlants, param1: "2,5", param2: 0.5
+  Item_18: GrowingPot, param1: "2,5", param2: 0.5
+}
+
+{ +LootGroup Name: Tools
+  Count: "1,2"
+  Item_0: Flashlight, param1: 1, param2: 0.1
+  # Item_3: Drill, param1: 1, param2: 0.1
+  Item_1: Chainsaw, param1: 1, param2: 0.1
+  Item_2: BioFuel, param1: "2,5", param2: 0.1
+  Item_3: MultiTool, param1: 1, param2: 0.1
+  Item_4: MultiCharge, param1: "1,5", param2: 0.1
+  Item_5: DrillT2, param1: 1, param2: 0.02
+  Item_6: DrillCharge, param1: "1,5", param2: 0.1
+  Item_7: MultiToolT2, param1: 1, param2: 0.02
+}
+
+{ +LootGroup Name: WeaponsBasic
+  Count: "1,2"
+  Item_0: Pistol, param1: 1, param2: 0.3
+  Item_1: Shotgun, param1: 1, param2: 0.3
+  Item_2: AssaultRifle, param1: 1, param2: 0.3
+  Item_3: Sniper, param1: 1, param2: 0.3
+  # Item_1: 50Caliber, param1: "10,20", param2: 0.3
+  # Item_5: 5.8mmBullet, param1: "20,30", param2: 0.3
+  # Item_7: 12.7mmBullet, param1: "5,12", param2: 0.3
+}
+
+{ +LootGroup Name: WeaponsBasicKit
+  Count: "1"
+  Item_0: PistolKit, param1: 1, param2: 0.3
+  Item_1: ShotgunKit, param1: 1, param2: 0.2
+  Item_2: RifleKit, param1: 1, param2: 0.3
+  Item_3: SniperKit, param1: 1, param2: 0.1
+}
+
+{ +LootGroup Name: Seeds
+  Count: "2,3"
+  Item_0: DurianRoot, param1: "2,5", param2: 0.3
+  Item_1: CornStage1, param1: "2,5", param2: 0.3
+  Item_2: PumpkinStage1, param1: "2,5", param2: 0.3
+  Item_3: TomatoStage1, param1: "2,5", param2: 0.3
+  Item_4: WheatStage1, param1: "2,5", param2: 0.3
+  Item_5: PearthingStage1, param1: "2,5", param2: 0.3
+  Item_6: InsanityPepperStage1, param1: "2,5", param2: 0.3
+  Item_7: AlienPlantTube2Stage1, param1: "2,5", param2: 0.3
+  Item_8: DesertPlant20Stage1, param1: "2,5", param2: 0.3
+  Item_9: ElderberryStage1, param1: "2,5", param2: 0.3
+  Item_10: AlienPalmTreeStage1, param1: "2,5", param2: 0.3
+  Item_11: AlienplantWormStage1, param1: "2,5", param2: 0.3
+  Item_12: BulbShroomYoungStage1, param1: "2,5", param2: 0.3
+ # Item_13: GrowingPot, param1: "2,4", param2: 0.3
+ # Item_14: NutrientSolution, param1: "2,5", param2: 0.3
+}
+
+{ +LootGroup Name: MedicalItems
+  Count: "1"
+  Item_0: Medikit04, param1: "1,2", param2: 0.2
+  Item_1: AntibioticOintment, param1: "2,3", param2: 0.8
+  Item_2: AntibioticPills, param1: "1,2", param2: 0.6
+  Item_3: AntiToxicOintment, param1: "2,3", param2: 0.7
+  Item_4: AntiToxicPills, param1: "1,2", param2: 0.5
+  Item_5: AntiRadiationOintment, param1: "2,3", param2: 0.6
+  Item_6: AntiParasitePills, param1: "1,2", param2: 0.3
+  Item_7: StomachPills, param1: "2,3", param2: 0.8
+  Item_8: RadiationPills, param1: "1,2", param2: 0.4
+  Item_9: AntibioticInjection, param1: "1", param2: 0.4
+  Item_10: AntiToxicInjection, param1: "1", param2: 0.3
+  Item_11: AntiRadiationInjection, param1: "1", param2: 0.2
+  Item_12: AntiParasiteInjection, param1: "1", param2: 0.1
+  
+}
+
+{ +LootGroup Name: Medikits
+  Count: "1,2"
+  Item_0: Medikit01, param1: "1", param2: 0.6
+  Item_1: Medikit02, param1: "1", param2: 0.4
+  Item_2: Medikit03, param1: "1", param2: 0.2
+  Item_3: Medikit04, param1: "3,4", param2: 0.8
+}
+## Common 
+{ +LootGroup Name: DevicesCommon
+  Count: "1,2"
+  Item_0: GeneratorBA, param1: 1, param2: 0.05
+  Item_1: FuelTankMSSmall, param1: 1, param2: 0.1
+  Item_2: WaterGenerator, param1: 1, param2: 0.3
+  Item_3: OxygenTankSmallMS, param1: 1, param2: 0.3
+  Item_4: OxygenStation, param1: 1, param2: 0.3
+  Item_5: OxygenGenerator, param1: 1, param2: 0.3
+  Item_6: FridgeMS, param1: 1, param2: 0.3
+  Item_7: FoodProcessorV2, param1: 1, param2: 0.08
+  Item_8: LightLargeBlocks, param1: 1, param2: 0.3
+  Item_9: ConstructorT1V2, param1: 1, param2: 0.03
+  Item_10: ContainerAmmoSmall, param1: 1, param2: 0.3
+  Item_11: DoorBlocks, param1: "2,4", param2: 0.3
+  Item_12: CargoContainerSmall, param1: 1, param2: 0.3
+  Item_13: ElevatorMS, param1: "2,4", param2: 0.3
+  Item_14: Core, param1: 1, param2: 0.01
+  Item_15: HangarDoorBlocks, param1: 1, param2: 0.1
+  Item_16: ShutterDoorLargeBlocks, param1: 1, param2: 0.3
+  Item_17: TurretBaseCannon, param1: 1, param2: 0.05
+  Item_18: CloneChamber, param1: 1, param2: 0.3
+}
+
+## Rare 
+{ +LootGroup Name: DevicesRare
+  Count: "1"
+  Item_0: GeneratorMS, param1: 1, param2: 0.05
+  Item_1: FuelTankMSLarge, param1: 1, param2: 0.1
+  Item_2: ConstructorT2, param1: 1, param2: 0.03
+  Item_3: ContainerAmmoLarge, param1: 1, param2: 0.3
+  Item_4: DoorArmoredBlocks, param1: "2,4", param2: 0.3
+  Item_5: FuelTankMSLarge, param1: 1, param2: 0.1
+  Item_6: FuelTankMSLargeT2, param1: 1, param2: 0.1
+  Item_7: RepairBayBA, param1: 1, param2: 0.01
+  Item_8: GeneratorMST2, param1: 1, param2: 0.01
+  Item_9: OfflineProtector, param1: 1, param2: 0.3
+  Item_10: ATM, param1: 1, param2: 0.3
+} 
+
+## Rare Vessel  
+{ +LootGroup Name: DevicesVesselRare
+  Count: "1"
+  Item_0: GeneratorSV, param1: 1, param2: 0.01
+  Item_1: FuelTankSV, param1: 1, param2: 0.1
+  Item_2: RCSBlockSV, param1: 1, param2: 0.01
+  Item_3: RCSBlockGV, param1: 1, param2: 0.01
+  Item_4: OxygenTankSV, param1: 1, param2: 0.3
+  Item_5: FridgeSV, param1: 1, param2: 0.1
+  Item_6: DoorBlocksSV, param1: 1, param2: 0.3
+  Item_7: SpotlightSSCube, param1: 1, param2: 0.3
+  Item_8: ContainerAmmoSmall, param1: 1, param2: 0.3
+  Item_9: PassengerSeatSV, param1: 1, param2: 0.3
+  Item_10: PassengerSeat2SV, param1: 1, param2: 0.3
+  Item_11: ThrusterGVDirectional, param1: 1, param2: 0.02
+  Item_12: ThrusterSVDirectional, param1: 1, param2: 0.02
+  Item_13: ThrusterSVRoundBlocks, param1: 1, param2: 0.01
+  Item_14: ThrusterGVRoundBlocks, param1: 1, param2: 0.01
+  Item_15: DockingPad, param1: 1, param2: 0.3
+  Item_16: WeaponSV02, param1: 1, param2: 0.3
+  Item_17: TurretGVMinigun, param1: 1, param2: 0.01
+  Item_18: TurretGVRocket, param1: 1, param2: 0.005
+  Item_20: TurretGVPlasma, param1: 1, param2: 0.001
+}
+
+{ +LootGroup Name: ComponentsRare
+  Count: "1"
+  Item_0: CapacitorComponent, param1: "1,2", param2: 0.3
+  Item_1: CobaltAlloy, param1: "1,2", param2: 0.3
+  Item_2: Oscillator, param1: "1,2", param2: 0.3
+  Item_3: FluxCoil, param1: "1,2", param2: 0.3
+  Item_4: PowerCoil, param1: "1,2", param2: 0.3
+}
+
+{ +LootGroup Name: FoodItems
+  Count: "1"
+  Item_0: CannedVegetables, param1: "2,4", param2: 0.3
+  Item_1: CannedMeat, param1: "2,4", param2: 0.3
+  Item_3: EmergencyRations, param1: "1,2", param2: 0.1
+}
+
+{ +LootGroup Name: WeaponsRare
+  Count: "1"
+  Item_0: PistolT2, param1: 1, param2: 0.1
+  Item_1: Shotgun2, param1: 1, param2: 0.1
+  Item_2: PulseRifle, param1: 1, param2: 0.1
+  Item_3: AssaultRifleT2, param1: 1, param2: 0.1
+  Item_4: Sniper2, param1: 1, param2: 0.1
+  Item_5: LaserPistol, param1: 1, param2: 0.05
+  Item_6: LaserRifle, param1: 1, param2: 0.03
+  Item_7: RocketLauncher, param1: 1, param2: 0.01
+  # Item_1: 50Caliber, param1: "10,20", param2: 0.1
+  # Item_3: ShotgunShells, param1: "5,10", param2: 0.1
+  # Item_6: 5.8mmBullet, param1: "20,30", param2: 0.1
+  # Item_3: PulseLaserChargePistol, param1: "10,20"
+  # Item_8: 12.7mmBullet, param1: "5,12", param2: 0.1
+  # Item_10: SlowRocket, param1: "5,10", param2: 0.1
+}
+{ +LootGroup Name: WeaponsRareKit
+  Count: "1"
+  Item_0: HeavyWeaponKit, param1: 1, param2: 0.01
+  Item_1: LaserKit, param1: 1, param2: 0.01
+}
+
+{ +LootGroup Name: IngotsRare
+  Count: "1"
+  Item_0: ErestrumIngot, param1: "5,10", param2: 0.2
+  Item_1: SathiumIngot, param1: "5,10", param2: 0.2
+  Item_2: ZascosiumIngot, param1: "5,10", param2: 0.2
+}
+
+{ +LootGroup Name: LootGoldIngot
+  Count: 1
+  Item_0: GoldIngot, param1: "1,2", param2: 0.2
+}
+
+{ +LootGroup Name: LootGoldCoins
+  Count: 1
+  Item_0: GoldIngot, param1: "10,15", param2: 0.2
+}
+
+{ +LootGroup Name: LootMoneyCard
+  Count: 1
+  Item_0: MoneyCard, param1: "100,500", param2: 0.2
+}
+
+## Very Rare 
+{ +LootGroup Name: DevicesVeryRare
+  Count: "1"
+  Item_0: GeneratorMS, param1: 1, param2: 0.05
+  Item_1: FuelTankMSLarge, param1: 1, param2: 0.3
+  Item_2: FridgeMS02, param1: 1, param2: 0.3
+  Item_3: OxygenTankMS, param1: 1, param2: 0.3
+  Item_4: ConstructorSurvival, param1: 1, param2: 0.3
+  Item_5: ConstructorT2, param1: 1, param2: 0.03
+  Item_6: GravityGeneratorMS, param1: 1, param2: 0.3
+  Item_7: ContainerAmmoLarge, param1: 1, param2: 0.3
+  Item_8: MedicinelabMS, param1: 1, param2: 0.3
+  Item_9: GeneratorMST2, param1: 1, param2: 0.01
+  Item_10: TurretBaseRocket, param1: 1, param2: 0.03  
+  Item_11: TurretBaseMinigun, param1: 1, param2: 0.02
+  Item_12: TurretBasePlasma, param1: 1, param2: 0.01
+  Item_13: TurretBaseFlak, param1: 1, param2: 0.02
+  Item_14: TurretBaseArtillery, param1: 1, param2: 0.01
+  Item_15: TurretBasePulseLaser, param1: 1, param2: 0.01
+}
+
+{ +LootGroup Name: DevicesVesselVeryRare
+  Count: "1"
+  Item_0: HoverEngineSmall, param1: 1, param2: 0.3
+  Item_1: SawAttachment, param1: 1, param2: 0.3
+  Item_2: TurretGVPlasma, param1: 1, param2: 0.02
+  Item_3: TurretGVArtillery, param1: 1, param2: 0.03
+  Item_4: ThrusterSVRoundBlocks, param1: 1, param2: 0.1
+  Item_5: LandinggearBlocksSV, param1: 1, param2: 0.3
+  Item_6: LandinggearBlocksHeavySV, param1: 1, param2: 0.3
+  Item_7: HoverEngineLarge, param1: 1, param2: 0.01
+  Item_8: WeaponSV01, param1: 1, param2: 0.008
+  Item_9: WeaponSV03, param1: 1, param2: 0.008
+  Item_10: WeaponSV04, param1: 1, param2: 0.008
+  Item_11: WeaponSV05, param1: 1, param2: 0.008
+}
+
+{ +LootGroup Name: DevicesCVVeryRare
+  Count: "1"
+  Item_0: ThrusterMSRoundBlocks, param1: 1, param2: 0.03
+  Item_1: RCSBlockMS, param1: 1, param2: 0.01
+  Item_2: RepairBayCV, param1: 1, param2: 0.03
+  Item_3: ThrusterMSRound2x2Blocks, param1: 1, param2: 0.02
+  Item_4: ThrusterMSRound3x3Blocks, param1: 1, param2: 0.01
+  Item_5: LandinggearBlocksCV, param1: 1, param2: 0.3
+  Item_6: WeaponMS01, param1: 1, param2: 0.03
+  Item_7: WeaponMS02, param1: 1, param2: 0.03
+  Item_8: TurretMSProjectileBlocks, param1: 1, param2: 0.008
+  Item_9: TurretMSLaserBlocks, param1: 1, param2: 0.005
+  Item_10: TurretMSRocketBlocks, param1: 1, param2: 0.005
+  Item_11: TurretMSArtilleryBlocks, param1: 1, param2: 0.001
+  Item_12: TurretMSToolBlocks, param1: 1, param2: 0.3
+  Item_13: RCSBlockMS_T2, param1: 1, param2: 0.001
+}
+
+{ +LootGroup Name: WeaponsVeryRare
+  Count: "1"
+  Item_0: Minigun, param1: 1
+  Item_1: LaserPistolT2, param1: 1
+  Item_2: LaserRifle, param1: 1
+  Item_3: PulseRifleT2, param1: 1, param2: 0.1
+  Item_4: ScifiCannon, param1: 1
+  Item_5: RocketLauncherT2, param1: 1
+  # Item_1: 8.3mmBullet, param1: "50,150"
+  # Item_3: PulseLaserChargePistol, param1: "10,20"
+  # Item_5: PulseLaserChargeRifle, param1: "20,30"
+  # Item_9: SlowRocket, param1: "5,10"
+}
+
+{ +LootGroup Name: WeaponsEpic
+  Count: 1
+  Item_0: AssaultRifleEpic, param1: 1, param2: 1
+  Item_1: Sniper2Epic, param1: 1, param2: 0.6
+  Item_2: MinigunEpic, param1: 1, param2: 0.5
+  Item_3: Shotgun2Epic, param1: 1, param2: 0.7
+  Item_4: LaserRifleEpic, param1: 1, param2: 0.7
+  Item_5: PistolEpic, param1: 1, param2: 1
+  Item_6: ScifiCannonEpic, param1: 1, param2: 0.2
+  Item_7: RocketLauncherEpic, param1: 1, param2: 0.3
+  Item_8: PulseRifleEpic, param1: 1, param2: 1
+  Item_9: DrillEpic, param1: 1, param2: 0.1
+  Item_10: ArmorHeavyEpic, param1: 1, param2: 0.1
+}
+
+{ +LootGroup Name: AutoMinerCore
+  Count: 1
+  Item_0: AutoMinerCore, param1: "1,3"
+}
+
+{ +LootGroup Name: TroopersFood
+  Count: 1
+  Item_0: Salami, param1: "1,2", param2: 0.7
+  Item_1: Sandwich, param1: "1", param2: 0.4
+  Item_2: PowerBar, param1: "2,4", param2: 0.8
+ # Item_3: PumpkinCookie, param1: "1,2", param2: 0.4
+  Item_4: HotBeverage, param1: "1", param2: 0.5
+}
+
+{ +LootGroup Name: Biological01
+  Count: "2,3"
+  Item_0: Spice, param1: "1,3", param2: 0.7
+  Item_1: AlienThorn, param1: "1,3", param2: 0.7
+  Item_2: Varonroot, param1: "1,3", param2: 0.7
+  Item_3: HerbalLeaves, param1: "1,3", param2: 0.7
+  Item_4: PlantProtein, param1: "1,3", param2: 0.7
+  Item_5: PhoenixFernFonds, param1: "1,3", param2: 0.7
+  Item_6: MushroomBrown, param1: "1,3", param2: 0.7
+  Item_7: MushroomSpiky, param1: "1,3", param2: 0.7
+  Item_8: NaturalSweetener, param1: "1,3", param2: 0.7
+}
+
+{ +LootGroup Name: SuitBooster
+  Count: "1"
+  Item_0: ArmorBoost, param1: 1, param2: 0.1
+  Item_1: JetpackBoost, param1: 1, param2: 0.1
+  Item_2: MultiBoost, param1: 1, param2: 0.1
+  Item_3: OxygenBoost, param1: 1, param2: 0.1
+  Item_4: InsulationBoost, param1: 1, param2: 0.1
+  Item_5: MobilityBoost, param1: 1, param2: 0.1
+  Item_6: RadiationBoost, param1: 1, param2: 0.1
+  Item_7: EVABoost, param1: 1, param2: 0.1
+}
+
+{ +LootGroup Name: SmallOptronics
+  Count: "1"
+  Item_0: SmallOptronicBridge, param1: 1, param2: 0.5
+  Item_1: SmallOptronicMatrix, param1: 1, param2: 0.1
+}
+
+{ +LootGroup Name: LargeOptronics
+  Count: "1"
+  Item_0: LargeOptronicBridge, param1: 1, param2: 0.5
+  Item_1: LargeOptronicMatrix, param1: 1, param2: 0.1
+}

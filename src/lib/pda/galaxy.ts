@@ -684,6 +684,7 @@ export type OrbitIssue = {
   reason: string;
   suggested: [number, number, number];
   suggestedDistance: number;
+  movable: boolean;
 };
 
 const MOON_MAX_SEP = 10;
@@ -723,8 +724,9 @@ export function diagnoseOrbits(star: EcfObject, bodies: SystemBody[]): OrbitIssu
       return;
     }
 
-    let suggested: [number, number, number];
-    let suggestedDistance: number;
+    let suggested: [number, number, number] = body.coords;
+    let suggestedDistance = body.distance;
+    let movable = false;
     if (targetKey === "parent" && parent) {
       const base = parent.distance || 1;
       const nest = base + 3;
@@ -733,12 +735,24 @@ export function diagnoseOrbits(star: EcfObject, bodies: SystemBody[]): OrbitIssu
         suggested = [roundCoord(parent.coords[0] + 3), parent.coords[1], parent.coords[2]];
       }
       suggestedDistance = dist(suggested, [0, 0, 0]);
-    } else {
-      const key = (targetKey && targetKey !== "parent" ? targetKey : null) || (off ? "OuterSystem" : zone?.key) || "HabitableTemperate";
-      const slot = slotInZone(star, key, used) ?? zoneMidpoint(star, key) ?? Math.max(outer * 0.85, 20);
-      suggested = scaleCoords(body.coords, slot);
-      suggestedDistance = dist(suggested, [0, 0, 0]);
-      used.push(suggestedDistance);
+      movable = true;
+    } else if (targetKey && targetKey !== "parent") {
+      const slot = slotInZone(star, targetKey, used) ?? zoneMidpoint(star, targetKey);
+      if (slot != null) {
+        suggested = scaleCoords(body.coords, slot);
+        suggestedDistance = dist(suggested, [0, 0, 0]);
+        const landed = zoneAtDistance(star, suggestedDistance);
+        movable = landed?.key === targetKey;
+        if (movable) used.push(suggestedDistance);
+      }
+    } else if (off) {
+      const slot = slotInZone(star, "OuterSystem", used) ?? zoneMidpoint(star, "OuterSystem");
+      if (slot != null) {
+        suggested = scaleCoords(body.coords, slot);
+        suggestedDistance = dist(suggested, [0, 0, 0]);
+        movable = Boolean(zoneAtDistance(star, suggestedDistance));
+        if (movable) used.push(suggestedDistance);
+      }
     }
 
     issues.push({
@@ -747,9 +761,12 @@ export function diagnoseOrbits(star: EcfObject, bodies: SystemBody[]): OrbitIssu
       climate,
       currentZone: zone?.label ?? (off ? "off-scale" : null),
       expectedZone: targetKey,
-      reason,
+      reason: movable
+        ? reason
+        : `${reason} This star has no ${STAR_ZONES.find((z) => z.key === targetKey)?.label || "matching"} range to move it into.`,
       suggested,
       suggestedDistance,
+      movable,
     });
     relocated.set(body.name, { ...body, coords: suggested, distance: suggestedDistance });
   };
@@ -788,16 +805,14 @@ export function applyOrbitFixes(
   yaml: string,
   fixes: { name: string; coords: [number, number, number] }[],
 ): string {
-  let out = yaml;
-  for (const fix of fixes) {
-    const name = fix.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const coord = formatCoords(fix.coords);
-    const re = new RegExp(
-      `(\\[[\\s'"]*)-?[\\d.]+\\s*,\\s*-?[\\d.]+\\s*,\\s*-?[\\d.]+([\\s'"]*,\\s*['"]?${name}\\b)`,
-    );
-    if (re.test(out)) out = out.replace(re, `$1${coord}$2`);
-  }
-  return out;
+  const byName = new Map(fixes.map((fix) => [fix.name.trim().toLowerCase(), formatCoords(fix.coords)]));
+  const tupleRe =
+    /\[\s*(['"]?)\s*-?[\d.]+\s*,\s*-?[\d.]+\s*,\s*-?[\d.]+\s*\1\s*,\s*(['"]?)([^,\]]+?)\2(?=\s*,)/g;
+  return yaml.replace(tupleRe, (full, coordQuote: string, nameQuote: string, rawName: string) => {
+    const coord = byName.get(rawName.trim().toLowerCase());
+    if (!coord) return full;
+    return `[${coordQuote}${coord}${coordQuote}, ${nameQuote}${rawName.trim()}${nameQuote}`;
+  });
 }
 
 export function renameSectorBody(yaml: string, from: string, to: string): string {
