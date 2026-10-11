@@ -45,6 +45,28 @@ import { warmImageCache } from "@/lib/pda/image-store.ts";
 
 type Tab = ConfigRole | "compare" | "localization" | "playfields";
 
+const GROUP_TONE: Record<ConfigGroup, { idle: string; on: string }> = {
+  catalog: {
+    idle: "border-[#245854] bg-[#0e1c1b] text-[#9ad7d1]",
+    on: "border-[#3d8f88] bg-[#163330] text-[#e7fffb]",
+  },
+  world: {
+    idle: "border-[#5a4630] bg-[#1c160f] text-[#e4c89a]",
+    on: "border-[#a68558] bg-[#2a2116] text-[#fff4df]",
+  },
+  loot: {
+    idle: "border-[#4a3a58] bg-[#16121c] text-[#d4b8e6]",
+    on: "border-[#7a62a0] bg-[#261c30] text-[#f6ecff]",
+  },
+  defs: {
+    idle: "border-[#2c4660] bg-[#101820] text-[#a9c7e4]",
+    on: "border-[#4d7eaa] bg-[#172838] text-[#e8f4ff]",
+  },
+  text: {
+    idle: "border-[#2d5244] bg-[#101a16] text-[#9ed4bc]",
+    on: "border-[#4f8f74] bg-[#163028] text-[#e7fff4]",
+  },
+};
 const GROUPS: { id: ConfigGroup; label: string }[] = [
   { id: "catalog", label: "Catalog" },
   { id: "world", label: "World" },
@@ -123,40 +145,44 @@ export function LibraryPage() {
           </p>
         </div>
       </div>
-      <div className="flex gap-1 overflow-x-auto border-b border-border px-3">
-        {GROUPS.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setGroupAndTab(item.id)}
-            className={`relative h-9 shrink-0 px-3 text-xs uppercase tracking-[0.14em] ${
-              group === item.id ? "text-fg" : "text-muted hover:text-fg"
-            }`}
-          >
-            {item.label}
-            {group === item.id ? <span className="absolute inset-x-2 bottom-0 h-px bg-accent" /> : null}
-          </button>
-        ))}
+      <div className="flex flex-wrap gap-2 border-b border-border px-4 py-3">
+        {GROUPS.map((item) => {
+          const active = group === item.id;
+          const tone = GROUP_TONE[item.id];
+          return (
+            <button
+              key={item.id}
+              onClick={() => setGroupAndTab(item.id)}
+              className={`inline-flex h-12 items-center rounded-md border px-5 text-xl font-medium tracking-wide ${active ? tone.on : tone.idle}`}
+            >
+              {item.label}
+            </button>
+          );
+        })}
       </div>
-      <div className="flex gap-1 overflow-x-auto border-b border-border px-3">
+      <div className="flex flex-wrap gap-2 border-b border-border bg-surface/40 px-4 py-3">
         {tabs.map((id) => {
-            const href = WORKSPACE[id];
-            const active = tab === id;
-            const className = `relative h-10 shrink-0 px-3 text-sm ${active ? "text-fg" : "text-muted hover:text-fg"}`;
-            if (href) {
-              return (
-                <Link key={id} to={href} className={className}>
-                  {tabLabel(id)}
-                  <span className="ml-1 text-[10px] uppercase tracking-wide text-subtle">page</span>
-                </Link>
-              );
-            }
+          const href = WORKSPACE[id];
+          const active = tab === id;
+          const tone = GROUP_TONE[group];
+          const className = `inline-flex h-7 items-center gap-1.5 rounded-md border px-2.5 text-xs ${active ? tone.on : `${tone.idle} opacity-80 hover:opacity-100`}`;
+          const badge = href ? (
+            <span className="rounded-sm bg-black/25 px-1.5 py-0.5 text-[10px] uppercase tracking-wide">page</span>
+          ) : null;
+          if (href) {
             return (
-              <button key={id} onClick={() => setTab(id)} className={className}>
+              <Link key={id} to={href} className={className}>
                 {tabLabel(id)}
-                {active ? <span className="absolute inset-x-2 bottom-0 h-px bg-accent" /> : null}
-              </button>
+                {badge}
+              </Link>
             );
-          })}
+          }
+          return (
+            <button key={id} onClick={() => setTab(id)} className={className}>
+              {tabLabel(id)}
+            </button>
+          );
+        })}
       </div>
       <div className="min-h-0 flex-1">
         {WORKSPACE[tab] ? (

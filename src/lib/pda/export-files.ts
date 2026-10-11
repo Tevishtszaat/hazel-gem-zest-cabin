@@ -127,10 +127,107 @@ export function exportSlots(project: PdaProject, catalog: ScenarioCatalog): Expo
 }
 
 export function downloadText(name: string, text: string, type: string) {
-  const blob = new Blob([text], { type: `${type};charset=utf-8` });
+  downloadAxisExport([{ name, text, type }]);
+}
+
+const AXIS_FOLDER = "axisexport";
+
+export function downloadAxisExport(files: { name: string; text: string; type?: string }[]) {
+  const blob = new Blob([axisExportZip(files)], { type: "application/zip" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = name;
+  a.download = `${AXIS_FOLDER}.zip`;
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+export function axisExportZip(files: { name: string; text: string }[]): Uint8Array {
+  const enc = new TextEncoder();
+  const used = new Set<string>();
+  const packed = files.map((file) => {
+    const base = file.name.split(/[\\/]/).pop() || "file.txt";
+    let name = `${AXIS_FOLDER}/${base}`;
+    const key = name.toLowerCase();
+    if (used.has(key)) {
+      const dot = base.lastIndexOf(".");
+      const stem = dot > 0 ? base.slice(0, dot) : base;
+      const ext = dot > 0 ? base.slice(dot) : "";
+      let n = 2;
+      while (used.has(`${AXIS_FOLDER}/${stem}-${n}${ext}`.toLowerCase())) n += 1;
+      name = `${AXIS_FOLDER}/${stem}-${n}${ext}`;
+    }
+    used.add(name.toLowerCase());
+    return { name, data: enc.encode(file.text) };
+  });
+  return zipStored(packed);
+}
+
+function crc32(data: Uint8Array): number {
+  let c = ~0;
+  for (let i = 0; i < data.length; i++) {
+    c ^= data[i]!;
+    for (let k = 0; k < 8; k++) c = (c >>> 1) ^ (c & 1 ? 0xedb88320 : 0);
+  }
+  return ~c >>> 0;
+}
+
+function zipStored(files: { name: string; data: Uint8Array }[]): Uint8Array {
+  const enc = new TextEncoder();
+  const now = new Date();
+  const time = (now.getHours() << 11) | (now.getMinutes() << 5) | Math.floor(now.getSeconds() / 2);
+  const date = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+  const locals: Uint8Array[] = [];
+  const central: Uint8Array[] = [];
+  let offset = 0;
+  for (const file of files) {
+    const name = enc.encode(file.name);
+    const crc = crc32(file.data);
+    const local = new Uint8Array(30);
+    const view = new DataView(local.buffer);
+    view.setUint32(0, 0x04034b50, true);
+    view.setUint16(4, 20, true);
+    view.setUint16(6, 0x0800, true);
+    view.setUint16(10, time, true);
+    view.setUint16(12, date, true);
+    view.setUint32(14, crc, true);
+    view.setUint32(18, file.data.length, true);
+    view.setUint32(22, file.data.length, true);
+    view.setUint16(26, name.length, true);
+    locals.push(local, name, file.data);
+    const cen = new Uint8Array(46);
+    const cenView = new DataView(cen.buffer);
+    cenView.setUint32(0, 0x02014b50, true);
+    cenView.setUint16(4, 20, true);
+    cenView.setUint16(6, 20, true);
+    cenView.setUint16(8, 0x0800, true);
+    cenView.setUint16(12, time, true);
+    cenView.setUint16(14, date, true);
+    cenView.setUint32(16, crc, true);
+    cenView.setUint32(20, file.data.length, true);
+    cenView.setUint32(24, file.data.length, true);
+    cenView.setUint16(28, name.length, true);
+    cenView.setUint32(42, offset, true);
+    central.push(cen, name);
+    offset += local.length + name.length + file.data.length;
+  }
+  const centralStart = offset;
+  const centralSize = central.reduce((sum, part) => sum + part.length, 0);
+  const eocd = new Uint8Array(22);
+  const end = new DataView(eocd.buffer);
+  end.setUint32(0, 0x06054b50, true);
+  end.setUint16(8, files.length, true);
+  end.setUint16(10, files.length, true);
+  end.setUint32(12, centralSize, true);
+  end.setUint32(16, centralStart, true);
+  return concatBytes([...locals, ...central, eocd]);
+}
+
+function concatBytes(chunks: Uint8Array[]): Uint8Array {
+  const out = new Uint8Array(chunks.reduce((sum, chunk) => sum + chunk.length, 0));
+  let offset = 0;
+  for (const chunk of chunks) {
+    out.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return out;
 }

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { AppHeader } from "@/components/app-header.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { downloadText, exportSlots } from "@/lib/pda/export-files.ts";
+import { downloadAxisExport, exportSlots } from "@/lib/pda/export-files.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
 
 export function ExportPage() {
@@ -17,11 +17,11 @@ export function ExportPage() {
   const downloadOne = (id: string) => {
     const slot = slots.find((s) => s.id === id);
     if (!slot?.ready) return;
-    downloadText(slot.filename, slot.build(), slot.mime);
+    downloadAxisExport([{ name: slot.filename, text: slot.build() }]);
   };
 
   const downloadSelected = () => {
-    for (const slot of selected) downloadText(slot.filename, slot.build(), slot.mime);
+    downloadAxisExport(selected.map((slot) => ({ name: slot.filename, text: slot.build() })));
   };
 
   return (
@@ -32,8 +32,8 @@ export function ExportPage() {
           <div>
             <h1 className="font-medium text-2xl tracking-tight">Export</h1>
             <p className="mt-1 max-w-2xl text-sm text-muted">
-              Download the files this workshop can edit. Drop them back into the scenario folder, replacing the
-              originals.
+              Download saves one axisexport.zip. The configs sit in a folder named axisexport and keep their original
+              names. Export again and the browser numbers that zip, not the files inside.
             </p>
           </div>
           <Button disabled={!selected.length} onClick={downloadSelected}>
