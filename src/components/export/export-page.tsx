@@ -13,6 +13,11 @@ export function ExportPage() {
   );
 
   const selected = slots.filter((s) => s.ready && picked[s.id]);
+  const available = slots.filter((s) => s.ready);
+
+  const selectAvailable = () => {
+    setPicked(Object.fromEntries(available.map((slot) => [slot.id, true])));
+  };
 
   const downloadOne = (id: string) => {
     const slot = slots.find((s) => s.id === id);
@@ -36,9 +41,14 @@ export function ExportPage() {
               names. Export again and the browser numbers that zip, not the files inside.
             </p>
           </div>
-          <Button disabled={!selected.length} onClick={downloadSelected}>
-            Download selected ({selected.length})
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" disabled={!available.length} onClick={selectAvailable}>
+              Select all available ({available.length})
+            </Button>
+            <Button disabled={!selected.length} onClick={downloadSelected}>
+              Download selected ({selected.length})
+            </Button>
+          </div>
         </div>
 
         <ul className="grid gap-2 sm:grid-cols-2">
