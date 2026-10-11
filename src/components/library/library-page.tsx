@@ -79,16 +79,17 @@ const GROUPS: { id: ConfigGroup; label: string }[] = [
 
 const GROUP_TABS: Record<ConfigGroup, Tab[]> = {
   catalog: ["items", "blocks", "templates", "tokens", "compare"],
-  world: ["factions", "playfields", "presets", "eclass", "egroups", "reputation", "warfare", "galaxy"],
+  world: ["factions", "playfields", "presets", "eclass", "egroups", "reputation", "warfare", "galaxy", "sectors"],
   loot: ["containers", "lootgroups", "traders"],
   defs: ["materials", "statuseffects", "globaldefs", "blockgroups", "blockshapes", "animations", "baiconfig"],
-  text: ["localization", "sectors"],
+  text: ["localization"],
 };
 
 const WORKSPACE: Partial<
   Record<
     Tab,
     | "/library/galaxy"
+    | "/library/sectors"
     | "/library/reputation"
     | "/library/warfare"
     | "/library/items"
@@ -104,6 +105,7 @@ const WORKSPACE: Partial<
   playfields: "/library/playfields",
   presets: "/library/presets",
   galaxy: "/library/galaxy",
+  sectors: "/library/sectors",
   reputation: "/library/reputation",
   warfare: "/library/warfare",
 };
@@ -113,6 +115,7 @@ function tabLabel(id: Tab) {
   if (id === "localization") return "Localization";
   if (id === "playfields") return "Playfields";
   if (id === "presets") return "Random presets";
+  if (id === "sectors") return "Sectors";
   return configMeta(id)?.label || id;
 }
 
@@ -198,8 +201,6 @@ export function LibraryPage() {
           <BlockCompare initial={compareLeft} />
         ) : tab === "localization" ? (
           <LocaEditor />
-        ) : tab === "sectors" ? (
-          <YamlEditor role="sectors" fileName="Sectors.yaml" title="Sectors" />
         ) : meta ? (
           <ObjectBrowser
             key={meta.role}
@@ -1082,31 +1083,6 @@ function ChildrenEditor({
           </Button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function YamlEditor({ role, fileName, title }: { role: string; fileName: string; title: string }) {
-  const catalog = usePdaStore((s) => s.catalog);
-  const setCatalogText = usePdaStore((s) => s.setCatalogText);
-  const text = catalogText(catalog, role)?.text ?? "";
-  return (
-    <div className="mx-auto h-full max-w-4xl overflow-auto p-6">
-      <div className="mb-4 flex items-end justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-medium tracking-tight">{title}</h2>
-          <p className="mt-1 text-sm text-muted">{fileName} — YAML. Saved into this workshop on every keystroke.</p>
-        </div>
-        <Button size="sm" variant="secondary" disabled={!text.trim()} onClick={() => download(fileName, text, "text/yaml")}>
-          Export
-        </Button>
-      </div>
-      <Textarea
-        className="min-h-[60vh] font-mono text-xs leading-5"
-        value={text}
-        placeholder={"Sectors:\n  - Coordinates: [0, 0, 0]\n    Playfields:\n      - ['0, 0, 0', My Planet, Planet]"}
-        onChange={(e) => setCatalogText(role, e.target.value, catalogText(catalog, role)?.path || fileName)}
-      />
     </div>
   );
 }

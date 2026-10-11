@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useMemo, useState, type ReactNode } from "react";
 import { GalaxyStarChart } from "@/components/library/galaxy-chart.tsx";
 import { Button } from "@/components/ui/button.tsx";
@@ -8,6 +9,8 @@ import { stringifyEcfObjects, type EcfObject } from "@/lib/pda/ecf.ts";
 import { noteForField } from "@/lib/pda/field-notes.ts";
 import { catalogText, objectsFor } from "@/lib/pda/library.ts";
 import { applyOrbitFixes, parseSectorBodies, STAR_MODELS, STAR_REGION_STATS, STAR_STATS, fieldToHex, hexToField, isStarType, parseStarMix, writeStarMix, type StarMix } from "@/lib/pda/galaxy.ts";
+import { VolumeViewport } from "@/components/library/volume-view.tsx";
+import { parseVolumeSystems, readGalaxyVolume } from "@/lib/pda/volume.ts";
 import { usePdaStore } from "@/store/pda-store.ts";
 
 function download(name: string, text: string) {
@@ -165,6 +168,8 @@ export function GalaxyEditor() {
   const [nebulaKey, setNebulaKey] = useState(nebulaKeys[0] || "");
   const nebula = nebulaKeys.includes(nebulaKey) ? nebulaKey : nebulaKeys[0] || "";
   const extraStar = star ? Object.keys(star.fields).filter((k) => !STAR_STATS.includes(k)) : [];
+  const volumeSystems = useMemo(() => parseVolumeSystems(sectorText?.text || ""), [sectorText?.text]);
+  const galaxyVolume = useMemo(() => readGalaxyVolume(general), [general]);
 
   return (
     <div className="h-full min-h-0 overflow-auto p-6">
@@ -207,6 +212,18 @@ export function GalaxyEditor() {
           in the scenario drop (Content/Sectors.yaml) or imported on the Sectors slot.
         </p>
       ) : null}
+
+      <div className="mt-4 h-[520px]">
+        <VolumeViewport space="galaxy" galaxy={galaxyVolume} systems={volumeSystems} />
+      </div>
+      <p className="mt-2 text-xs text-subtle">
+        Outside view, in light years. The disk is the galaxy radius, rings are star regions, colored spheres are
+        territories, and the glow is nebula color. Scroll in to read a region. Bright points are stars from Sectors.yaml.{" "}
+        <Link to="/library/sectors" className="text-accent hover:underline">
+          Open the sectors volume
+        </Link>{" "}
+        to zoom into a star, planet, or moon and edit it.
+      </p>
 
       {star ? (
         <GalaxyStarChart

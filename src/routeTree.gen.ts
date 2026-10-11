@@ -23,6 +23,7 @@ import { Route as LibraryItemsRouteImport } from './routes/library.items'
 import { Route as LibraryPlayfieldsRouteImport } from './routes/library.playfields'
 import { Route as LibraryPresetsRouteImport } from './routes/library.presets'
 import { Route as LibraryReputationRouteImport } from './routes/library.reputation'
+import { Route as LibrarySectorsRouteImport } from './routes/library.sectors'
 import { Route as LibraryWarfareRouteImport } from './routes/library.warfare'
 
 const IndexRoute = IndexRouteImport.update({
@@ -95,6 +96,11 @@ const LibraryReputationRoute = LibraryReputationRouteImport.update({
   path: '/reputation',
   getParentRoute: () => LibraryRoute,
 } as any)
+const LibrarySectorsRoute = LibrarySectorsRouteImport.update({
+  id: '/sectors',
+  path: '/sectors',
+  getParentRoute: () => LibraryRoute,
+} as any)
 const LibraryWarfareRoute = LibraryWarfareRouteImport.update({
   id: '/warfare',
   path: '/warfare',
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/library/playfields': typeof LibraryPlayfieldsRoute
   '/library/presets': typeof LibraryPresetsRoute
   '/library/reputation': typeof LibraryReputationRoute
+  '/library/sectors': typeof LibrarySectorsRoute
   '/library/warfare': typeof LibraryWarfareRoute
   '/library/': typeof LibraryIndexRoute
 }
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/library/playfields': typeof LibraryPlayfieldsRoute
   '/library/presets': typeof LibraryPresetsRoute
   '/library/reputation': typeof LibraryReputationRoute
+  '/library/sectors': typeof LibrarySectorsRoute
   '/library/warfare': typeof LibraryWarfareRoute
   '/library': typeof LibraryIndexRoute
 }
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/library/playfields': typeof LibraryPlayfieldsRoute
   '/library/presets': typeof LibraryPresetsRoute
   '/library/reputation': typeof LibraryReputationRoute
+  '/library/sectors': typeof LibrarySectorsRoute
   '/library/warfare': typeof LibraryWarfareRoute
   '/library/': typeof LibraryIndexRoute
 }
@@ -168,6 +177,7 @@ export interface FileRouteTypes {
     | '/library/playfields'
     | '/library/presets'
     | '/library/reputation'
+    | '/library/sectors'
     | '/library/warfare'
     | '/library/'
   fileRoutesByTo: FileRoutesByTo
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
     | '/library/playfields'
     | '/library/presets'
     | '/library/reputation'
+    | '/library/sectors'
     | '/library/warfare'
     | '/library'
   id:
@@ -201,6 +212,7 @@ export interface FileRouteTypes {
     | '/library/playfields'
     | '/library/presets'
     | '/library/reputation'
+    | '/library/sectors'
     | '/library/warfare'
     | '/library/'
   fileRoutesById: FileRoutesById
@@ -314,6 +326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LibraryReputationRouteImport
       parentRoute: typeof LibraryRoute
     }
+    '/library/sectors': {
+      id: '/library/sectors'
+      path: '/sectors'
+      fullPath: '/library/sectors'
+      preLoaderRoute: typeof LibrarySectorsRouteImport
+      parentRoute: typeof LibraryRoute
+    }
     '/library/warfare': {
       id: '/library/warfare'
       path: '/warfare'
@@ -332,6 +351,7 @@ interface LibraryRouteChildren {
   LibraryPlayfieldsRoute: typeof LibraryPlayfieldsRoute
   LibraryPresetsRoute: typeof LibraryPresetsRoute
   LibraryReputationRoute: typeof LibraryReputationRoute
+  LibrarySectorsRoute: typeof LibrarySectorsRoute
   LibraryWarfareRoute: typeof LibraryWarfareRoute
   LibraryIndexRoute: typeof LibraryIndexRoute
 }
@@ -344,6 +364,7 @@ const LibraryRouteChildren: LibraryRouteChildren = {
   LibraryPlayfieldsRoute: LibraryPlayfieldsRoute,
   LibraryPresetsRoute: LibraryPresetsRoute,
   LibraryReputationRoute: LibraryReputationRoute,
+  LibrarySectorsRoute: LibrarySectorsRoute,
   LibraryWarfareRoute: LibraryWarfareRoute,
   LibraryIndexRoute: LibraryIndexRoute,
 }
