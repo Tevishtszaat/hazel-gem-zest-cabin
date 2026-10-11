@@ -1,6 +1,6 @@
 import * as yaml from "js-yaml";
 import { parseCsv } from "./csv.ts";
-import { extractEcfRecords } from "./ecf.ts";
+import { extractEcfRecords, harvestDeclaredNames } from "./ecf.ts";
 import { configMetaByFile, CONFIG_TEXT_ROLES } from "./config-roles.ts";
 import { isPlayfieldBasename } from "./playfield.ts";
 import type { ImportFiles } from "./yaml-import.ts";
@@ -92,6 +92,33 @@ const KIND_FROM_ECF: Record<string, CatalogKind> = {
   container: "item",
 };
 
+export const MULTI_FILE_ROLES = new Set([
+  "blocks",
+  "items",
+  "templates",
+  "tokens",
+  "eclass",
+  "factions",
+  "dialogues",
+  "dialoguesCsv",
+  "ecf",
+  "traders",
+  "lootgroups",
+  "containers",
+  "blockshapes",
+  "warfare",
+  "reputation",
+  "statuseffects",
+]);
+
+export function textForIndex(path: string, text: string | undefined): string | undefined {
+  if (!text) return undefined;
+  if (/\.ecf$/i.test(path)) return text;
+  if (text.length > 6_000_000) return undefined;
+  if (/\bPlayfields?\b/i.test(path) && /playfield.*\.ya?ml$/i.test(path)) return undefined;
+  return text;
+}
+
 export function emptyCatalog(): ScenarioCatalog {
   return { folderName: "", files: [], entries: [], texts: [], indexedAt: 0 };
 }
@@ -166,6 +193,10 @@ export function collectCatalogTexts(files: ScenarioSource[], hint?: string): Cat
   const consider = (role: string, file: ScenarioSource) => {
     if (!file.text) return;
     const next: CatalogText = { role, path: normalizePath(file.path), text: file.text };
+    if (MULTI_FILE_ROLES.has(role)) {
+      byRole.set(`${role}:${next.path}`, next);
+      return;
+    }
     const prev = byRole.get(role);
     if (!prev) {
       byRole.set(role, next);
@@ -556,6 +587,14 @@ export function indexScenario(files: ScenarioSource[], hint?: string): IndexedSc
       (CONFIG_TEXT_ROLES.has(role) || role === "ecf" || role === "dialogues")
     ) {
       const records = extractEcfRecords(file.text);
+      const harvested = harvestDeclaredNames(file.text);
+      const seenRec = new Set(records.map((rec) => `${rec.kind}:${rec.name}`.toLowerCase()));
+      for (const extra of harvested) {
+        const key = `${extra.kind}:${extra.name}`.toLowerCase();
+        if (seenRec.has(key)) continue;
+        seenRec.add(key);
+        records.push({ kind: extra.kind, name: extra.name });
+      }
       for (const rec of records) {
         const kind = KIND_FROM_ECF[rec.kind.toLowerCase()];
         if (!kind) continue;

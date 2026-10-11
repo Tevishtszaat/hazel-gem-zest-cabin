@@ -10,7 +10,7 @@ import {
   matchesClassFilter,
   groupByEntityType,
 } from "./config-stats.ts";
-import { extractEcfRecords, parseEcfObjects, stringifyEcfObjects } from "./ecf.ts";
+import { extractEcfRecords, harvestDeclaredNames, parseEcfObjects, stringifyEcfObjects } from "./ecf.ts";
 
 describe("templates and unused ids", () => {
   it("round-trips Templates.ecf child inputs", () => {
@@ -65,6 +65,7 @@ describe("templates and unused ids", () => {
     );
     assert.equal(rows[0]?.abbrev, "TLN");
     assert.equal(parseEcfObjects(text).length, 2);
+    assert.ok(harvestDeclaredNames(text).some((row) => row.kind === "Faction" && row.name === "Polaris"));
   });
 
   it("lists empty item and block ids so they can be claimed", () => {

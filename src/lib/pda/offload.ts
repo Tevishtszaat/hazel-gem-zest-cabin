@@ -1,6 +1,6 @@
 import { runHeavy, slimCatalog, type HeavyOp, type HeavyPayload, type ValidateResult } from "./heavy-jobs.ts";
 import type { ImportKind } from "./import-kinds.ts";
-import { collectCatalogTexts, type IndexedScenario, type ScenarioCatalog, type ScenarioSource } from "./scenario-index.ts";
+import { collectCatalogTexts, textForIndex, type IndexedScenario, type ScenarioCatalog, type ScenarioSource } from "./scenario-index.ts";
 import type { PdaProject } from "./types.ts";
 import type { ImportFiles } from "./yaml-import.ts";
 import { slimCatalogForSource, type FileDebugId } from "./validate-files.ts";
@@ -54,9 +54,8 @@ function call<T>(op: HeavyOp, payload: HeavyPayload, markBusy = true): Promise<T
 
 export function indexScenarioOffthread(files: ScenarioSource[], kind?: ImportKind) {
   const light = files.map((file) => {
-    const text = file.text;
+    const text = textForIndex(file.path, file.text);
     if (!text) return { path: file.path, meta: file.meta };
-    if (text.length > 6_000_000) return { path: file.path };
     if (/\bPlayfields?\b/i.test(file.path) && /playfield.*\.ya?ml$/i.test(file.path)) {
       return { path: file.path };
     }

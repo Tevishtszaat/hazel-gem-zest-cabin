@@ -134,6 +134,32 @@ export function parseEcfObjects(text: string): EcfObject[] {
   return roots;
 }
 
+export function harvestDeclaredNames(text: string): { kind: string; name: string }[] {
+  const src = stripEcfComments(text);
+  const out: { kind: string; name: string }[] = [];
+  const seen = new Set<string>();
+  const re = /\{\s*\+?([A-Za-z][A-Za-z0-9]*)\b([^\n]*)/g;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(src))) {
+    const kind = match[1] ?? "";
+    if (!kind || /^child$/i.test(kind)) continue;
+    const header = match[2] ?? "";
+    const headerName = header.match(NAME_FIELD);
+    let name = (headerName?.[1] || headerName?.[2] || headerName?.[3] || "").trim();
+    if (!name) {
+      const window = src.slice(match.index, match.index + 700);
+      const named = window.match(/\bName:\s*(?:"([^"]+)"|'([^']+)'|([A-Za-z0-9_-]+))/);
+      name = (named?.[1] || named?.[2] || named?.[3] || "").trim();
+    }
+    if (!name) continue;
+    const key = `${kind}:${name}`.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ kind, name });
+  }
+  return out;
+}
+
 export function extractEcfRecords(text: string): EcfRecord[] {
   const seen = new Set<string>();
   const out: EcfRecord[] = [];

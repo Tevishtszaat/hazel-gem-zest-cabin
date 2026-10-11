@@ -123,6 +123,27 @@ describe("scenario folder index", () => {
     assert.equal(unknown.filter((i) => i.message.includes("AlienBug01")).length, 0);
   });
 
+  it("indexes Eden_TreasureBox from the scenario BlocksConfig even when the game file is larger", () => {
+    const game = `{ Block Name: HullLarge\n}\n${" ".repeat(80)}`;
+    const scenario = `{ +Block Name: Eden_TreasureBox
+  Description: "chest {with a brace"
+}
+{ Block Name: HullSmall
+}
+`;
+    const files = [
+      { path: "Game/Content/Configuration/BlocksConfig.ecf", text: game },
+      { path: "Ascension/Content/Configuration/BlocksConfig.ecf", text: scenario },
+    ];
+    const indexed = indexScenario(files);
+    assert.ok(lookupCatalog(indexed.catalog, "Eden_TreasureBox"));
+    assert.equal(lookupCatalog(indexed.catalog, "Eden_TreasureBox")?.kind, "block");
+    assert.ok(lookupCatalog(indexed.catalog, "HullLarge"));
+    assert.ok(lookupCatalog(indexed.catalog, "HullSmall"));
+    const texts = collectCatalogTexts(files);
+    assert.equal(texts.filter((t) => t.role === "blocks").length, 2);
+  });
+
   it("indexes factions.ecf from the scenario folder, including abbreviations", () => {
     const indexed = indexScenario([
       {

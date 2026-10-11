@@ -1,6 +1,7 @@
 import type { StateStorage } from "zustand/middleware";
 import { beginBusy, endBusy } from "@/store/busy-store.ts";
 import type { CatalogText } from "./scenario-index.ts";
+import { MULTI_FILE_ROLES } from "./scenario-index.ts";
 
 const DB = "pulsepda";
 const STORE = "kv";
@@ -89,7 +90,7 @@ async function flush(name: string, value: string) {
 }
 
 function catalogTextKey(text: CatalogText) {
-  if (text.role === "playfieldYaml" || text.role === "factions") return `${text.role}:${text.path}`;
+  if (text.role === "playfieldYaml" || MULTI_FILE_ROLES.has(text.role)) return `${text.role}:${text.path}`;
   return text.role;
 }
 
