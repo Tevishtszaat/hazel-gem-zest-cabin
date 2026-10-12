@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { GalaxyVolume, Vec3, VolumeSystem } from "@/lib/pda/volume.ts";
-import { starTint } from "@/lib/pda/volume.ts";
+import { starClassKey, starTint } from "@/lib/pda/volume.ts";
 
 export type ZoneRing = { label: string; min: number; max: number; color: string };
 
@@ -79,6 +79,7 @@ export function VolumeViewport({
   zones,
   onPick,
   layer = "all",
+  hidden,
 }: {
   space: "galaxy" | "system";
   galaxy: GalaxyVolume | null;
@@ -88,6 +89,7 @@ export function VolumeViewport({
   zones?: ZoneRing[];
   onPick?: (pick: { system: string; body?: string }) => void;
   layer?: "galaxy" | "regions" | "territories" | "all";
+  hidden?: ReadonlySet<string>;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -157,18 +159,19 @@ export function VolumeViewport({
         const showGalaxy = layer === "galaxy" || layer === "all";
         const showRegions = layer === "regions" || layer === "all";
         const showTerritories = layer === "territories" || layer === "all";
+        const off = (id: string) => Boolean(hidden?.has(id));
         const outer = galaxy?.outer || 1000;
         const yScale = 0.22;
         if (showGalaxy) {
-          shell(ctx, cam, w, h, outer, yScale, "rgba(150,186,255,0.85)", 0.35);
-          if ((galaxy?.inner || 0) > 1) shell(ctx, cam, w, h, galaxy!.inner, yScale, "rgba(255,220,160,0.8)", 0.28);
+          if (!off("radius:outer")) shell(ctx, cam, w, h, outer, yScale, "rgba(150,186,255,0.85)", 0.35);
+          if (!off("radius:inner") && (galaxy?.inner || 0) > 1) shell(ctx, cam, w, h, galaxy!.inner, yScale, "rgba(255,220,160,0.8)", 0.28);
         } else {
           shell(ctx, cam, w, h, outer, yScale, "rgba(150,186,255,0.45)", 0.12);
         }
         if (showRegions) {
           const regionLabels: { x: number; y: number; text: string }[] = [];
           for (const region of galaxy?.regions || []) {
-            if (region.outer <= 0) continue;
+            if (region.outer <= 0 || off(`region:${region.id}`)) continue;
             shell(ctx, cam, w, h, region.outer, region.shape === "elliptical" ? 0.22 : 1, region.color, layer === "regions" ? 0.8 : 0.45);
             const at = project([region.outer, 0, 0], cam, w, h);
             if (at) regionLabels.push({ x: at.x, y: at.y, text: region.name });
@@ -184,7 +187,8 @@ export function VolumeViewport({
           }
         }
         if (showGalaxy) {
-          const nebulas = (galaxy?.nebulas || []).slice(0, 8);
+          const visible = (galaxy?.nebulas || []).filter((nebula) => !off(`nebula:${nebula.key}`));
+          const nebulas = hidden?.size ? visible.slice(0, 12) : visible.slice(0, 8);
           nebulas.forEach((nebula, i) => {
             const angle = (i / nebulas.length) * Math.PI * 2;
             const r = outer * (0.35 + (i % 3) * 0.15);
@@ -207,6 +211,7 @@ export function VolumeViewport({
         if (showTerritories) {
           const drawn: { x: number; y: number }[] = [];
           for (const territory of galaxy?.territories || []) {
+            if (off(`territory:${territory.id}`)) continue;
             const center = territory.center;
             shell(ctx, { ...cam, target: [cam.target[0] - center[0], cam.target[1] - center[1], cam.target[2] - center[2]] }, w, h, territory.radius, 1, territory.color, layer === "territories" ? 0.9 : 0.55);
             const at = project(center, cam, w, h);
@@ -230,6 +235,7 @@ export function VolumeViewport({
             .filter((item): item is { item: VolumeSystem; at: { x: number; y: number; depth: number } } => Boolean(item))
             .sort((a, b) => b.at.depth - a.at.depth);
           for (const { item, at } of projected) {
+            if (off(starClassKey(item.starClass))) continue;
             const tint = starTint(item.starClass, item.color);
             const focused = item.name === focusSystem;
             ctx.fillStyle = tint;
@@ -331,7 +337,7 @@ export function VolumeViewport({
       wrap.removeEventListener("wheel", onWheel);
       wrap.removeEventListener("volume-cam", requestDraw);
     };
-  }, [space, galaxy, systems, system, focusSystem, focusBody, zones, frameKey, layer]);
+  }, [space, galaxy, systems, system, focusSystem, focusBody, zones, frameKey, layer, hidden]);
 
   return (
     <div

@@ -341,13 +341,21 @@ export function readGalaxyVolume(general: EcfObject | null | undefined): GalaxyV
 }
 
 export const STAR_CLASS_LEGEND = [
-  { label: "O / B stars", color: "#9ecbff" },
-  { label: "A / F stars", color: "#f4f7ff" },
-  { label: "G stars", color: "#ffe29a" },
-  { label: "K stars", color: "#ffb15a" },
-  { label: "M stars", color: "#ff6d4a" },
-  { label: "Other stars", color: "#fff4cf" },
+  { id: "class:OB", label: "O / B stars", color: "#9ecbff" },
+  { id: "class:AF", label: "A / F stars", color: "#f4f7ff" },
+  { id: "class:G", label: "G stars", color: "#ffe29a" },
+  { id: "class:K", label: "K stars", color: "#ffb15a" },
+  { id: "class:M", label: "M stars", color: "#ff6d4a" },
+  { id: "class:other", label: "Other stars", color: "#fff4cf" },
 ];
+
+export function starClassKey(starClass: string) {
+  const letter = starClass.trim().charAt(0).toUpperCase();
+  if (letter === "O" || letter === "B") return "class:OB";
+  if (letter === "A" || letter === "F") return "class:AF";
+  if (letter === "G" || letter === "K" || letter === "M") return `class:${letter}`;
+  return "class:other";
+}
 
 export function starTint(starClass: string, color: string) {
   if (color) return cssColor(color, "#ffe7a3");

@@ -169,6 +169,7 @@ export function GalaxyEditor() {
   const nebula = nebulaKeys.includes(nebulaKey) ? nebulaKey : nebulaKeys[0] || "";
   const extraStar = star ? Object.keys(star.fields).filter((k) => !STAR_STATS.includes(k)) : [];
   const [volumeTab, setVolumeTab] = useState<"galaxy" | "regions" | "territories" | "all">("galaxy");
+  const [hiddenLegend, setHiddenLegend] = useState<Set<string>>(() => new Set());
   const volumeSystems = useMemo(() => parseVolumeSystems(sectorText?.text || ""), [sectorText?.text]);
   const galaxyVolume = useMemo(() => readGalaxyVolume(general), [general]);
 
@@ -234,9 +235,9 @@ export function GalaxyEditor() {
       </div>
       <div className="mt-2 flex h-[520px] gap-3">
         <div className="min-w-0 flex-1">
-          <VolumeViewport space="galaxy" layer={volumeTab} galaxy={galaxyVolume} systems={volumeSystems} />
+          <VolumeViewport space="galaxy" layer={volumeTab} galaxy={galaxyVolume} systems={volumeSystems} hidden={hiddenLegend} />
         </div>
-        <VolumeLegend tab={volumeTab} galaxy={galaxyVolume} />
+        <VolumeLegend tab={volumeTab} galaxy={galaxyVolume} hidden={hiddenLegend} onChange={setHiddenLegend} />
       </div>
       <p className="mt-2 text-xs text-subtle">
         {volumeTab === "regions"
@@ -732,88 +733,194 @@ function Swatch({ color, ring }: { color: string; ring?: boolean }) {
   );
 }
 
-function VolumeLegend({ tab, galaxy }: { tab: "galaxy" | "regions" | "territories" | "all"; galaxy: GalaxyVolume }) {
+function legendIds(tab: "galaxy" | "regions" | "territories" | "all", galaxy: GalaxyVolume) {
+  const ids: string[] = [];
+  const galaxyOn = tab === "galaxy" || tab === "all";
+  const regionsOn = tab === "regions" || tab === "all";
+  const territoriesOn = tab === "territories" || tab === "all";
+  if (galaxyOn) {
+    ids.push("radius:outer");
+    if (galaxy.inner > 1) ids.push("radius:inner");
+    for (const nebula of galaxy.nebulas) ids.push(`nebula:${nebula.key}`);
+    for (const item of STAR_CLASS_LEGEND) ids.push(item.id);
+  }
+  if (regionsOn) for (const region of galaxy.regions) ids.push(`region:${region.id}`);
+  if (territoriesOn) for (const territory of galaxy.territories) ids.push(`territory:${territory.id}`);
+  return ids;
+}
+
+function LegendRow({
+  id,
+  color,
+  ring,
+  label,
+  detail,
+  hidden,
+  onToggle,
+  onOnly,
+}: {
+  id: string;
+  color: string;
+  ring?: boolean;
+  label: string;
+  detail?: string;
+  hidden: boolean;
+  onToggle: (id: string) => void;
+  onOnly: (id: string) => void;
+}) {
+  return (
+    <li className={`flex items-start gap-2 text-xs ${hidden ? "opacity-35" : ""}`}>
+      <button type="button" className="flex min-w-0 flex-1 items-start gap-2 text-left" onClick={() => onToggle(id)}>
+        <Swatch ring={ring} color={color} />
+        <span className="min-w-0">
+          <span className="block truncate">{label}</span>
+          {detail ? <span className="text-[10px] text-subtle">{detail}</span> : null}
+        </span>
+      </button>
+      <button type="button" className="shrink-0 text-[10px] uppercase tracking-wide text-subtle hover:text-fg" onClick={() => onOnly(id)}>
+        Only
+      </button>
+    </li>
+  );
+}
+
+function VolumeLegend({
+  tab,
+  galaxy,
+  hidden,
+  onChange,
+}: {
+  tab: "galaxy" | "regions" | "territories" | "all";
+  galaxy: GalaxyVolume;
+  hidden: Set<string>;
+  onChange: (next: Set<string>) => void;
+}) {
   const showGalaxy = tab === "galaxy" || tab === "all";
   const showRegions = tab === "regions" || tab === "all";
   const showTerritories = tab === "territories" || tab === "all";
+  const ids = legendIds(tab, galaxy);
+  const shown = ids.filter((id) => !hidden.has(id)).length;
+  const toggle = (id: string) => {
+    const next = new Set(hidden);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    onChange(next);
+  };
+  const only = (id: string) => {
+    const next = new Set(hidden);
+    for (const item of ids) {
+      if (item === id) next.delete(item);
+      else next.add(item);
+    }
+    onChange(next);
+  };
   return (
-    <aside className="w-56 shrink-0 overflow-auto rounded-md border border-border bg-surface/50 p-3">
-      <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted">Legend</p>
-      {showGalaxy ? (
-        <section className="mt-3">
-          <p className="text-[10px] uppercase tracking-[0.12em] text-subtle">Galaxy</p>
-          <ul className="mt-1.5 space-y-1.5">
-            <li className="flex items-start gap-2 text-xs">
-              <Swatch ring color="rgba(150,186,255,0.95)" />
-              <span>Outer radius</span>
-            </li>
-            {galaxy.inner > 1 ? (
-              <li className="flex items-start gap-2 text-xs">
-                <Swatch ring color="rgba(255,220,160,0.95)" />
-                <span>Inner radius</span>
-              </li>
-            ) : null}
-            {galaxy.nebulas.slice(0, 8).map((nebula) => (
-              <li key={nebula.key} className="flex items-start gap-2 text-xs">
-                <Swatch color={stopColor(nebula.stops[0] || [1, 1, 1])} />
-                <span className="truncate">{nebula.key}</span>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-3 text-[10px] uppercase tracking-[0.12em] text-subtle">Star class</p>
-          <ul className="mt-1.5 space-y-1.5">
-            {STAR_CLASS_LEGEND.map((item) => (
-              <li key={item.label} className="flex items-center gap-2 text-xs">
-                <Swatch color={item.color} />
-                <span>{item.label}</span>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-1.5 text-[10px] leading-4 text-subtle">A star Color field overrides the class tint.</p>
-        </section>
-      ) : null}
-      {showRegions ? (
-        <section className="mt-3">
-          <p className="text-[10px] uppercase tracking-[0.12em] text-subtle">Regions</p>
-          <ul className="mt-1.5 space-y-1.5">
-            {galaxy.regions.length ? (
-              galaxy.regions.map((region) => (
-                <li key={region.id} className="flex items-start gap-2 text-xs">
-                  <Swatch ring color={region.color} />
-                  <span className="min-w-0">
-                    <span className="block truncate">{region.name}</span>
-                    <span className="text-[10px] text-subtle">
-                      {region.inner}–{region.outer} LY
-                    </span>
-                  </span>
-                </li>
-              ))
-            ) : (
-              <li className="text-xs text-subtle">No star regions in this file.</li>
-            )}
-          </ul>
-        </section>
-      ) : null}
-      {showTerritories ? (
-        <section className="mt-3">
-          <p className="text-[10px] uppercase tracking-[0.12em] text-subtle">Territories</p>
-          <ul className="mt-1.5 space-y-1.5">
-            {galaxy.territories.length ? (
-              galaxy.territories.map((territory) => (
-                <li key={territory.id} className="flex items-start gap-2 text-xs">
-                  <Swatch ring color={territory.color} />
-                  <span className="min-w-0">
-                    <span className="block truncate">{territory.faction}</span>
-                    <span className="text-[10px] text-subtle">{territory.id}</span>
-                  </span>
-                </li>
-              ))
-            ) : (
-              <li className="text-xs text-subtle">No territories in this file.</li>
-            )}
-          </ul>
-        </section>
-      ) : null}
+    <aside className="flex w-60 shrink-0 flex-col overflow-hidden rounded-md border border-border bg-surface/50">
+      <div className="border-b border-border p-3">
+        <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted">Legend</p>
+        <p className="mt-1 text-[10px] text-subtle">
+          Showing {shown} of {ids.length}. Click a row to hide it.
+        </p>
+        <div className="mt-2 flex gap-2">
+          <button
+            type="button"
+            className="h-7 rounded-sm border border-border px-2 text-xs hover:text-fg"
+            onClick={() => {
+              const next = new Set(hidden);
+              for (const id of ids) next.delete(id);
+              onChange(next);
+            }}
+          >
+            All
+          </button>
+          <button
+            type="button"
+            className="h-7 rounded-sm border border-border px-2 text-xs hover:text-fg"
+            onClick={() => onChange(new Set(ids))}
+          >
+            None
+          </button>
+        </div>
+      </div>
+      <div className="min-h-0 flex-1 overflow-auto p-3">
+        {showGalaxy ? (
+          <section>
+            <p className="text-[10px] uppercase tracking-[0.12em] text-subtle">Galaxy</p>
+            <ul className="mt-1.5 space-y-1.5">
+              <LegendRow id="radius:outer" ring color="rgba(150,186,255,0.95)" label="Outer radius" hidden={hidden.has("radius:outer")} onToggle={toggle} onOnly={only} />
+              {galaxy.inner > 1 ? (
+                <LegendRow id="radius:inner" ring color="rgba(255,220,160,0.95)" label="Inner radius" hidden={hidden.has("radius:inner")} onToggle={toggle} onOnly={only} />
+              ) : null}
+              {galaxy.nebulas.map((nebula) => (
+                <LegendRow
+                  key={nebula.key}
+                  id={`nebula:${nebula.key}`}
+                  color={stopColor(nebula.stops[0] || [1, 1, 1])}
+                  label={nebula.key}
+                  hidden={hidden.has(`nebula:${nebula.key}`)}
+                  onToggle={toggle}
+                  onOnly={only}
+                />
+              ))}
+            </ul>
+            <p className="mt-3 text-[10px] uppercase tracking-[0.12em] text-subtle">Star class</p>
+            <ul className="mt-1.5 space-y-1.5">
+              {STAR_CLASS_LEGEND.map((item) => (
+                <LegendRow key={item.id} id={item.id} color={item.color} label={item.label} hidden={hidden.has(item.id)} onToggle={toggle} onOnly={only} />
+              ))}
+            </ul>
+            <p className="mt-1.5 text-[10px] leading-4 text-subtle">A star Color field overrides the class tint.</p>
+          </section>
+        ) : null}
+        {showRegions ? (
+          <section className="mt-3">
+            <p className="text-[10px] uppercase tracking-[0.12em] text-subtle">Regions</p>
+            <ul className="mt-1.5 space-y-1.5">
+              {galaxy.regions.length ? (
+                galaxy.regions.map((region) => (
+                  <LegendRow
+                    key={region.id}
+                    id={`region:${region.id}`}
+                    ring
+                    color={region.color}
+                    label={region.name}
+                    detail={`${region.inner}–${region.outer} LY`}
+                    hidden={hidden.has(`region:${region.id}`)}
+                    onToggle={toggle}
+                    onOnly={only}
+                  />
+                ))
+              ) : (
+                <li className="text-xs text-subtle">No star regions in this file.</li>
+              )}
+            </ul>
+          </section>
+        ) : null}
+        {showTerritories ? (
+          <section className="mt-3">
+            <p className="text-[10px] uppercase tracking-[0.12em] text-subtle">Territories</p>
+            <ul className="mt-1.5 space-y-1.5">
+              {galaxy.territories.length ? (
+                galaxy.territories.map((territory) => (
+                  <LegendRow
+                    key={territory.id}
+                    id={`territory:${territory.id}`}
+                    ring
+                    color={territory.color}
+                    label={territory.faction}
+                    detail={territory.id}
+                    hidden={hidden.has(`territory:${territory.id}`)}
+                    onToggle={toggle}
+                    onOnly={only}
+                  />
+                ))
+              ) : (
+                <li className="text-xs text-subtle">No territories in this file.</li>
+              )}
+            </ul>
+          </section>
+        ) : null}
+      </div>
     </aside>
   );
 }

@@ -1,0 +1,1 @@
+import{n as e}from"./library-page-DNf4_7Gs.js";import{Dr as t}from"./index-BiBOQ73A.js";import{t as n}from"./workspace-page-FW_C2n-R.js";var r=t();function i(){return(0,r.jsx)(n,{group:`World`,title:`Factions`,kicker:`Factions.ecf · slide the roster`,children:(0,r.jsx)(e,{role:`factions`,title:`Factions`,listCap:400})})}export{i as component};

@@ -1,0 +1,5 @@
+{ +LootGroup Name: TutorialLoot
+  Count: "1,2"
+  Item_0: GoldCoins, param1: "1,5", param2: 0.5
+  Item_1: BioFuel, param1: 1, param2: 0.3
+}

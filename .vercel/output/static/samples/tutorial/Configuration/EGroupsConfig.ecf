@@ -1,0 +1,4 @@
+{ EGroup Name: TutorialSpiders
+  Spider01: "1, 3"
+  SpawnInSameDirection: false
+}

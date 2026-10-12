@@ -4,3 +4,11 @@ Sectors:
       - ['0, 0, 0', Sathium Freighter Mission, Space]
       - ['10, 0, 0', Akua, Planet]
       - ['20, 0, 0', Omicron, Planet]
+  - Name: Ellyon
+    Coordinates: [10, 0, 10]
+    StarClass: G
+    Playfields:
+      - ['0, 0, 0', Ellyon, Sun]
+      - ['66, 0, 0', Akua, Planet]
+      - ['12, 0, 0', TooCloseLava, Planet]
+      - ['110, 0, 0', OuterGas, Planet]

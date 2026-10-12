@@ -2,6 +2,24 @@
 var stateIndexKey = "__TSR_index";
 var popStateEvent = "popstate";
 var beforeUnloadEvent = "beforeunload";
+/**
+* Turn protocol-relative inputs such as "//evil.example" into paths
+* such as "/evil.example", keeping navigation on the current origin.
+*
+* For HTTP(S) URLs, WHATWG parsing ignores leading C0 controls and spaces,
+* removes tabs/newlines, and treats backslashes as slashes, so inputs like
+* "/\evil.example" also need normalization. This only allocates when those
+* rules would make the input protocol-relative.
+*/
+var protocolRelativePrefix = /^[\x00-\x20]*(?:[\\/][\t\n\r]*){2,}/;
+function normalizeProtocolRelative(url) {
+	const match = protocolRelativePrefix.exec(url);
+	return match ? "/" + url.slice(match[0].length) : url;
+}
+function normalizeHref(href) {
+	if (/[\x00-\x1f\x7f]/.test(href)) href = href.replace(/[\x00-\x1f\x7f]/g, (character) => "	\n\r".includes(character) ? "" : encodeURIComponent(character));
+	return normalizeProtocolRelative(href);
+}
 function createHistory(opts) {
 	let location = opts.getLocation();
 	const subscribers = /* @__PURE__ */ new Set();
@@ -16,25 +34,20 @@ function createHistory(opts) {
 		if (opts.notifyOnIndexChange ?? true) notify(action);
 		else location = opts.getLocation();
 	};
-	const tryNavigation = async ({ task, navigateOpts, ...actionInfo }) => {
-		if (navigateOpts?.ignoreBlocker ?? false) {
-			task();
-			return;
-		}
-		const blockers = opts.getBlockers?.() ?? [];
-		const isPushOrReplace = actionInfo.type === "PUSH" || actionInfo.type === "REPLACE";
-		if (typeof document !== "undefined" && blockers.length && isPushOrReplace) for (const blocker of blockers) {
-			const nextLocation = parseHref(actionInfo.path, actionInfo.state);
+	const tryNavigation = async (args) => {
+		const blockers = args.navigateOpts?.ignoreBlocker ? void 0 : opts.getBlockers?.();
+		if (typeof document !== "undefined" && blockers?.length && (args.type === "PUSH" || args.type === "REPLACE")) for (const blocker of blockers) {
+			const nextLocation = parseHref(args.path, args.state);
 			if (await blocker.blockerFn({
 				currentLocation: location,
 				nextLocation,
-				action: actionInfo.type
+				action: args.type
 			})) {
 				opts.onBlocked?.();
 				return;
 			}
 		}
-		task();
+		args.task();
 	};
 	return {
 		get location() {
@@ -124,11 +137,11 @@ function createHistory(opts) {
 		},
 		flush: () => opts.flush?.(),
 		destroy: () => opts.destroy?.(),
-		notify
+		notify,
+		_getBlockers: () => opts.getBlockers?.() ?? []
 	};
 }
 function assignKeyAndIndex(index, state) {
-	if (!state) state = {};
 	const key = createRandomKey();
 	return {
 		...state,
@@ -160,7 +173,7 @@ function createBrowserHistory(opts) {
 	let blockers = [];
 	const _getBlockers = () => blockers;
 	const _setBlockers = (newBlockers) => blockers = newBlockers;
-	const createHref = opts?.createHref ?? ((path) => path);
+	const createHref = (path) => normalizeHref(opts?.createHref ? opts.createHref(path) : path);
 	const parseLocation = opts?.parseLocation ?? (() => parseHref(`${win.location.pathname}${win.location.search}${win.location.hash}`, win.history.state));
 	if (!win.history.state?.__TSR_key && !win.history.state?.key) {
 		const addedKey = createRandomKey();
@@ -187,12 +200,12 @@ function createBrowserHistory(opts) {
 		rollbackLocation = void 0;
 	};
 	const queueHistoryAction = (isPush, destHref, state) => {
-		const href = createHref(destHref);
+		const href = opts?.createHref ? createHref(destHref) : void 0;
 		const hasPendingAction = !!next;
 		if (!hasPendingAction) rollbackLocation = currentLocation;
 		currentLocation = parseHref(destHref, state);
 		next = [
-			href,
+			href ?? currentLocation.href,
 			state,
 			next?.[2] || isPush
 		];
@@ -288,7 +301,7 @@ function createBrowserHistory(opts) {
 			}
 			win.history.go(n);
 		},
-		createHref: (href) => createHref(href),
+		createHref,
 		flush,
 		destroy: () => {
 			win.history.pushState = originalPushState;
@@ -303,6 +316,13 @@ function createBrowserHistory(opts) {
 		setBlockers: _setBlockers,
 		notifyOnIndexChange: false
 	});
+	history._ignoreNextBeforeUnload = (href) => {
+		ignoreNextBeforeUnload = false;
+		try {
+			href = new URL(href, win.document.baseURI).href;
+			ignoreNextBeforeUnload = /^https?:/.test(href) && (!href.includes("#") || href.split("#")[0] !== win.location.href.split("#")[0]);
+		} catch {}
+	};
 	win.addEventListener(beforeUnloadEvent, onBeforeUnload, { capture: true });
 	win.addEventListener(popStateEvent, onPushPopEvent);
 	win.history.pushState = function(...args) {
@@ -317,77 +337,67 @@ function createBrowserHistory(opts) {
 	};
 	return history;
 }
-/**
-* Create an in-memory history implementation.
-* Ideal for server rendering, tests, and non-DOM environments.
-* @link https://tanstack.com/router/latest/docs/framework/react/guide/history-types
-*/
-function createMemoryHistory(opts = { initialEntries: ["/"] }) {
-	const entries = opts.initialEntries;
-	let index = opts.initialIndex ? Math.min(Math.max(opts.initialIndex, 0), entries.length - 1) : entries.length - 1;
-	const states = entries.map((_entry, index) => assignKeyAndIndex(index, void 0));
-	const getLocation = () => parseHref(entries[index], states[index]);
-	let blockers = [];
-	const _getBlockers = () => blockers;
-	const _setBlockers = (newBlockers) => blockers = newBlockers;
-	return createHistory({
-		getLocation,
-		getLength: () => entries.length,
-		pushState: (path, state) => {
-			if (index < entries.length - 1) {
-				entries.splice(index + 1);
-				states.splice(index + 1);
-			}
-			states.push(state);
-			entries.push(path);
-			index = Math.max(entries.length - 1, 0);
-		},
-		replaceState: (path, state) => {
-			states[index] = state;
-			entries[index] = path;
-		},
-		back: () => {
-			index = Math.max(index - 1, 0);
-		},
-		forward: () => {
-			index = Math.min(index + 1, entries.length - 1);
-		},
-		go: (n) => {
-			index = Math.min(Math.max(index + n, 0), entries.length - 1);
-		},
-		createHref: (path) => path,
-		getBlockers: _getBlockers,
-		setBlockers: _setBlockers
-	});
-}
-/**
-* Sanitize a path to prevent open redirect vulnerabilities.
-* Removes control characters and collapses leading double slashes.
-*/
-function sanitizePath(path) {
-	let sanitized = path.replace(/[\x00-\x1f\x7f]/g, "");
-	if (sanitized.startsWith("//")) sanitized = "/" + sanitized.replace(/^\/+/, "");
-	return sanitized;
+var noop = () => {};
+var ServerHistory = class {
+	constructor(location) {
+		this.location = location;
+	}
+	get length() {
+		return 1;
+	}
+	get subscribers() {
+		return this._subscribers ??= /* @__PURE__ */ new Set();
+	}
+	subscribe() {
+		return noop;
+	}
+	push() {}
+	replace() {}
+	go() {}
+	back() {}
+	forward() {}
+	canGoBack() {
+		return false;
+	}
+	createHref(href) {
+		return normalizeHref(href);
+	}
+	block() {
+		return noop;
+	}
+	flush() {}
+	destroy() {}
+	notify() {}
+	_getBlockers() {
+		return [];
+	}
+};
+/** A fixed request location; server navigation is a no-op. */
+function createServerHistory(href) {
+	return new ServerHistory(parseHref(href, void 0));
 }
 function parseHref(href, state) {
-	const sanitizedHref = sanitizePath(href);
+	const sanitizedHref = normalizeHref(href);
 	const hashIndex = sanitizedHref.indexOf("#");
 	const searchIndex = sanitizedHref.indexOf("?");
-	const addedKey = createRandomKey();
+	if (!state) {
+		const key = createRandomKey();
+		state = {
+			[stateIndexKey]: 0,
+			key,
+			__TSR_key: key
+		};
+	}
 	return {
 		href: sanitizedHref,
-		pathname: sanitizedHref.substring(0, hashIndex > 0 ? searchIndex > 0 ? Math.min(hashIndex, searchIndex) : hashIndex : searchIndex > 0 ? searchIndex : sanitizedHref.length),
-		hash: hashIndex > -1 ? sanitizedHref.substring(hashIndex) : "",
+		pathname: sanitizedHref.slice(0, hashIndex > -1 ? searchIndex > -1 ? Math.min(hashIndex, searchIndex) : hashIndex : searchIndex > -1 ? searchIndex : sanitizedHref.length),
+		hash: hashIndex > -1 ? sanitizedHref.slice(hashIndex) : "",
 		search: searchIndex > -1 ? sanitizedHref.slice(searchIndex, hashIndex === -1 ? void 0 : hashIndex) : "",
-		state: state || {
-			[stateIndexKey]: 0,
-			key: addedKey,
-			__TSR_key: addedKey
-		}
+		state
 	};
 }
 function createRandomKey() {
-	return (Math.random() + 1).toString(36).substring(7);
+	return (Math.random() + 1).toString(36).slice(7);
 }
 //#endregion
-export { createMemoryHistory as n, parseHref as r, createBrowserHistory as t };
+export { parseHref as i, createServerHistory as n, normalizeProtocolRelative as r, createBrowserHistory as t };
