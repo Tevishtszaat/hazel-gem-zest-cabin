@@ -1,1 +1,0 @@
-import{Bn as e,Dr as t,pr as n}from"./index-BiBOQ73A.js";var r=t();function i({text:t,className:i,as:a=`span`,inline:o=!1}){return(0,r.jsx)(a,{className:`bbcode ${i??``}`,dangerouslySetInnerHTML:{__html:n(t||``,{inline:o,imageUrl:e})}})}export{i as t};

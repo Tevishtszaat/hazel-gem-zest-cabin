@@ -1,0 +1,1 @@
+import{Dr as e,wr as t}from"./index-CEq7YMle.js";var n=e(),r=function(){return(0,n.jsx)(t,{})};export{r as component};

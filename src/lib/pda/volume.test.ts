@@ -75,6 +75,32 @@ test("patches coordinates, class, and playfields without dropping the other syst
   assert.equal(parsed[0]?.bodies.some((body) => body.name === "New Moon"), false);
 });
 
+test("reads map, list, and name-first planet coordinates", () => {
+  const named = parsePlayfieldLine("  - [Pearls Eye, AscArcticWater, '-12000, 0, 4000']");
+  assert.equal(named?.name, "Pearls Eye");
+  assert.deepEqual(named?.local, [-12000, 0, 4000]);
+  const map = parseVolumeSystems(`- Name: Pearl
+  StarClass: R
+  Coordinates:
+    - 0
+    - 0
+    - 0
+  Playfields:
+    - Name: Pearls Eye
+      PlayfieldType: AscArcticWater
+      Coordinates: [-12000, 0, 4000]
+    - - -8000, 200, 1000
+      - Pearls Moon
+      - MoonBarren
+`);
+  assert.deepEqual(map[0]?.ly, [0, 0, 0]);
+  assert.equal(map[0]?.bodies[0]?.name, "Pearls Eye");
+  assert.deepEqual(map[0]?.bodies[0]?.local, [-12000, 0, 4000]);
+  assert.equal(map[0]?.bodies[0]?.playfieldType, "AscArcticWater");
+  assert.deepEqual(map[0]?.bodies[1]?.local, [-8000, 200, 1000]);
+  assert.equal(map[0]?.bodies[1]?.name, "Pearls Moon");
+});
+
 test("reads galaxy radius, regions, territories, and nebula stops", () => {
   const general = parseEcfObjects(`{ GalaxyConfig, Name: General
   Radius: "0, 11000"

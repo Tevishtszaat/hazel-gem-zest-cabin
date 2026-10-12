@@ -7,7 +7,7 @@ export type ZoneRing = { label: string; min: number; max: number; color: string 
 type Cam = { yaw: number; pitch: number; dist: number; target: Vec3 };
 type Hit = { id: string; x: number; y: number; depth: number; label: string };
 
-const ZONE_FALLBACK: ZoneRing[] = [
+export const ZONE_FALLBACK: ZoneRing[] = [
   { label: "Inner", min: 0, max: 40, color: "rgba(255,106,61,0.9)" },
   { label: "Hot", min: 40, max: 70, color: "rgba(255,176,32,0.9)" },
   { label: "Temperate", min: 70, max: 100, color: "rgba(61,255,154,0.9)" },
@@ -155,11 +155,11 @@ export function VolumeViewport({
       }
       ctx.globalAlpha = 1;
 
+      const off = (id: string) => Boolean(hidden?.has(id));
       if (space === "galaxy") {
         const showGalaxy = layer === "galaxy" || layer === "all";
         const showRegions = layer === "regions" || layer === "all";
         const showTerritories = layer === "territories" || layer === "all";
-        const off = (id: string) => Boolean(hidden?.has(id));
         const outer = galaxy?.outer || 1000;
         const yScale = 0.22;
         if (showGalaxy) {
@@ -257,6 +257,7 @@ export function VolumeViewport({
       } else if (system) {
         const rings = zones?.length ? zones : ZONE_FALLBACK;
         for (const zone of rings) {
+          if (off(`zone:${zone.label}`)) continue;
           const pts = [];
           for (let i = 0; i <= 72; i++) {
             const a = (i / 72) * Math.PI * 2;
@@ -266,7 +267,7 @@ export function VolumeViewport({
           strokeLoop(ctx, pts, zone.color, 1.2, 0.55);
         }
         const sun = project([0, 0, 0], cam, w, h);
-        if (sun) {
+        if (sun && !off("kind:sun")) {
           const tint = starTint(system.starClass, system.color);
           const glow = ctx.createRadialGradient(sun.x, sun.y, 0, sun.x, sun.y, 36);
           glow.addColorStop(0, tint);
@@ -283,27 +284,36 @@ export function VolumeViewport({
           })
           .filter((item): item is NonNullable<typeof item> => Boolean(item))
           .sort((a, b) => b.at.depth - a.at.depth);
+        const namedAt: { x: number; y: number }[] = [];
         for (const { body, at } of bodies) {
           if (/sun|star/i.test(body.kind) && Math.hypot(body.local[0], body.local[1], body.local[2]) < 1) continue;
-          const orbit = [];
-          const radius = Math.hypot(body.local[0], body.local[2]) || Math.hypot(body.local[0], body.local[1], body.local[2]);
-          for (let i = 0; i <= 48; i++) {
-            const a = (i / 48) * Math.PI * 2;
-            const p = project([Math.cos(a) * radius, body.local[1], Math.sin(a) * radius], cam, w, h);
-            if (p) orbit.push(p);
-          }
-          strokeLoop(ctx, orbit, "rgba(180,198,230,0.35)", 1, 0.8);
           const moon = /moon/i.test(body.kind);
           const planet = /planet/i.test(body.kind);
+          const sunBody = /sun|star/i.test(body.kind);
+          const kindId = sunBody ? "kind:sun" : moon ? "kind:moon" : planet ? "kind:planet" : "kind:other";
+          if (off(kindId)) continue;
+          if (!off("path:orbit")) {
+            const orbit = [];
+            const radius = Math.hypot(body.local[0], body.local[2]) || Math.hypot(body.local[0], body.local[1], body.local[2]);
+            for (let i = 0; i <= 48; i++) {
+              const a = (i / 48) * Math.PI * 2;
+              const p = project([Math.cos(a) * radius, body.local[1], Math.sin(a) * radius], cam, w, h);
+              if (p) orbit.push(p);
+            }
+            strokeLoop(ctx, orbit, "rgba(180,198,230,0.35)", 1, 0.8);
+          }
           ctx.fillStyle = moon ? "#d5d8e0" : planet ? "#8ec8ff" : "#b9a6ff";
           const focused = body.name === focusBody;
           ctx.beginPath();
           ctx.arc(at.x, at.y, focused ? 7 : moon ? 3.5 : 5, 0, Math.PI * 2);
           ctx.fill();
-          if (focused) {
-            ctx.fillStyle = "#f4f7ff";
-            ctx.font = "12px sans-serif";
+          const named = focused || planet || moon || /sun|star/i.test(body.kind);
+          const crowded = !focused && namedAt.some((prev) => Math.hypot(prev.x - at.x, prev.y - at.y) < 18);
+          if (named && !crowded) {
+            ctx.fillStyle = focused ? "#f4f7ff" : "rgba(214,224,242,0.85)";
+            ctx.font = focused ? "12px sans-serif" : "11px sans-serif";
             ctx.fillText(body.name, at.x + 8, at.y - 8);
+            namedAt.push(at);
           }
           hits.push({ id: body.name, x: at.x, y: at.y, depth: at.depth, label: body.name });
         }

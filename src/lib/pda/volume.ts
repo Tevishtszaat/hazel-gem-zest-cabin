@@ -9,6 +9,12 @@ export type VolumeBody = {
   local: Vec3;
   line: number;
   quoted: boolean;
+  coordLine?: number;
+  nameLine?: number;
+  kindLine?: number;
+  typeLine?: number;
+  entryEnd?: number;
+  flowLocal?: Vec3;
 };
 
 export type VolumeSystem = {
@@ -112,6 +118,37 @@ function splitFields(rest: string) {
   return out.map(unquote).filter((part) => part && !/^~/.test(part));
 }
 
+function isStructuralKind(value: string) {
+  return /^(sun|star|planet|moon|orbit|space|asteroid|gas|station|playfield)$/i.test(value.trim());
+}
+
+function inferKind(name: string, biome: string) {
+  const text = `${name} ${biome}`;
+  if (/moon/i.test(text)) return "Moon";
+  if (/orbit/i.test(text)) return "Orbit";
+  if (/\b(sun|star)\b/i.test(text)) return "Sun";
+  if (/space|warp|station|asteroid/i.test(text)) return "Space";
+  return "Planet";
+}
+
+function describeSlots(name: string, slot2 = "", slot3 = "") {
+  const second = slot2.trim();
+  const third = slot3.trim();
+  if (!second) return { kind: "Playfield", playfieldType: third || undefined };
+  if (isStructuralKind(second)) return { kind: second, playfieldType: third || undefined };
+  return { kind: inferKind(name, second), playfieldType: third || second };
+}
+
+function tripleFrom(text: string): Vec3 | null {
+  const n = nums(text);
+  if (n.length < 3) return null;
+  return [n[0]!, n[1]!, n[2]!];
+}
+
+function isZero(v: Vec3) {
+  return v[0] === 0 && v[1] === 0 && v[2] === 0;
+}
+
 export function parsePlayfieldLine(line: string): Omit<VolumeBody, "line"> | null {
   const start = line.indexOf("[");
   const end = line.lastIndexOf("]");
@@ -119,19 +156,167 @@ export function parsePlayfieldLine(line: string): Omit<VolumeBody, "line"> | nul
   const inner = line.slice(start + 1, end).trim();
   const quoted = inner.match(/^(['"])(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\1\s*,\s*([\s\S]*)$/);
   const numeric = inner.match(/^(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*([\s\S]*)$/);
-  if (!quoted && !numeric) return null;
-  const local: Vec3 = quoted
-    ? [Number(quoted[2]), Number(quoted[3]), Number(quoted[4])]
-    : [Number(numeric![1]), Number(numeric![2]), Number(numeric![3])];
-  if (local.some((n) => !Number.isFinite(n))) return null;
-  const fields = splitFields((quoted ? quoted[5] : numeric![4]) || "");
-  if (!fields[0]) return null;
+  if (quoted || numeric) {
+    const local: Vec3 = quoted
+      ? [Number(quoted[2]), Number(quoted[3]), Number(quoted[4])]
+      : [Number(numeric![1]), Number(numeric![2]), Number(numeric![3])];
+    if (local.some((n) => !Number.isFinite(n))) return null;
+    const fields = splitFields((quoted ? quoted[5] : numeric![4]) || "");
+    if (!fields[0]) return null;
+    let orbit = local;
+    for (const field of fields) {
+      const extra = tripleFrom(field);
+      if (extra && isZero(orbit) && !isZero(extra)) orbit = extra;
+    }
+    return {
+      name: fields[0],
+      kind: fields[1] || "Playfield",
+      playfieldType: fields[2] || undefined,
+      local: orbit,
+      quoted: Boolean(quoted),
+    };
+  }
+  const fields = splitFields(inner);
+  if (fields.length < 2) return null;
+  const last = fields[fields.length - 1] || "";
+  const trailing = tripleFrom(last);
+  const numericTail = fields.length >= 5 && fields.slice(-3).every((field) => /^-?[\d.]+$/.test(field));
+  let local: Vec3 | null = null;
+  let head = fields;
+  if (numericTail) {
+    const tail = fields.slice(-3);
+    local = [Number(tail[0]), Number(tail[1]), Number(tail[2])];
+    head = fields.slice(0, -3);
+  } else if (trailing && !/^[A-Za-z]/.test(last.trim())) {
+    local = trailing;
+    head = fields.slice(0, -1);
+  }
+  if (!local || local.some((n) => !Number.isFinite(n)) || !head[0]) return null;
   return {
-    name: fields[0],
-    kind: fields[1] || "Playfield",
-    playfieldType: fields[2] || undefined,
+    name: head[0],
+    kind: head[1] || "Playfield",
+    playfieldType: head[2] || undefined,
     local,
-    quoted: Boolean(quoted),
+    quoted: false,
+  };
+}
+
+function readDashTriple(lines: string[], start: number) {
+  const found: number[] = [];
+  let i = start;
+  while (i < lines.length && found.length < 3) {
+    const trimmed = (lines[i] || "").trim();
+    if (!trimmed || trimmed.startsWith("#")) {
+      i += 1;
+      continue;
+    }
+    const hit = trimmed.match(/^-\s*(-?[\d.]+)\s*$/);
+    if (!hit) break;
+    found.push(Number(hit[1]));
+    i += 1;
+  }
+  if (found.length < 3 || found.some((n) => !Number.isFinite(n))) return null;
+  return { local: [found[0], found[1], found[2]] as Vec3, next: i };
+}
+
+function applyBodyKey(body: VolumeBody, lineIndex: number, text: string) {
+  const inline = text.match(/^(Coordinates|Pos|Position)\s*:\s*\[([^\]]+)\]/i);
+  if (inline) {
+    const local = tripleFrom(inline[2] || "");
+    if (local) {
+      body.local = local;
+      body.coordLine = lineIndex;
+    }
+    return;
+  }
+  const named = text.match(/^(Name|SectorName)\s*:\s*(.+)$/i);
+  if (named) {
+    body.name = unquote(named[2]!.replace(/\s+#.*$/, ""));
+    body.nameLine = lineIndex;
+    return;
+  }
+  const typed = text.match(/^(PlayfieldType|PlanetType|Biome|Type)\s*:\s*(.+)$/i);
+  if (typed) {
+    body.playfieldType = unquote(typed[2]!.replace(/\s+#.*$/, ""));
+    body.typeLine = lineIndex;
+    if (!isStructuralKind(body.kind)) body.kind = inferKind(body.name, body.playfieldType || "");
+    return;
+  }
+  const kind = text.match(/^Kind\s*:\s*(.+)$/i);
+  if (kind) {
+    body.kind = unquote(kind[1]!.replace(/\s+#.*$/, ""));
+    body.kindLine = lineIndex;
+  }
+}
+
+function readMapBody(lines: string[], start: number): { body: VolumeBody; next: number } | null {
+  const base = leading(lines[start] || "");
+  const body: VolumeBody = { name: "", kind: "Playfield", local: [0, 0, 0], line: start, quoted: false, nameLine: start };
+  applyBodyKey(body, start, (lines[start] || "").trim().replace(/^-\s+/, ""));
+  let i = start + 1;
+  while (i < lines.length) {
+    const line = lines[i] || "";
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) {
+      i += 1;
+      continue;
+    }
+    if (leading(line) <= base) break;
+    if (/^(Coordinates|Pos|Position)\s*:$/i.test(trimmed)) {
+      const triple = readDashTriple(lines, i + 1);
+      if (triple) {
+        body.local = triple.local;
+        body.coordLine = i;
+        i = triple.next;
+        continue;
+      }
+    }
+    applyBodyKey(body, i, trimmed);
+    i += 1;
+  }
+  if (!body.name) return null;
+  body.entryEnd = i;
+  if (!isStructuralKind(body.kind)) body.kind = inferKind(body.name, body.playfieldType || "");
+  return { body, next: i };
+}
+
+function readSeqBody(lines: string[], start: number): { body: VolumeBody; next: number } | null {
+  const base = leading(lines[start] || "");
+  const coordText = (lines[start] || "").trim().replace(/^-\s+-\s+/, "");
+  const local = tripleFrom(unquote(coordText));
+  if (!local) return null;
+  const fields: string[] = [];
+  const fieldLines: number[] = [];
+  let i = start + 1;
+  while (i < lines.length) {
+    const line = lines[i] || "";
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) {
+      i += 1;
+      continue;
+    }
+    if (leading(line) <= base || !trimmed.startsWith("-")) break;
+    fields.push(unquote(trimmed.replace(/^-\s+/, "").replace(/\s+#.*$/, "")));
+    fieldLines.push(i);
+    i += 1;
+  }
+  if (!fields[0]) return null;
+  const described = describeSlots(fields[0], fields[1] || "", fields[2] || "");
+  return {
+    body: {
+      name: fields[0],
+      kind: described.kind,
+      playfieldType: described.playfieldType,
+      local,
+      line: start,
+      coordLine: start,
+      nameLine: fieldLines[0],
+      kindLine: fieldLines[1],
+      typeLine: fieldLines[2],
+      quoted: /^['"]/.test(coordText.trim()),
+      entryEnd: i,
+    },
+    next: i,
   };
 }
 
@@ -204,9 +389,56 @@ export function parseVolumeSystems(yaml: string): VolumeSystem[] {
       cur.playfieldsLine = i;
       continue;
     }
+    if (/^Coordinates\s*:$/i.test(trimmed)) {
+      const triple = readDashTriple(lines, i + 1);
+      if (triple) {
+        if (inPlayfields) {
+          const body = cur.bodies[cur.bodies.length - 1];
+          if (body && isZero(body.local)) {
+            body.local = triple.local;
+            body.coordLine = i;
+          }
+        } else {
+          cur.ly = triple.local;
+          cur.coordLine = i;
+        }
+        i = triple.next - 1;
+        continue;
+      }
+    }
+    if (inPlayfields && /^\s*-\s+-\s+/.test(line)) {
+      const seq = readSeqBody(lines, i);
+      if (seq) {
+        cur.bodies.push(seq.body);
+        i = seq.next - 1;
+        continue;
+      }
+    }
+    if (inPlayfields && /^-\s+(Name|SectorName|Coordinates|Pos|Position)\s*:/i.test(trimmed)) {
+      const map = readMapBody(lines, i);
+      if (map) {
+        cur.bodies.push(map.body);
+        i = map.next - 1;
+        continue;
+      }
+    }
     if (inPlayfields && trimmed.startsWith("-") && trimmed.includes("[")) {
       const body = parsePlayfieldLine(line);
-      if (body) cur.bodies.push({ ...body, line: i });
+      if (body) {
+        const full: VolumeBody = { ...body, line: i };
+        const follow = /^\s*(Coordinates|Pos|Position)\s*:/i.test((lines[i + 1] || "").trim()) ? i + 1 : -1;
+        if (follow >= 0 && leading(lines[follow] || "") > leading(line)) {
+          const inline = (lines[follow] || "").trim().match(/^(?:Coordinates|Pos|Position)\s*:\s*\[([^\]]+)\]/i);
+          const nested = inline ? null : readDashTriple(lines, follow + 1);
+          const local = inline ? tripleFrom(inline[1] || "") : nested?.local;
+          if (local && (isZero(full.local) || !isZero(local))) {
+            full.flowLocal = full.flowLocal ?? full.local;
+            full.local = local;
+            full.coordLine = follow;
+          }
+        }
+        cur.bodies.push(full);
+      }
       continue;
     }
     if (inPlayfields && leading(line) <= 2 && /^[A-Za-z]/.test(trimmed)) inPlayfields = false;
@@ -264,9 +496,37 @@ export function patchSystemStarClass(yaml: string, system: VolumeSystem, starCla
 
 export function patchPlayfield(yaml: string, body: VolumeBody, next: Pick<VolumeBody, "local" | "name" | "kind" | "playfieldType">) {
   const lines = yaml.split(/\r?\n/);
-  const indent = (lines[body.line] || "").match(/^\s*/)?.[0] ?? "  ";
-  lines[body.line] = formatPlayfield(indent, { ...next, quoted: body.quoted });
+  if (body.coordLine != null && lines[body.coordLine] && body.coordLine !== body.line) {
+    lines[body.coordLine] = replaceCoordLine(lines[body.coordLine]!, next.local);
+  } else if (body.coordLine != null && lines[body.line] && !lines[body.line]!.includes("[")) {
+    lines[body.line] = replaceCoordLine(lines[body.line]!, next.local);
+  }
+  if (body.nameLine != null && lines[body.nameLine] && body.nameLine !== body.line) {
+    lines[body.nameLine] = replaceYamlValue(lines[body.nameLine]!, next.name);
+  }
+  if (body.kindLine != null && lines[body.kindLine]) lines[body.kindLine] = replaceYamlValue(lines[body.kindLine]!, next.kind);
+  if (body.typeLine != null && lines[body.typeLine]) lines[body.typeLine] = replaceYamlValue(lines[body.typeLine]!, next.playfieldType || "");
+  if (lines[body.line]?.includes("[")) {
+    const indent = (lines[body.line] || "").match(/^\s*/)?.[0] ?? "  ";
+    const flow = body.flowLocal ?? (body.coordLine != null && body.coordLine !== body.line ? body.flowLocal : undefined);
+    lines[body.line] = formatPlayfield(indent, {
+      ...next,
+      local: flow ?? next.local,
+      quoted: body.quoted,
+    });
+  }
   return join(yaml, lines);
+}
+
+function replaceYamlValue(line: string, value: string) {
+  return line.replace(/:\s*.+$/, `: ${value}`);
+}
+
+function replaceCoordLine(line: string, local: Vec3) {
+  if (/\[[^\]]*\]/.test(line)) return line.replace(/\[[^\]]*\]/, `[${formatTriple(local)}]`);
+  const indent = line.match(/^\s*/)?.[0] ?? "";
+  if (/^-\s+-/.test(line.trim()) || line.trim().startsWith("- -")) return `${indent}- - ${formatTriple(local)}`;
+  return line;
 }
 
 export function addPlayfield(yaml: string, system: VolumeSystem, body: Pick<VolumeBody, "local" | "name" | "kind" | "playfieldType">) {
@@ -282,7 +542,8 @@ export function addPlayfield(yaml: string, system: VolumeSystem, body: Pick<Volu
 
 export function removePlayfield(yaml: string, body: VolumeBody) {
   const lines = yaml.split(/\r?\n/);
-  lines.splice(body.line, 1);
+  const end = body.entryEnd ?? body.line + 1;
+  lines.splice(body.line, Math.max(1, end - body.line));
   return join(yaml, lines);
 }
 

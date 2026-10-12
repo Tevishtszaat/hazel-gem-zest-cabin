@@ -1,0 +1,1 @@
+import{Dr as e}from"./index-CEq7YMle.js";import{t}from"./workspace-page-CRZ33MvF.js";import{n}from"./config-tabs-D7UThAI1.js";var r=e();function i(){return(0,r.jsx)(t,{group:`World`,title:`Faction warfare`,kicker:`FactionWarfare.ecf`,children:(0,r.jsx)(n,{})})}export{i as component};

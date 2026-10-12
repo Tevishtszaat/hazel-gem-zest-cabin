@@ -1,1 +1,0 @@
-import{Dr as e}from"./index-BiBOQ73A.js";import{t}from"./workspace-page-FW_C2n-R.js";import{t as n}from"./config-tabs-C3x1DMcF.js";var r=e();function i(){return(0,r.jsx)(t,{group:`World`,title:`Reputation`,kicker:`DefReputation.ecf`,children:(0,r.jsx)(n,{})})}export{i as component};
