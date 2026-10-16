@@ -209,51 +209,64 @@ export function parseRandomPreset(text: string): RandomPresetDoc {
   return doc;
 }
 
+function presetScalar(value: string) {
+  const v = value.trim();
+  if (!v) return '""';
+  if (/^[[{]/.test(v) || /^['"]/.test(v)) return v;
+  if (/^(true|false)$/i.test(v)) return v.toLowerCase();
+  if (/^(yes|no|on|off|y|n|null)$/i.test(v)) return `"${v}"`;
+  if (/[:#]/.test(v) || /\s/.test(v)) return `'${v.replace(/'/g, "''")}'`;
+  return v;
+}
+
+function presetEntry(name: string, weight?: string) {
+  const raw = weight && weight !== "1" ? `${name}, ${weight}` : name;
+  return /[:#]/.test(raw) ? `'${raw.replace(/'/g, "''")}'` : raw;
+}
+
 function yamlList(value: string) {
   return value
     .split(",")
     .map((part) => part.trim())
     .filter(Boolean)
-    .map((part) => `            - ${part}`)
+    .map((part) => `            - ${presetScalar(part)}`)
     .join("\n");
 }
 
 function writeType(block: TypeBlock) {
-  const lines = [`      - Name: ${block.name}`];
-  if (block.color) lines.push(`        Color: ${block.color}`);
-  if (block.icon) lines.push(`        Icon: ${block.icon}`);
-  if (block.distance) lines.push(`        Distance: ${block.distance}`);
+  const lines = [`      - Name: ${presetScalar(block.name)}`];
+  if (block.color) lines.push(`        Color: ${presetScalar(block.color)}`);
+  if (block.icon) lines.push(`        Icon: ${presetScalar(block.icon)}`);
+  if (block.distance) lines.push(`        Distance: ${presetScalar(block.distance)}`);
   if (block.placement) {
     lines.push("        Placement:");
     lines.push(yamlList(block.placement));
   }
-  if (block.playerStart) lines.push(`        PlayerStart: ${block.playerStart}`);
-  if (block.moonProb) lines.push(`        MoonProb: '${block.moonProb}'`);
+  if (block.playerStart) lines.push(`        PlayerStart: ${presetScalar(block.playerStart)}`);
+  if (block.moonProb) lines.push(`        MoonProb: '${block.moonProb.replace(/'/g, "''")}'`);
   if (block.moonType) lines.push(`        MoonType: ${block.moonType.startsWith("[") ? block.moonType : `[${block.moonType}]`}`);
   if (block.orbitType) lines.push(`        OrbitType: ${block.orbitType.startsWith("[") ? block.orbitType : `[${block.orbitType}]`}`);
   if (block.moonOrbitType) {
     lines.push(`        MoonOrbitType: ${block.moonOrbitType.startsWith("[") ? block.moonOrbitType : `[${block.moonOrbitType}]`}`);
   }
-  if (block.climate) lines.push(`        Climate: ${block.climate}`);
-  if (block.playfieldLevel) lines.push(`        PlayfieldLevel: ${block.playfieldLevel}`);
-  if (block.forceSizeClass) lines.push(`        ForceSizeClass: ${block.forceSizeClass}`);
+  if (block.climate) lines.push(`        Climate: ${presetScalar(block.climate)}`);
+  if (block.playfieldLevel) lines.push(`        PlayfieldLevel: ${presetScalar(block.playfieldLevel)}`);
+  if (block.forceSizeClass) lines.push(`        ForceSizeClass: ${presetScalar(block.forceSizeClass)}`);
   if (block.forcePlanetType) {
     lines.push(`        ForcePlanetType: ${block.forcePlanetType.startsWith("[") ? block.forcePlanetType : `[${block.forcePlanetType}]`}`);
   }
-  if (block.hasOrbit) lines.push(`        HasOrbit: ${block.hasOrbit}`);
-  if (block.hasTerrain) lines.push(`        HasTerrain: ${block.hasTerrain}`);
+  if (block.hasOrbit) lines.push(`        HasOrbit: ${presetScalar(block.hasOrbit)}`);
+  if (block.hasTerrain) lines.push(`        HasTerrain: ${presetScalar(block.hasTerrain)}`);
   if (block.playfields.length) {
     lines.push("        Playfields:");
-    for (const play of block.playfields) {
-      lines.push(play.weight && play.weight !== "1" ? `            - ${play.name}, ${play.weight}` : `            - ${play.name}`);
-    }
+    for (const play of block.playfields) lines.push(`            - ${presetEntry(play.name, play.weight)}`);
   }
   return lines.join("\n");
 }
 
 export function writeRandomPreset(doc: RandomPresetDoc): string {
   const lines = ["---", "GenerationParams:"];
-  for (const scalar of doc.scalars) lines.push(`  ${scalar.key}: ${scalar.value}`);
+  for (const scalar of doc.scalars) lines.push(`  ${scalar.key}: ${presetScalar(scalar.value)}`);
   lines.push("  PlanetCountProbs:");
   for (const row of doc.countRows) lines.push(`    - '${row.raw}'${row.comment ? ` # ${row.comment}` : ""}`);
   lines.push("  PlanetLists:");

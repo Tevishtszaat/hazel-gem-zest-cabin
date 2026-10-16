@@ -184,9 +184,10 @@ function objectToDialogue(obj: { name: string; fields: Record<string, string> })
 }
 
 function quoteEcf(value: string) {
-  if (value === "") return '""';
-  if (/[\s,#:]/.test(value) || /[()"']/.test(value)) return `"${value.replace(/"/g, '\\"')}"`;
-  return value;
+  const safe = value.replace(/"/g, "'");
+  if (safe === "") return '""';
+  if (/[\s,#:()]/.test(safe) || /[']/.test(safe)) return `"${safe}"`;
+  return safe;
 }
 
 export function serializeDialogues(states: DialogueState[]): string {
@@ -200,18 +201,18 @@ export function serializeDialogues(states: DialogueState[]): string {
         if (state.requiredStates) lines.push(`  RequiredStates: ${quoteEcf(state.requiredStates)}`);
         for (const variable of state.variables) {
           if (!variable.name) continue;
-          const param = variable.param1 ? `, param1: ${variable.param1}` : "";
+          const param = variable.param1 ? `, param1: ${quoteEcf(variable.param1)}` : "";
           lines.push(`  Variable_${variable.index}: "${variable.name}"${param}`);
         }
         if (state.output) lines.push(`  Output: ${quoteEcf(state.output)}`);
         for (const n of state.nexts) {
-          if (n.next) lines.push(`  Next_${n.index}: ${n.next}`);
+          if (n.next) lines.push(`  Next_${n.index}: ${quoteEcf(n.next)}`);
           if (n.iff) lines.push(`  NextIf_${n.index}: ${quoteEcf(n.iff)}`);
           if (n.execute) lines.push(emitCode(`Execute_${n.index}`, n.execute));
         }
         for (const opt of state.options) {
           if (opt.text) lines.push(`  Option_${opt.index}: ${quoteEcf(opt.text)}`);
-          if (opt.next) lines.push(`  OptionNext_${opt.index}: ${opt.next}`);
+          if (opt.next) lines.push(`  OptionNext_${opt.index}: ${quoteEcf(opt.next)}`);
           if (opt.iff) lines.push(`  OptionIf_${opt.index}: ${quoteEcf(opt.iff)}`);
           if (opt.execute) lines.push(emitCode(`OptionExecute_${opt.index}`, opt.execute));
         }
@@ -275,7 +276,8 @@ export function blankDialogue(name = "NewDialogue"): DialogueState {
 }
 
 function emitCode(key: string, value: string) {
-  return `  ${key}: <![CDATA[${value}]]>`;
+  const safe = value.replace(/\]\]>/g, "]] >");
+  return `  ${key}: <![CDATA[${safe}]]>`;
 }
 
 export function parseDialogueDoc(text: string): DialogueDoc {

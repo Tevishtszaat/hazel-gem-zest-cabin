@@ -95,13 +95,26 @@ export function yamlScalars(text: string): Record<string, string> {
   return fields;
 }
 
+function yamlDouble(value: string) {
+  const escaped = value
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\r\n/g, "\\n")
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "\\n")
+    .replace(/\t/g, "\\t");
+  return `"${escaped}"`;
+}
+
 export function formatYamlValue(value: string) {
   const v = value.trim();
   if (!v) return '""';
-  if (/^(true|false|null)$/i.test(v)) return v;
+  if (/^(true|false)$/i.test(v)) return v.toLowerCase();
+  if (/^(yes|no|on|off|y|n|null)$/i.test(v)) return `"${v}"`;
   if (/^-?\d+(\.\d+)?$/.test(v)) return v;
-  if (v.startsWith("[") || v.startsWith("{")) return v;
-  if (/[:#,{}[\]]/.test(v) || /\s/.test(v)) return `"${v.replace(/"/g, '\\"')}"`;
+  if (/^\d{4}-\d{2}-\d{2}/.test(v)) return `"${v}"`;
+  if ((v.startsWith("[") || v.startsWith("{")) && !/[\n\r#]/.test(v)) return v;
+  if (/[\n\r\t:#{}[\]]/.test(value) || /\s/.test(v) || /["'\\]/.test(v)) return yamlDouble(v);
   return v;
 }
 

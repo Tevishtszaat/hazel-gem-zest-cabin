@@ -188,8 +188,9 @@ export function stringifyEcfObjects(objects: EcfObject[]): string {
     const bits: string[] = [];
     if (obj.id && /^\d+$/.test(obj.id.trim()) && Number(obj.id) > 0) bits.push(`Id: ${obj.id.trim()}`);
     if (obj.name) {
-      if (/^child$/i.test(obj.kind)) bits.push(obj.name);
-      else bits.push(`Name: ${needsQuote(obj.name) ? `"${obj.name}"` : obj.name}`);
+      const safeName = ecfSafe(obj.name);
+      if (/^child$/i.test(obj.kind)) bits.push(safeName);
+      else bits.push(`Name: ${needsQuote(safeName) || /[,()]/.test(safeName) ? `"${safeName}"` : safeName}`);
     }
     if (bits.length) head.push(bits.join(", "));
     const lines = [`${pad}{ ${head.join(" ")}`];
@@ -204,10 +205,15 @@ export function stringifyEcfObjects(objects: EcfObject[]): string {
   return objects.map((obj) => emit(obj, 0).join("\n")).join("\n") + "\n";
 }
 
+function ecfSafe(value: string) {
+  return value.replace(/"/g, "'");
+}
+
 function formatEcfValue(value: string) {
   if (/,\s*param\d+\s*:/i.test(value)) return value;
-  if (needsQuote(value) || /[:(),]/.test(value)) return `"${value.replace(/"/g, '\\"')}"`;
-  return value;
+  const safe = ecfSafe(value);
+  if (safe !== value || needsQuote(safe) || /[:(),]/.test(safe)) return `"${safe}"`;
+  return safe;
 }
 
 function needsQuote(value: string) {

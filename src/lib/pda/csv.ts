@@ -114,7 +114,7 @@ function splitCsvLines(src: string): string[] {
     if (quoted) {
       if (c === '"') {
         if (src[i + 1] === '"') {
-          cur += '"';
+          cur += '""';
           i++;
         } else {
           quoted = false;

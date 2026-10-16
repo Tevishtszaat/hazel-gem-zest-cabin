@@ -1,4 +1,5 @@
 import type { EcfObject } from "./ecf.ts";
+import { formatYamlValue } from "./playfield.ts";
 
 export type Vec3 = [number, number, number];
 
@@ -97,10 +98,15 @@ function splitFields(rest: string) {
   const out: string[] = [];
   let cur = "";
   let quote = "";
-  for (const ch of rest) {
+  for (let i = 0; i < rest.length; i++) {
+    const ch = rest[i]!;
     if (quote) {
-      if (ch === quote) quote = "";
-      else cur += ch;
+      if (ch === quote) {
+        if (rest[i + 1] === quote) {
+          cur += ch;
+          i += 1;
+        } else quote = "";
+      } else cur += ch;
       continue;
     }
     if (ch === "'" || ch === '"') {
@@ -458,10 +464,17 @@ export function formatTriple(v: Vec3) {
   return `${n(v[0])}, ${n(v[1])}, ${n(v[2])}`;
 }
 
+function yamlFlowToken(value: string) {
+  if (/^[A-Za-z0-9_+\-./]+$/.test(value)) return value;
+  return `'${value.replace(/'/g, "''")}'`;
+}
+
 export function formatPlayfield(indent: string, body: Pick<VolumeBody, "local" | "name" | "kind" | "playfieldType" | "quoted">) {
-  const type = body.playfieldType ? `, ${body.playfieldType}` : "";
-  if (body.quoted) return `${indent}- ['${formatTriple(body.local)}', ${body.name}, ${body.kind}${type}]`;
-  return `${indent}- [${formatTriple(body.local)}, ${body.name}, ${body.kind}${type}]`;
+  const type = body.playfieldType ? `, ${yamlFlowToken(body.playfieldType)}` : "";
+  const name = yamlFlowToken(body.name);
+  const kind = yamlFlowToken(body.kind);
+  if (body.quoted) return `${indent}- ['${formatTriple(body.local)}', ${name}, ${kind}${type}]`;
+  return `${indent}- [${formatTriple(body.local)}, ${name}, ${kind}${type}]`;
 }
 
 export function patchVolumeLine(yaml: string, line: number, next: string) {
@@ -519,7 +532,7 @@ export function patchPlayfield(yaml: string, body: VolumeBody, next: Pick<Volume
 }
 
 function replaceYamlValue(line: string, value: string) {
-  return line.replace(/:\s*.+$/, `: ${value}`);
+  return line.replace(/:\s*.+$/, `: ${formatYamlValue(value)}`);
 }
 
 function replaceCoordLine(line: string, local: Vec3) {
